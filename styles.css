@@ -1,0 +1,45 @@
+:root{--paper:#fcfcfa;--ink:#403f3f;--muted:#626260;--mono:"Departure Mono",monospace;--sans:"Söhne",Arial,sans-serif;--serif:"Gelica",Georgia,serif}*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans)}button,a{-webkit-tap-highlight-color:transparent}button{font:inherit;color:inherit}a{color:inherit;text-decoration:none}button{border:0;background:none;cursor:pointer}button:focus-visible,a:focus-visible{outline:2px solid #3e897a;outline-offset:5px}p,h1,h2{margin:0}.skip{position:fixed;top:-100px;z-index:10;background:var(--paper);padding:12px}.skip:focus{top:10px}.hero{position:relative;margin:21px 20px 20px 21px;height:787px;border-radius:10px;overflow:hidden;color:white}.hero-art{position:absolute;width:100%;height:100%;object-fit:cover}.hero h1{position:relative;margin-left:calc(50% - 523.5px);padding-top:101px;max-width:701px;font:500 45px/1.17 var(--serif);letter-spacing:-.7px}.hero h1 em{font-weight:500}.current{position:absolute;right:46px;bottom:100px;font:16px/1.4 var(--mono);text-transform:uppercase}.utility{padding:20px 20px 0 21px;display:flex;align-items:center;justify-content:space-between}.mark{display:block;width:33px;height:33px}.utility p{font-size:11.5px;color:var(--muted)}.layout{display:grid;grid-template-columns:242px minmax(0,1fr);gap:21px;padding-left:1px}aside{height:774px;position:sticky;top:0;padding:20px;display:flex;flex-direction:column;justify-content:space-between;color:var(--muted);font-size:11.5px;line-height:1.42}.bio{max-width:200px}.links{display:grid;gap:20px}.links h2{font:11.5px/20.2px var(--mono);text-transform:uppercase;margin-bottom:5px}.links a,.links button{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:0;font-size:11.5px;line-height:21.384px}.links a:hover,.links button:hover{color:#111}.projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:393px 393px 393px;gap:25px 20px;padding:20px;min-width:0;height:774px;overflow-y:auto;scrollbar-width:none}.projects::-webkit-scrollbar{display:none}.project{min-width:0}.media{display:block;position:relative;width:100%;height:337px;overflow:hidden;border-radius:9.8px;text-align:left;padding:0;margin:0 0 10px;isolation:isolate}.media>img{position:absolute;width:100%;height:100%;object-fit:cover}.category{font:10.5px/1.35 var(--mono);text-transform:uppercase}.project h2{font-size:16px;line-height:1.35;font-weight:600}.mental{grid-column:2;grid-row:1/span 2;display:flex;flex-direction:column}.mental .media{height:auto;flex:1;background:#f3f3f3;margin-bottom:16px}.mental .media>img{width:422px;height:688px;right:0;top:67px;object-fit:cover}.course{grid-column:1;grid-row:2}.community{grid-column:1;grid-row:3}.community .media>img:not(.underlay){left:0;top:-2.89px;width:486.9px;height:350.36px}.artboard{position:absolute;width:478.5px;height:337px;left:0;top:0;transform-origin:top left;pointer-events:none}.artboard p{margin:0}.artboard div{border-width:0}.artboard img[src$=".svg"]{max-width:none}.underlay{z-index:-1}dialog{border:1px solid #ddd;border-radius:12px;padding:30px;max-width:420px;width:calc(100% - 40px);background:var(--paper);color:var(--ink)}dialog::backdrop{background:#0005}dialog h2{font-size:22px;margin-bottom:12px}dialog p{line-height:1.5;font-size:14px}.close{position:absolute;right:10px;top:6px;font-size:25px}.done{margin-top:20px;background:var(--ink);color:white;border-radius:6px;padding:9px 16px}
+@media(min-width:1440px){main{max-width:1600px;margin:auto}.hero h1{margin-left:96px}}
+@media(max-width:1100px){.hero{height:62vw;min-height:500px}.hero h1{margin-left:7.8%;max-width:65%;font-size:clamp(32px,3.52vw,45px)}.current{font-size:12px;right:5%;bottom:12.7%}.layout{grid-template-columns:190px minmax(0,1fr);gap:12px}.mental .media>img{width:88%;height:auto;top:12%;right:0}.community .media>img:not(.underlay){width:101%;height:102%;object-fit:cover}}
+@media(max-width:700px){.hero{margin:12px;height:620px;min-height:0}.hero h1{padding-top:60px;margin-left:26px;max-width:calc(100% - 52px);font-size:34px}.hero-art{object-position:56% center}.current{left:26px;right:26px;bottom:40px;font-size:11px;max-width:290px}.utility{padding:12px 20px}.layout{display:flex;flex-direction:column;gap:8px;padding:0}aside{position:static;height:auto;padding:12px 20px 26px;gap:28px}.bio{max-width:340px;font-size:13px;line-height:1.5}.links{grid-template-columns:1fr 1fr;gap:35px}.projects{height:auto;overflow:visible;display:flex;flex-direction:column;gap:28px;padding:0 20px 40px}.media{height:auto;aspect-ratio:478.5/337}.mental .media{aspect-ratio:478.5/745;flex:auto}.mental .media>img{width:88%;height:auto;top:9%}.project h2{font-size:17px}.category{font-size:10px}.utility p{font-size:10px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+.artboard{display:flex;flex-direction:column}
+.artboard [data-name="internal"]{left:calc(50% + 110.08px)!important;top:calc(50% + 67.37px)!important}
+@media(max-width:1100px){.mental .media>img{height:92.3%;object-fit:cover}}
+.course .media>img,.community .media>.underlay{inset:0}
+@media(min-width:701px){
+  .utility{position:sticky;top:0;z-index:5;background:var(--paper);height:73px;padding:20px 20px 20px 21px}
+  .layout{height:auto;align-items:start}
+  .layout aside{position:sticky;top:73px;height:min(774px,calc(100dvh - 73px))}
+  .projects{height:auto;overflow:visible}
+  #work,#story{scroll-margin-top:73px}
+}
+/* Use Apple’s SF Pro system face for navigation and external-link arrows. */
+.links a>span,.links button>span{font-family:"SF Pro Text","SF Pro Display",-apple-system,BlinkMacSystemFont,sans-serif;font-weight:400}
+.current{text-transform:none}
+/* Consistent inner spacing for the hero content. */
+.hero{padding:100px}
+.hero-art{inset:0}
+.hero h1{margin-left:0;padding-top:0;max-width:min(701px,100%)}
+.hero .current{left:auto;right:100px;bottom:100px;max-width:calc(100% - 200px)}
+#copy-email .email-label{font-family:var(--sans)}
+#copy-email.is-copied .email-label{opacity:.55}
+/* Sidebar typography; preserve the separate SF Pro arrow styling. */
+.links a,.links button,.links #copy-email .email-label{font-family:"Departure Mono",monospace;text-transform:uppercase;font-weight:400}
+.links h2{font-family:"Test Söhne","Söhne",Arial,sans-serif;text-transform:none;font-weight:500}
+.links h2{font-size:13.5px}
+.links h2{font-size:12.5px}
+/* Reference-inspired sidebar: biography, divider, grouped links, footer. */
+.layout aside{justify-content:flex-start}
+.layout aside .bio{max-width:none}
+.layout aside .links{margin-top:28px;padding-top:20px;border-top:1px solid #dededb;gap:24px}
+.links h2{margin-bottom:8px}
+.links a,.links button{line-height:25px}
+.sidebar-copyright{margin-top:auto;padding-top:28px;font-family:"Test Söhne","Söhne",Arial,sans-serif;font-size:11.5px;line-height:1.4}
+@media(max-width:700px){.layout aside{gap:0}.layout aside .links{width:100%}.sidebar-copyright{margin-top:32px;padding-top:0}}
+.layout aside .bio{font-size:11.5px;line-height:20px}
+
+.utility p{font-size:11.5px}
+.sidebar-copyright{display:block;width:100%;min-height:88px;padding:28px 0 0;text-align:left;font-family:var(--mono);font-size:11.5px;line-height:1.4;text-transform:uppercase}
+
+
