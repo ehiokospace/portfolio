@@ -1,3 +1,10 @@
+// Trial fonts are available only in the local preview.
+if (['localhost', '127.0.0.1'].includes(location.hostname)) {
+  const fonts = document.createElement('link');
+  fonts.rel = 'stylesheet';
+  fonts.href = './local-fonts/fonts.css';
+  document.head.append(fonts);
+}
 // Replace null destinations with your own URLs. Relative paths work on GitHub Pages.
 const destinations = {
   Gallery: null, Resume: null,
@@ -23,6 +30,7 @@ document.querySelectorAll('[data-missing]').forEach(button => {
 dialog.addEventListener('click', event => { if(event.target === dialog) dialog.close(); });
 function sizeArtwork() {
   const art = document.querySelector('.artboard');
+  if (!art) return;
   art.style.transform = 'scale(' + art.parentElement.clientWidth / 478.5 + ')';
 }
 new ResizeObserver(sizeArtwork).observe(document.querySelector('.internal .media'));
