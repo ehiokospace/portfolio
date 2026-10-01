@@ -43,3 +43,7 @@
 .sidebar-copyright{display:block;width:100%;min-height:88px;padding:28px 0 0;text-align:left;font-family:var(--mono);font-size:11.5px;line-height:1.4;text-transform:uppercase}
 
 
+
+/* Keep the complete hero and its outer spacing within the viewport. */
+.hero{height:calc(100dvh - 41px);min-height:0}
+@media(max-width:700px){.hero{height:calc(100dvh - 24px);padding:clamp(24px,8vw,100px)}.hero .current{right:clamp(24px,8vw,100px);bottom:clamp(24px,8vw,100px);max-width:calc(100% - clamp(48px,16vw,200px))}}
