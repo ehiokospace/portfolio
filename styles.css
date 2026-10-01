@@ -50,3 +50,6 @@
 /* Keep the complete hero and its outer spacing within the viewport. */
 .hero{height:calc(100dvh - 41px);min-height:0}
 @media(max-width:700px){.hero{height:calc(100dvh - 24px);padding:clamp(24px,8vw,100px)}.hero .current{right:clamp(24px,8vw,100px);bottom:clamp(24px,8vw,100px);max-width:calc(100% - clamp(48px,16vw,200px))}}
+
+@font-face{font-family:'ABC Areal';src:url('./assets/ABCAreal-Medium.woff2') format('woff2');font-weight:500;font-style:normal;font-display:swap}
+.layout aside h2{font-family:'ABC Areal',Arial,sans-serif;font-weight:500}
