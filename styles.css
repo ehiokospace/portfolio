@@ -66,3 +66,5 @@
 .projects .media>img:not(.underlay){position:static;display:block;width:100%;height:auto;object-fit:contain}
 
 @media(max-width:700px){.hero h1{font-size:clamp(18px,5.35vw,37px);max-width:100%;letter-spacing:-.3px}.hero-line{display:block;white-space:nowrap}.hero .current{left:clamp(24px,8vw,100px);right:clamp(24px,8vw,100px);width:auto;max-width:none;text-align:center}}
+
+.mobile-the{display:none}@media(max-width:700px){.hero h1{font-size:clamp(14px,4.3vw,30px)}.mobile-the{display:inline}}
