@@ -128,7 +128,7 @@ copyEmailButton.addEventListener('click', async () => {
 });
 
 const descriptionButton = document.querySelector('#scramble-description');
-const descriptions = ['DESIGNED AND CODED WITH ♥︎','SOLVING PROBLEMS ONE PRODUCT AT A TIME','DESIGNING FOR HUMANS','TRAVELING THE WORLD','TYPOGRAPHY ENTHUSIAST','SPARKING DELIGHT'];
+const descriptions = ['DESIGNED AND CODED WITH ♥︎','ALWAYS BUILDING','DESIGNING FOR HUMANS','TRAVELING THE WORLD','TYPOGRAPHY ENTHUSIAST','SPARKING DELIGHT'];
 let descriptionIndex = 0;
 let scrambleFrame;
 function scrambleDescription() {
