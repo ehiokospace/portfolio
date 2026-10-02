@@ -74,3 +74,5 @@
 @media(max-width:700px){.hero h1{font-size:clamp(15px,4.64vw,32px)}}
 
 .hero-line{display:block;white-space:nowrap}
+
+.layout{padding-left:0}@media(min-width:701px){.hero{margin-left:20px;margin-right:20px}.utility{padding-left:20px;padding-right:20px}}
