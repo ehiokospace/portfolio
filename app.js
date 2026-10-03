@@ -151,3 +151,37 @@ function scrambleDescription() {
 descriptionButton.addEventListener('pointerenter', scrambleDescription);
 descriptionButton.addEventListener('focus', scrambleDescription);
 descriptionButton.addEventListener('click', scrambleDescription);
+
+// Keep native selection and copying, and paint a rounded ink layer behind it.
+(() => {
+  const layer = document.createElement('div');
+  layer.className = 'selection-ink';
+  layer.setAttribute('aria-hidden', 'true');
+  document.body.append(layer);
+  let frame;
+  function paint() {
+    layer.replaceChildren();
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || !selection.rangeCount || matchMedia('(forced-colors: active)').matches) return;
+    const range = selection.getRangeAt(0);
+    if (selection.anchorNode?.parentElement?.closest('input,textarea,[contenteditable]')) return;
+    const lines = [];
+    for (const rect of range.getClientRects()) {
+      if (rect.width < 1 || rect.height < 1) continue;
+      const sameLine = lines.find(line => Math.abs(line.top - rect.top) < 2 && Math.abs(line.height - rect.height) < 2 && rect.left <= line.right + 3 && rect.right >= line.left - 3);
+      if (sameLine) { sameLine.left = Math.min(sameLine.left, rect.left); sameLine.right = Math.max(sameLine.right, rect.right); }
+      else lines.push({left:rect.left,right:rect.right,top:rect.top,height:rect.height});
+    }
+    for (const rect of lines) {
+      const ink = document.createElement('div');
+      ink.style.cssText = `left:${rect.left-2}px;top:${rect.top+rect.height*.1}px;width:${rect.right-rect.left+4}px;height:${rect.height*.8}px`;
+      layer.append(ink);
+    }
+  }
+  function schedule() { cancelAnimationFrame(frame); frame = requestAnimationFrame(paint); }
+  document.addEventListener('selectionchange', schedule);
+  window.addEventListener('scroll', schedule, true);
+  window.addEventListener('resize', schedule);
+  document.fonts.ready.then(schedule);
+  document.documentElement.classList.add('custom-selection');
+})();
