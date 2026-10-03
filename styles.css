@@ -105,3 +105,5 @@ html:has(#command-palette[open]),body:has(#command-palette[open]){overflow:hidde
 .project,#intro,.current,.utility p,#story p,#scramble-description{scroll-margin-top:90px}.command-result>span{min-width:0;overflow-wrap:anywhere}
 
 @media(max-width:700px){.hero{height:60dvh;min-height:0}.command-trigger{display:none}}
+
+@media(min-width:701px){.projects{padding-bottom:44px}}
