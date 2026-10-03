@@ -131,3 +131,10 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 }
 
 .case-section{grid-template-columns:1fr;gap:16px}.case-meta dt,.case-eyebrow{font:11.5px/1.5 var(--mono);text-transform:uppercase}.case-category{display:table;margin:0 0 18px;padding:5px 9px;border:1px solid #e7bcb1;color:#b95643;font:11.5px/1.4 var(--mono);text-transform:uppercase}
+
+@media(min-width:701px){main{display:flex;flex-direction:column}main>.hero{order:0}main>.utility{order:1}main>.layout{order:2}}
+@media(max-width:700px){
+ .utility{padding:14px 20px}.hero{margin-top:0}.layout aside{padding:20px 20px 24px;gap:0}.layout aside .bio{max-width:none;font-size:14px;line-height:22px;text-wrap:pretty}.bio p+p{margin-top:16px}
+ main>.sidebar-copyright{width:auto;margin:0 20px 24px;min-height:0;padding:0;text-align:left}.projects{padding-bottom:28px}
+ #command-query{font-size:16px;transform-origin:right center}#command-query::placeholder{font-size:10px}
+}

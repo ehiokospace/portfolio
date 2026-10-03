@@ -245,7 +245,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     });
     empty.hidden=filtered.length!==0;highlight();
   }
-  function open() { if(palette.open)return;query.value='';render();palette.showModal();query.focus(); }
+  function open() { if(palette.open)return;query.value='';render();palette.showModal();if(matchMedia('(max-width:700px)').matches)palette.focus({preventScroll:true});else query.focus(); }
   trigger.addEventListener('click',open);
   document.querySelector('#mobile-menu').addEventListener('click',open);
   document.querySelector('#close-search').addEventListener('click',()=>palette.close());
@@ -295,3 +295,6 @@ descriptionButton.addEventListener('click', scrambleDescription);
   window.addEventListener('popstate',()=>{const id=new URL(location.href).searchParams.get('case');if(studies[id])openCase(id,false);else if(modal.open)modal.close();});
   const initial=new URL(location.href).searchParams.get('case');if(studies[initial])openCase(initial,false);
 })();
+
+// Keep the credit after all work on mobile, and in the sidebar on desktop.
+(() => {const credit=document.querySelector("#scramble-description"),sidebar=document.querySelector(".layout aside"),main=document.querySelector("main"),mobile=matchMedia("(max-width:700px)");function placeCredit(){(mobile.matches?main:sidebar).append(credit);}mobile.addEventListener("change",placeCredit);placeCredit();})();
