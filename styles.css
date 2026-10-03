@@ -122,3 +122,10 @@ html:has(#command-palette[open]),body:has(#command-palette[open]){overflow:hidde
 #case-study.expanded{width:100%;max-width:none;height:100dvh;border-radius:0;border:0}
 html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscroll-behavior:none}
 @media(max-width:700px){#case-study{width:calc(100% - 20px);height:calc(100dvh - 24px);border-radius:12px}.case-toolbar{padding:0 18px;height:52px}.case-scroll{height:calc(100% - 52px);padding:24px 20px 48px}.case-intro{grid-template-columns:1fr;gap:28px}.case-meta{margin-top:28px;gap:20px}.case-summary{font-size:14px}.case-section{grid-template-columns:1fr;gap:16px;margin-top:28px;padding-top:24px}.case-section p:not(.case-eyebrow){font-size:14px}}
+
+#mobile-menu{display:none}
+@media(max-width:700px){
+ .layout aside .links{display:none}.utility{position:relative;display:flex;align-items:center;justify-content:space-between;padding:16px 20px}.utility>p{display:none}#mobile-menu{display:block;padding:8px 0;font:11.5px var(--mono);color:var(--muted)}
+ #command-palette{position:fixed;inset:20px 12px auto;margin:0;width:calc(100% - 24px);max-width:none;height:auto;max-height:calc(100dvh - 100px);padding:24px 20px;border-radius:3px;overflow:visible}
+ #command-results{max-height:calc(100dvh - 230px)}.command-header{gap:12px;font-size:11px}.command-header label{gap:6px}.search-butterfly{width:18px;height:18px}.command-header input{font-size:10px}.command-result{padding:14px 8px}.command-shortcut{display:none}.command-footer{margin-top:20px}.command-footer>span{display:none}.command-footer #close-search{position:fixed;top:auto;bottom:24px;left:50%;font-size:12px;padding:12px 16px}
+}

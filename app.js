@@ -247,6 +247,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   }
   function open() { if(palette.open)return;query.value='';render();palette.showModal();query.focus(); }
   trigger.addEventListener('click',open);
+  document.querySelector('#mobile-menu').addEventListener('click',open);
   document.querySelector('#close-search').addEventListener('click',()=>palette.close());
   palette.addEventListener('click',event=>{if(event.target===palette){const r=palette.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)palette.close();}});
   query.addEventListener('input',render);
