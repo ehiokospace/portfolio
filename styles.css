@@ -99,3 +99,5 @@
 .command-header label{display:flex;align-items:center;gap:10px}.search-butterfly{width:22px;height:22px;object-fit:contain}
 
 .command-header{padding-bottom:8px}#command-results>.command-group:first-child{margin-top:12px}
+
+html:has(#command-palette[open]),body:has(#command-palette[open]){overflow:hidden;overscroll-behavior:none}#command-results{overscroll-behavior:contain}
