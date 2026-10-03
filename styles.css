@@ -129,3 +129,5 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
  #command-palette{position:fixed;inset:20px 12px auto;margin:0;width:calc(100% - 24px);max-width:none;height:auto;max-height:calc(100dvh - 100px);padding:24px 20px;border-radius:3px;overflow:visible}
  #command-results{max-height:calc(100dvh - 230px)}.command-header{gap:12px;font-size:11px}.command-header label{gap:6px}.search-butterfly{width:18px;height:18px}.command-header input{font-size:10px}.command-result{padding:14px 8px}.command-shortcut{display:none}.command-footer{margin-top:20px}.command-footer>span{display:none}.command-footer #close-search{position:fixed;top:auto;bottom:24px;left:50%;font-size:12px;padding:12px 16px}
 }
+
+.case-section{grid-template-columns:1fr;gap:16px}.case-meta dt,.case-eyebrow{font:11.5px/1.5 var(--mono);text-transform:uppercase}.case-category{display:table;margin:0 0 18px;padding:5px 9px;border:1px solid #e7bcb1;color:#b95643;font:11.5px/1.4 var(--mono);text-transform:uppercase}
