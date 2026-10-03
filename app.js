@@ -193,13 +193,11 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const empty = palette.querySelector('.command-empty');
   const trigger = document.querySelector('#open-search');
   const items = [
-    {name:'Work',group:'Pages',detail:'#WORK',run:()=>location.hash='work'},
-    {name:'Story',group:'Pages',detail:'#STORY',run:()=>location.hash='story'},
-    {name:'Back to top',group:'Pages',detail:'#INTRO',run:()=>location.hash='intro'},
-    ...[...document.querySelectorAll('.project')].map(project=>({name:project.querySelector('h2').textContent,group:'Projects',detail:'VIEW',run:()=>project.scrollIntoView({behavior:'smooth',block:'center'})})),
-    {name:'Copy email',group:'Commands',detail:'COPY',run:()=>document.querySelector('#copy-email').click()},
-    {name:'LinkedIn',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
-    {name:'X/Twitter',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
+    {name:'Work',key:'w',shortcut:'[W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
+    {name:'Story',key:'s',shortcut:'[S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
+    {name:'Gallery',key:'g',shortcut:'[G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
+    {name:'Download résumé',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'NOT ADDED YET',run:()=>document.querySelector('[data-missing="Resume"]').click()},
+    {name:'Copy email',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
   ];
   let filtered = [], active = 0;
   function highlight() {
@@ -213,7 +211,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     filtered.forEach((item,index)=>{
       if(item.group!==group){const title=document.createElement('h2');title.className='command-group';title.textContent=item.group;results.append(title);group=item.group;}
       const button=document.createElement('button');button.className='command-result';
-      const name=document.createElement('span');name.textContent=item.name;
+      const name=document.createElement('span');name.textContent=item.name+' ';const shortcut=document.createElement('span');shortcut.className='command-shortcut';shortcut.textContent=item.shortcut;name.append(shortcut);
       const detail=document.createElement('small');detail.textContent=item.detail;
       button.append(name,detail);button.addEventListener('click',()=>choose(index));
       button.addEventListener('pointerenter',()=>{active=index;highlight();});results.append(button);
@@ -227,7 +225,14 @@ descriptionButton.addEventListener('click', scrambleDescription);
   query.addEventListener('input',render);
   palette.addEventListener('keydown',event=>{
     if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();if(!filtered.length)return;active=(active+(event.key==='ArrowDown'?1:-1)+filtered.length)%filtered.length;highlight();results.querySelectorAll('button')[active].scrollIntoView({block:'nearest'});}
-    if(event.key==='Enter'&&event.target===query){event.preventDefault();choose(active);}
+    if(event.key==='Enter'&&(event.target===query||event.target.classList.contains('command-result'))){event.preventDefault();choose(active);}
   });
-  document.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();palette.open?palette.close():open();}});
+  document.addEventListener('keydown',event=>{
+    const key=event.key.toLowerCase();
+    if((event.metaKey||event.ctrlKey)&&key==='k'){event.preventDefault();palette.open?palette.close():open();return;}
+    if(!palette.open||event.altKey||event.isComposing)return;
+    const modifier=event.metaKey||event.ctrlKey;
+    const item=items.find(item=>item.key===key&&Boolean(item.modifier)===Boolean(modifier));
+    if(item&&(modifier||!query.value)){event.preventDefault();palette.close();item.run();}
+  });
 })();
