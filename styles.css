@@ -82,3 +82,5 @@
 .selection-ink{position:fixed;inset:0;pointer-events:none;z-index:1000;mix-blend-mode:multiply;overflow:hidden}
 .selection-ink>div{position:absolute;border-radius:4px;background:linear-gradient(88deg,#a87b4f40,#a87b4f55 15%,#a87b4f45 85%,#a87b4f30);pointer-events:none}
 @media(forced-colors:active){.selection-ink{display:none}.custom-selection ::selection{background:Highlight;color:HighlightText}}
+
+::selection{background:#FDEFE4}.selection-ink{mix-blend-mode:multiply}.selection-ink>div{background:#FDEFE4}.bio p+p{margin-top:16px}.bio a{text-decoration:underline;text-decoration-color:#aaa9a4;text-underline-offset:2px}.bio a:hover{text-decoration-color:currentColor}
