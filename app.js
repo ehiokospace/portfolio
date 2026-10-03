@@ -194,21 +194,25 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const trigger = document.querySelector('#open-search');
   const items = [
     {name:'Work',key:'w',shortcut:'[W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
-    {name:'Story',key:'s',shortcut:'[S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
+    {name:'Story',aliases:'about bio biography',key:'s',shortcut:'[S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
     {name:'Gallery',key:'g',shortcut:'[G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
-    {name:'Download résumé',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'NOT ADDED YET',run:()=>document.querySelector('[data-missing="Resume"]').click()},
-    {name:'Copy email',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
-    {name:'LinkedIn',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
-    {name:'X/Twitter',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
+    {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'NOT ADDED YET',run:()=>document.querySelector('[data-missing="Resume"]').click()},
+    {name:'Copy email',aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
+    {name:'LinkedIn',aliases:'https://www.linkedin.com/in/ehi-oko social',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
+    {name:'X/Twitter',aliases:'https://www.x.com/ehigoko social twitter',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
   ];
   let filtered = [], active = 0;
   function highlight() {
     [...results.querySelectorAll('button')].forEach((button,index)=>button.classList.toggle('active',index===active));
   }
   function choose(index) { const item=filtered[index]; if (!item) return; palette.close(); item.run(); }
+  const normalizeSearch = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/⌘/g,' cmd command ctrl control ').replace(/[\[\]]/g,' ').trim();
   function render() {
-    const term=query.value.trim().toLowerCase();
-    filtered=items.filter(item=>(item.name+' '+item.group).toLowerCase().includes(term));active=0;results.replaceChildren();
+    const terms=normalizeSearch(query.value).split(/\s+/).filter(Boolean);
+    filtered=items.filter(item=>{
+      const searchable=normalizeSearch([item.name,item.group,item.detail,item.shortcut,item.key||'',item.aliases||''].join(' '));
+      return terms.every(term=>searchable.includes(term));
+    });active=0;results.replaceChildren();
     let group='';
     filtered.forEach((item,index)=>{
       if(item.group!==group){const title=document.createElement('h2');title.className='command-group';title.textContent=item.group;results.append(title);group=item.group;}
