@@ -185,3 +185,49 @@ descriptionButton.addEventListener('click', scrambleDescription);
   document.fonts.ready.then(schedule);
   document.documentElement.classList.add('custom-selection');
 })();
+
+(() => {
+  const palette = document.querySelector('#command-palette');
+  const query = document.querySelector('#command-query');
+  const results = document.querySelector('#command-results');
+  const empty = palette.querySelector('.command-empty');
+  const trigger = document.querySelector('#open-search');
+  const items = [
+    {name:'Work',group:'Pages',detail:'#WORK',run:()=>location.hash='work'},
+    {name:'Story',group:'Pages',detail:'#STORY',run:()=>location.hash='story'},
+    {name:'Back to top',group:'Pages',detail:'#INTRO',run:()=>location.hash='intro'},
+    ...[...document.querySelectorAll('.project')].map(project=>({name:project.querySelector('h2').textContent,group:'Projects',detail:'VIEW',run:()=>project.scrollIntoView({behavior:'smooth',block:'center'})})),
+    {name:'Copy email',group:'Commands',detail:'COPY',run:()=>document.querySelector('#copy-email').click()},
+    {name:'LinkedIn',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
+    {name:'X/Twitter',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
+  ];
+  let filtered = [], active = 0;
+  function highlight() {
+    [...results.querySelectorAll('button')].forEach((button,index)=>button.classList.toggle('active',index===active));
+  }
+  function choose(index) { const item=filtered[index]; if (!item) return; palette.close(); item.run(); }
+  function render() {
+    const term=query.value.trim().toLowerCase();
+    filtered=items.filter(item=>(item.name+' '+item.group).toLowerCase().includes(term));active=0;results.replaceChildren();
+    let group='';
+    filtered.forEach((item,index)=>{
+      if(item.group!==group){const title=document.createElement('h2');title.className='command-group';title.textContent=item.group;results.append(title);group=item.group;}
+      const button=document.createElement('button');button.className='command-result';
+      const name=document.createElement('span');name.textContent=item.name;
+      const detail=document.createElement('small');detail.textContent=item.detail;
+      button.append(name,detail);button.addEventListener('click',()=>choose(index));
+      button.addEventListener('pointerenter',()=>{active=index;highlight();});results.append(button);
+    });
+    empty.hidden=filtered.length!==0;highlight();
+  }
+  function open() { if(palette.open)return;query.value='';render();palette.showModal();query.focus(); }
+  trigger.addEventListener('click',open);
+  document.querySelector('#close-search').addEventListener('click',()=>palette.close());
+  palette.addEventListener('click',event=>{if(event.target===palette){const r=palette.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)palette.close();}});
+  query.addEventListener('input',render);
+  palette.addEventListener('keydown',event=>{
+    if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();if(!filtered.length)return;active=(active+(event.key==='ArrowDown'?1:-1)+filtered.length)%filtered.length;highlight();results.querySelectorAll('button')[active].scrollIntoView({block:'nearest'});}
+    if(event.key==='Enter'&&event.target===query){event.preventDefault();choose(active);}
+  });
+  document.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();palette.open?palette.close():open();}});
+})();
