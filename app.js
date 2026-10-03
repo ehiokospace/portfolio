@@ -207,7 +207,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
       name:project.querySelector('h2').textContent,
       group:'Content',shortcut:'',detail:'/WORK',
       aliases:[project.textContent,...[...project.querySelectorAll('img')].map(image=>image.alt),project.classList.contains('mental')?'Thrive Thribe':''].join(' '),
-      run:jump(project)
+      run:()=>project.querySelector('[data-case]').click()
     }));
     const extra = [
       [document.querySelector('#intro'),'Introduction','/HOME'],
@@ -262,4 +262,35 @@ descriptionButton.addEventListener('click', scrambleDescription);
     const item=items.find(item=>item.key===key&&Boolean(item.modifier)===Boolean(modifier));
     if(item&&(modifier||!query.value)){event.preventDefault();palette.close();item.run();}
   });
+})();
+
+// Each study supports optional metadata and story sections as content is added.
+(() => {
+  const studies = {
+    'internal-tooling': {title:'Internal tooling',summary:'Leading design of 0-1 internal tooling',category:'Product, internship',status:'Partially shipped',image:'./assets/internal-tooling.png',alt:'Eliada Homes internal tooling dashboard',overview:'Leading design of 0-1 internal tooling.',metadata:[],sections:[]},
+    'thrive': {title:'Thrive',summary:'Leading design at an AI mental health startup',category:'Startup',status:'HBCU Pitch Competition winner',image:'./assets/mental-health.png',alt:'Focus Challenge interface on a phone',overview:'Leading design at an AI mental health startup.',metadata:[],sections:[]},
+    'course-scheduling': {title:'Course scheduling',summary:'Smarter course scheduling for AAMU students',category:'Web app',status:'Concept',image:'./assets/7230c.png',alt:'Soft pink blossoms',overview:'A concept for a smarter course scheduling system for AAMU students.',metadata:[],sections:[]},
+    'colorstack': {title:'ColorStack AAMU',summary:'Fostering a community of students in tech',category:'Brand, community',image:'./assets/community.png',alt:'ColorStack AAMU community artwork',overview:'Fostering a community of students in tech.',metadata:[],sections:[]}
+  };
+  const modal=document.querySelector('#case-study'),content=document.querySelector('#case-content'),expand=document.querySelector('#case-expand');
+  const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let previousFocus=null;
+  function render(study){
+    const metadata=[['Discipline',study.category],...(study.status?[['Status',study.status]]:[]),...study.metadata];
+    content.innerHTML='<div class="case-intro"><div class="case-intro-copy"><img class="case-logo" src="./assets/search-butterfly.png" alt=""><h2 id="case-title">'+escape(study.title)+'</h2><p class="case-summary">'+escape(study.summary)+'</p><dl class="case-meta">'+metadata.map(([label,value])=>'<div><dt>'+escape(label)+'</dt><dd>'+escape(value)+'</dd></div>').join('')+'</dl></div><figure class="case-cover"><img src="'+escape(study.image)+'" alt="'+escape(study.alt)+'"></figure></div><section class="case-section"><p class="case-eyebrow">Overview</p><div><h3>'+escape(study.overview)+'</h3></div></section>'+study.sections.map(section=>'<section class="case-section"><p class="case-eyebrow">'+escape(section.label)+'</p><div><h3>'+escape(section.title)+'</h3>'+(section.body?'<p>'+escape(section.body)+'</p>':'')+(section.image?'<img class="case-story-image" src="'+escape(section.image)+'" alt="'+escape(section.alt||'')+'">':'')+'</div></section>').join('');
+  }
+  function openCase(id,updateURL=true){
+    if(!studies[id])return;
+    if(!modal.open)previousFocus=document.activeElement;
+    render(studies[id]);modal.classList.remove('expanded');expand.setAttribute('aria-pressed','false');expand.setAttribute('aria-label','Expand case study');
+    if(!modal.open)modal.showModal();content.scrollTop=0;
+    if(updateURL){const url=new URL(location.href);url.searchParams.set('case',id);history.pushState(null,'',url);}
+  }
+  document.querySelectorAll('[data-case]').forEach(button=>button.addEventListener('click',()=>openCase(button.dataset.case)));
+  document.querySelector('#case-home').addEventListener('click',()=>modal.close());
+  expand.addEventListener('click',()=>{const expanded=modal.classList.toggle('expanded');expand.setAttribute('aria-pressed',String(expanded));expand.setAttribute('aria-label',expanded?'Restore popup size':'Expand case study');});
+  modal.addEventListener('click',event=>{if(event.target!==modal)return;const r=modal.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)modal.close();});
+  modal.addEventListener('close',()=>{const url=new URL(location.href);if(url.searchParams.has('case')){url.searchParams.delete('case');history.replaceState(null,'',url);}previousFocus?.focus({preventScroll:true});});
+  window.addEventListener('popstate',()=>{const id=new URL(location.href).searchParams.get('case');if(studies[id])openCase(id,false);else if(modal.open)modal.close();});
+  const initial=new URL(location.href).searchParams.get('case');if(studies[initial])openCase(initial,false);
 })();
