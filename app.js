@@ -198,6 +198,8 @@ descriptionButton.addEventListener('click', scrambleDescription);
     {name:'Gallery',key:'g',shortcut:'[G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
     {name:'Download résumé',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'NOT ADDED YET',run:()=>document.querySelector('[data-missing="Resume"]').click()},
     {name:'Copy email',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
+    {name:'LinkedIn',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
+    {name:'X/Twitter',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
   ];
   let filtered = [], active = 0;
   function highlight() {
