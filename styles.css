@@ -101,3 +101,5 @@
 .command-header{padding-bottom:8px}#command-results>.command-group:first-child{margin-top:12px}
 
 html:has(#command-palette[open]),body:has(#command-palette[open]){overflow:hidden;overscroll-behavior:none}#command-results{overscroll-behavior:contain}
+
+.project,#intro,.current,.utility p,#story p,#scramble-description{scroll-margin-top:90px}.command-result>span{min-width:0;overflow-wrap:anywhere}

@@ -201,6 +201,27 @@ descriptionButton.addEventListener('click', scrambleDescription);
     {name:'LinkedIn',aliases:'https://www.linkedin.com/in/ehi-oko social',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
     {name:'X/Twitter',aliases:'https://www.x.com/ehigoko social twitter',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
   ];
+  function contentItems() {
+    const jump = element => () => element.scrollIntoView({block:'start',behavior:'smooth'});
+    const content = [...document.querySelectorAll('.project')].map(project => ({
+      name:project.querySelector('h2').textContent,
+      group:'Content',shortcut:'',detail:'/WORK',
+      aliases:[project.textContent,...[...project.querySelectorAll('img')].map(image=>image.alt),project.classList.contains('mental')?'Thrive Thribe':''].join(' '),
+      run:jump(project)
+    }));
+    const extra = [
+      [document.querySelector('#intro'),'Introduction','/HOME'],
+      [document.querySelector('.current'),'Previous experience','/HOME'],
+      [document.querySelector('#story p:first-child'),'About Ehi Oko','/STORY'],
+      [document.querySelector('#story p:nth-child(2)'),'Education and experience','/STORY'],
+      [document.querySelector('.utility p'),'Location and weather','/WORK'],
+      [document.querySelector('#scramble-description'),'Designed and coded with ♥︎','/WORK']
+    ];
+    extra.forEach(([element,name,detail])=>{
+      if(element)content.push({name,group:'Content',shortcut:'',detail,aliases:element.textContent+(element.id==='scramble-description'?' '+descriptions.join(' '):''),run:jump(element)});
+    });
+    return content;
+  }
   let filtered = [], active = 0;
   function highlight() {
     [...results.querySelectorAll('button')].forEach((button,index)=>button.classList.toggle('active',index===active));
@@ -209,7 +230,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const normalizeSearch = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/⌘/g,' cmd command ctrl control ').replace(/[\[\]]/g,' ').trim();
   function render() {
     const terms=normalizeSearch(query.value).split(/\s+/).filter(Boolean);
-    filtered=items.filter(item=>{
+    filtered=[...items,...(terms.length?contentItems():[])].filter(item=>{
       const searchable=normalizeSearch([item.name,item.group,item.detail,item.shortcut,item.key||'',item.aliases||''].join(' '));
       return terms.every(term=>searchable.includes(term));
     });active=0;results.replaceChildren();
