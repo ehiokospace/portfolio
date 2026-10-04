@@ -285,15 +285,15 @@ descriptionButton.addEventListener('click', scrambleDescription);
     if(!modal.open)previousFocus=document.activeElement;
     render(studies[id]);modal.classList.remove('expanded');expand.setAttribute('aria-pressed','false');expand.setAttribute('aria-label','Expand case study');
     if(!modal.open)modal.showModal();content.scrollTop=0;
-    if(updateURL){const url=new URL(location.href);if(id==='internal-tooling'){url.pathname='/proojects/sullivanfoundation';url.searchParams.delete('case');url.hash='';}else{url.pathname='/';url.searchParams.set('case',id);}history.pushState(null,'',url);}
+    if(updateURL){const url=new URL(location.href);if(id==='internal-tooling'){url.pathname='/projects/sullivanfoundation';url.searchParams.delete('case');url.hash='';}else{url.pathname='/';url.searchParams.set('case',id);}history.pushState(null,'',url);}
   }
   document.querySelectorAll('[data-case]').forEach(button=>button.addEventListener('click',()=>openCase(button.dataset.case)));
   document.querySelector('#case-home').addEventListener('click',()=>modal.close());
   expand.addEventListener('click',()=>{const expanded=modal.classList.toggle('expanded');expand.setAttribute('aria-pressed',String(expanded));expand.setAttribute('aria-label',expanded?'Restore popup size':'Expand case study');});
   modal.addEventListener('click',event=>{if(event.target!==modal)return;const r=modal.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)modal.close();});
-  modal.addEventListener('close',()=>{const url=new URL(location.href);if(url.pathname.replace(/\/$/,'')==='/proojects/sullivanfoundation'){url.pathname='/';url.hash='work';history.replaceState(null,'',url);}if(url.searchParams.has('case')){url.searchParams.delete('case');history.replaceState(null,'',url);}previousFocus?.focus({preventScroll:true});});
-  window.addEventListener('popstate',()=>{const id=location.pathname.replace(/\/$/,'')==='/proojects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[id])openCase(id,false);else if(modal.open)modal.close();});
-  const initial=location.pathname.replace(/\/$/,'')==='/proojects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[initial])openCase(initial,initial==='internal-tooling'&&location.pathname==='/');
+  modal.addEventListener('close',()=>{const url=new URL(location.href);if(url.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'){url.pathname='/';url.hash='work';history.replaceState(null,'',url);}if(url.searchParams.has('case')){url.searchParams.delete('case');history.replaceState(null,'',url);}previousFocus?.focus({preventScroll:true});});
+  window.addEventListener('popstate',()=>{const id=location.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[id])openCase(id,false);else if(modal.open)modal.close();});
+  const initial=location.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[initial])openCase(initial,initial==='internal-tooling'&&location.pathname==='/');
 })();
 
 // Keep the credit after all work on mobile, and in the sidebar on desktop.
