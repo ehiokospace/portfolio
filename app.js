@@ -276,11 +276,19 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const modal=document.querySelector('#case-study'),content=document.querySelector('#case-content'),expand=document.querySelector('#case-expand');
   const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let previousFocus=null;
+  let soonFrame=0;
   function render(study){
-    const metadata=study.hideMetadata?[]:study.metadata.length?study.metadata:[['Discipline',study.category],...(study.status?[['Status',study.status]]:[])];
-    const entries=Object.entries(studies),current=entries.findIndex(([,value])=>value===study),[nextId,next]=entries[(current+1)%entries.length];
-    content.innerHTML='<header class="case-intro"><div><h2 id="case-title">'+escape(study.title)+'</h2><p class="case-category">'+escape(study.badge||study.category)+'</p></div><p class="case-summary">'+escape(study.overview)+'</p></header><figure class="case-cover"><img src="'+escape(study.image)+'" alt="'+escape(study.alt)+'"></figure><div class="case-detail-grid"><dl class="case-meta">'+metadata.map(([label,value])=>'<div><dt>'+escape(label)+'</dt><dd>'+escape(value)+'</dd></div>').join('')+'</dl><div class="case-narrative"><p>'+escape(study.summary)+'</p>'+(study.detailImage?'<img class="case-story-image" src="'+escape(study.detailImage)+'" alt="'+escape(study.detailAlt||'')+'">':'')+study.sections.map(section=>'<section class="case-section"><p class="case-eyebrow">'+escape(section.label)+'</p><h3>'+escape(section.title)+'</h3>'+(section.body?'<p>'+escape(section.body)+'</p>':'')+(section.image?'<img class="case-story-image" src="'+escape(section.image)+'" alt="'+escape(section.alt||'')+'">':'')+'</section>').join('')+'</div></div><button class="case-next" data-next-case="'+escape(nextId)+'"><span class="case-next-header"><span><span class="case-next-label">Next project</span><span class="case-next-title">'+escape(next.title)+'</span><span class="case-next-category">'+escape(next.badge||next.category)+'</span></span><span class="case-next-summary">'+escape(next.overview)+'</span></span><img src="'+escape(next.image)+'" alt="'+escape(next.alt)+'"></button>';
-    content.querySelector('[data-next-case]').addEventListener('click',()=>openCase(nextId));
+    cancelAnimationFrame(soonFrame);
+    content.innerHTML='<section class="project-soon"><div class="soon-wrap"><div class="soon-num" aria-label="404"><span class="soon-cell"><span>4</span></span><span class="soon-cell"><span>0</span></span><span class="soon-cell"><span>4</span></span></div><h2 id="case-title">'+escape(study.title)+' is still in the making.</h2><p>The '+escape(study.title)+' case study is being written up. If you would like to hear about it before it is public, reach out at <a href="mailto:ehigoko1@gmail.com">ehigoko1@gmail.com</a>.</p><button class="soon-back">‹ <span>Back to home</span></button></div></section>';
+    content.querySelector('.soon-back').addEventListener('click',()=>modal.close());
+    const row=content.querySelector('.soon-num'),cells=[...row.children].map((cell,index)=>({cell,glyph:cell.firstElementChild,index,next:1+Math.random()*4,until:0,lit:false,color:Math.random()<.5?'#A99939':'#340414'}));
+    const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;let lit=0,started=null;
+    function tick(now){if(!modal.open)return;if(started===null)started=now;const t=(now-started)/1000,available=Math.min(960,content.clientWidth-80),size=Math.min(180,Math.max(80,content.clientWidth*.18)),base=size*.57+12,stretch=size*2.2;
+      const widths=cells.map(c=>base+Math.pow(.5+.5*Math.sin(t*.23*Math.PI*2+c.index*.74*1.7),2)*stretch),total=widths.reduce((x,y)=>x+y,0),scale=Math.min(1,Math.max(0,available-base*3)/(total-base*3||1));
+      for(const [i,c] of cells.entries()){c.cell.style.width=(base+(widths[i]-base)*scale).toFixed(1)+'px';c.glyph.style.fontSize=size+'px';if(!reduced){if(c.lit&&t>c.until){c.lit=false;lit--;c.next=t+4+Math.random()*10;}else if(!c.lit&&t>c.next){if(lit){c.next=t+1+Math.random()*3;}else{c.lit=true;lit++;c.until=t+.3+Math.random()*.9;}}}c.cell.style.background=c.lit?c.color:'transparent';c.glyph.style.color=c.lit?'#FAF9F7':'';}
+      if(!reduced)soonFrame=requestAnimationFrame(tick);
+    }
+    soonFrame=requestAnimationFrame(tick);
   }
   function openCase(id,updateURL=true){
     if(!studies[id])return;
@@ -293,7 +301,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   document.querySelector('#case-home').addEventListener('click',()=>modal.close());
   expand.addEventListener('click',()=>{const expanded=modal.classList.toggle('expanded');expand.setAttribute('aria-pressed',String(expanded));expand.setAttribute('aria-label',expanded?'Restore popup size':'Expand case study');});
   modal.addEventListener('click',event=>{if(event.target!==modal)return;const r=modal.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)modal.close();});
-  modal.addEventListener('close',()=>{const url=new URL(location.href);if(url.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'){url.pathname='/';url.hash='work';history.replaceState(null,'',url);}if(url.searchParams.has('case')){url.searchParams.delete('case');history.replaceState(null,'',url);}previousFocus?.focus({preventScroll:true});});
+  modal.addEventListener('close',()=>{cancelAnimationFrame(soonFrame);const url=new URL(location.href);if(url.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'){url.pathname='/';url.hash='work';history.replaceState(null,'',url);}if(url.searchParams.has('case')){url.searchParams.delete('case');history.replaceState(null,'',url);}previousFocus?.focus({preventScroll:true});});
   window.addEventListener('popstate',()=>{const id=location.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[id])openCase(id,false);else if(modal.open)modal.close();});
   const initial=location.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[initial])openCase(initial,initial==='internal-tooling'&&location.pathname==='/');
 })();
