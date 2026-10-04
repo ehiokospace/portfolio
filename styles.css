@@ -174,3 +174,5 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .node-arrow-glyph{display:inline-block;transition:transform .22s ease;transform-origin:center}.links nav[aria-label="Social and contact"] a:hover .node-arrow-glyph,.links nav[aria-label="Social and contact"] button:hover .node-arrow-glyph,.links nav[aria-label="Social and contact"] a:focus-visible .node-arrow-glyph,.links nav[aria-label="Social and contact"] button:focus-visible .node-arrow-glyph{transform:rotate(45deg)}@media(prefers-reduced-motion:reduce){.node-arrow-glyph{transition:none}}
 
 .links nav>a,.links nav>button{transition:padding-left .2s ease,color .2s ease}.links nav>a:hover,.links nav>button:hover,.links nav>a:focus-visible,.links nav>button:focus-visible{padding-left:6px}@media(prefers-reduced-motion:reduce){.links nav>a,.links nav>button{transition:none}}
+
+.soon-cell>span{font-family:var(--sans)}
