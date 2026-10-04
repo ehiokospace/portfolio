@@ -146,3 +146,5 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .layout aside .bio p:not(.bio-intro){font-size:14px;line-height:22px}
 
 .layout aside .bio .bio-intro{margin-bottom:8px}.layout aside .bio .bio-intro+p{margin-top:0}
+
+.case-cover img[src*="sullivan-service-corps"]{transform:translateX(5%) scale(1.18);transform-origin:center bottom}
