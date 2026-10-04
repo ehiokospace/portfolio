@@ -164,6 +164,8 @@ descriptionButton.addEventListener('click', scrambleDescription);
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || !selection.rangeCount || matchMedia('(forced-colors: active)').matches) return;
     const range = selection.getRangeAt(0);
+    const host=selection.anchorNode?.parentElement?.closest("dialog[open]")||document.body;
+    if(layer.parentElement!==host)host.append(layer);
     if (selection.anchorNode?.parentElement?.closest('input,textarea,[contenteditable]')) return;
     const lines = [];
     for (const rect of range.getClientRects()) {
