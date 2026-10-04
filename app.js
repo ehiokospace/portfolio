@@ -179,6 +179,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
       ink.style.cssText = `left:${rect.left-2}px;top:${rect.top+rect.height*.1}px;width:${rect.right-rect.left+4}px;height:${rect.height*.8}px`;
       layer.append(ink);
     }
+    frame = requestAnimationFrame(paint);
   }
   function schedule() { cancelAnimationFrame(frame); frame = requestAnimationFrame(paint); }
   document.addEventListener('selectionchange', schedule);
