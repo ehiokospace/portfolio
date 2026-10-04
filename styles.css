@@ -142,3 +142,5 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .featured-work-header{display:none}@media(max-width:700px){.featured-work-header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:12px 20px 20px}.featured-work-header h2{font:500 26px/1.2 var(--serif);letter-spacing:-.4px}.featured-work-header a{font:14px/1.4 var(--sans);color:var(--muted)}.featured-work-header a:hover{color:var(--ink)}}
 
 .layout aside .bio .bio-intro{font-size:15px;line-height:1.5;margin-bottom:16px;color:var(--ink)}.bio-amp{font-family:Baskerville,"Baskerville Old Face","Libre Baskerville",Georgia,serif;font-style:italic}.bio-intro+p{margin-top:0}@media(max-width:700px){.layout aside .bio .bio-intro{font-size:22px;line-height:1.35;margin-bottom:16px}}
+
+.layout aside .bio p:not(.bio-intro){font-size:14px;line-height:22px}
