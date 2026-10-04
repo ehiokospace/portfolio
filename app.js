@@ -212,8 +212,8 @@ descriptionButton.addEventListener('click', scrambleDescription);
     const extra = [
       [document.querySelector('#intro'),'Introduction','/HOME'],
       [document.querySelector('.current'),'Previous experience','/HOME'],
-      [document.querySelector('#story p:first-child'),'About Ehi Oko','/STORY'],
-      [document.querySelector('#story p:nth-child(2)'),'Education and experience','/STORY'],
+      [document.querySelector('#story p:nth-child(2)'),'About Ehi Oko','/STORY'],
+      [document.querySelector('#story p:nth-child(3)'),'Education and experience','/STORY'],
       [document.querySelector('.utility p'),'Location and weather','/WORK'],
       [document.querySelector('#scramble-description'),'Designed and coded with ♥︎','/WORK']
     ];
