@@ -144,3 +144,5 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .layout aside .bio .bio-intro{font-size:15px;line-height:1.5;margin-bottom:16px;color:var(--ink)}.bio-amp{font-family:Baskerville,"Baskerville Old Face","Libre Baskerville",Georgia,serif;font-style:italic}.bio-intro+p{margin-top:0}@media(max-width:700px){.layout aside .bio .bio-intro{font-size:22px;line-height:1.35;margin-bottom:16px}}
 
 .layout aside .bio p:not(.bio-intro){font-size:14px;line-height:22px}
+
+.layout aside .bio .bio-intro{margin-bottom:8px}.layout aside .bio .bio-intro+p{margin-top:0}
