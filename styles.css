@@ -176,3 +176,5 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .links nav>a,.links nav>button{transition:padding-left .2s ease,color .2s ease}.links nav>a:hover,.links nav>button:hover,.links nav>a:focus-visible,.links nav>button:focus-visible{padding-left:6px}@media(prefers-reduced-motion:reduce){.links nav>a,.links nav>button{transition:none}}
 
 .soon-cell>span{font-family:var(--sans)}
+
+.layout aside .bio p:not(.bio-intro){text-wrap:wrap;white-space:normal;max-width:none}
