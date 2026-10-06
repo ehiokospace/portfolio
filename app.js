@@ -338,7 +338,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const bar=document.querySelector('#feedback-mode-bar'),status=document.querySelector('#feedback-status');
   const send=document.querySelector('#feedback-send'),message=document.querySelector('#feedback-message');
   let mode=false,selected=null,token='',widget=null,loading=null,previousFocus=null,submitting=false;
-  const targets=[['.hero h1','Introduction'],['.hero .current','Previous experience'],['.bio p','Biography'],['nav h2','Navigation heading'],['nav a,nav button:not(#leave-feedback)','Navigation link'],['.utility p','Location and weather']];
+  const targets=[['.hero h1','Introduction'],['.hero .current','Previous experience'],['.bio p','Biography'],['nav h2','Navigation heading'],['nav a,nav button:not(#leave-feedback)','Navigation link'],['.utility p','Location and weather'],['.story-bio p','Story biography'],['.story-experience','Story experience'],['.story-particle-stage','Story image']];
   targets.forEach(([selector,label])=>document.querySelectorAll(selector).forEach(el=>el.dataset.feedbackSection=label));
   document.querySelectorAll('.project').forEach(card=>{const title=card.querySelector('h2').textContent;card.querySelectorAll('.media,.category,h2').forEach(el=>el.dataset.feedbackSection=title);});
   function markTargets(enabled){
@@ -348,7 +348,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     });
   }
   function stop(){if(!mode)return;mode=false;bar.hidden=true;document.body.classList.remove('feedback-selecting');markTargets(false);}
-  function start(){floating.hidden=true;modal.append(section,form);
+  function start(){const story=document.querySelector('#story-overlay');const host=story.open?story:document.body;host.append(modal,floating);floating.hidden=true;modal.append(section,form);
 
     const caseModal=document.querySelector('#case-study');
     if(caseModal.open){compose('Case study: '+document.querySelector('#case-title').textContent,null);return;}
@@ -375,13 +375,14 @@ descriptionButton.addEventListener('click', scrambleDescription);
     }catch{status.textContent='Spam check could not load. Please close and try again.';}
   }
   document.querySelector('#leave-feedback').addEventListener('click',start);
+  document.querySelector('#story-feedback').addEventListener('click',start);
   document.querySelector('#feedback-mobile').addEventListener('click',start);
   document.querySelector('#feedback-exit').addEventListener('click',stop);
   document.querySelector('#feedback-general').addEventListener('click',()=>compose('General feedback',null));
   document.querySelector('#feedback-close').addEventListener('click',()=>{if(!submitting)modal.close();});
   document.querySelector('#feedback-done').addEventListener('click',()=>modal.close());
   modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});
-  modal.addEventListener('close',()=>{floating.hidden=true;modal.append(section,form);stop();selected?.classList.remove('feedback-selected');selected=null;if(widget!==null&&window.turnstile){window.turnstile.remove(widget);widget=null;}token='';previousFocus?.focus({preventScroll:true});});
+  modal.addEventListener('close',()=>{floating.hidden=true;modal.append(section,form);stop();document.body.append(modal,floating);selected?.classList.remove('feedback-selected');selected=null;if(widget!==null&&window.turnstile){window.turnstile.remove(widget);widget=null;}token='';previousFocus?.focus({preventScroll:true});});
   document.addEventListener('click',event=>{
     if(!mode||event.target.closest('#feedback-dialog, #feedback-floating'))return;
     const element=event.target.closest('[data-feedback-section]');if(!element)return;
@@ -726,10 +727,10 @@ const rows=[...overlay.querySelectorAll('.story-experience')];
 function clock(){document.querySelector('#story-clock').textContent=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date());}
 function select(index){fallback.src=sources[index];fallback.alt=names[index];canvas.setAttribute('aria-label','Interactive particle rendering: '+names[index]);canvas.dataset.image=index;portrait?.setImage(index);rows.forEach(row=>row.setAttribute('aria-pressed',String(Number(row.dataset.storyImage)===index)));}
 function openStory(){if(overlay.open)return;opener=document.activeElement;document.querySelector('#command-palette').close();overlay.showModal();overlay.scrollTop=0;clock();clockTimer=setInterval(clock,1000);if(!portrait){portrait=new StoryPortrait(canvas,sources,{gap:3.1,size:2.65,bleed:0,coverage:0,fit:'cover',maxParticles:65000,entrySpread:500,entryStagger:850,entryFade:180,scatter:90,swirl:600,chaos:230,cornerRadius:0,background:'#1c1c1c'});}else{portrait.setVisible(true);select(0);portrait.reset(true);}document.querySelector('#story-close').focus({preventScroll:true});}
-function closeStory(){overlay.close();}
+function closeStory(){document.querySelector('#feedback-dialog').close();overlay.close();}
 document.querySelectorAll('a[href="#story"]').forEach(link=>link.addEventListener('click',event=>{if(document.body.classList.contains('feedback-selecting'))return;event.preventDefault();openStory();}));
 document.addEventListener('open-story',openStory);
 document.querySelector('#story-home').addEventListener('click',closeStory);document.querySelector('#story-close').addEventListener('click',closeStory);
-overlay.addEventListener('close',()=>{clearInterval(clockTimer);portrait?.setVisible(false);rows.forEach(row=>row.setAttribute('aria-pressed','false'));opener?.focus({preventScroll:true});});
+overlay.addEventListener('close',()=>{document.querySelector('#feedback-dialog').close();clearInterval(clockTimer);portrait?.setVisible(false);rows.forEach(row=>row.setAttribute('aria-pressed','false'));opener?.focus({preventScroll:true});});
 rows.forEach(row=>{const index=Number(row.dataset.storyImage);row.addEventListener('pointerenter',()=>select(index));row.addEventListener('pointerleave',()=>select(0));row.addEventListener('focus',()=>select(index));row.addEventListener('blur',()=>select(0));row.addEventListener('click',()=>select(index));});
 })();

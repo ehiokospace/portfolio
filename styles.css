@@ -282,3 +282,10 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 
 /* Experience marks reveal their original color only on hover. */
 .story-brand{filter:grayscale(1);transition:filter .18s ease}.story-brand-light{filter:grayscale(1) brightness(0) invert(1)}.story-experience:hover .story-brand{filter:none}.story-experience:hover .story-brand-light{filter:brightness(0) invert(1)}@media(prefers-reduced-motion:reduce){.story-brand{transition:none}}
+
+/* Keep the Story header utility in the same order as the portfolio. */
+#story-feedback{flex:none;margin-right:24px}
+.story-location{margin-right:16px}
+#story-overlay:has(#feedback-dialog[open]) .story-shell{margin-right:var(--feedback-column);max-width:calc(100% - var(--feedback-column))}
+#story-overlay #feedback-floating{position:fixed}
+@media(max-width:700px){#story-feedback{margin-right:12px}.story-location{margin-right:12px}}
