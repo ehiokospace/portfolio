@@ -198,3 +198,10 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .feedback-selecting .project::after,.project.feedback-selected::after{content:"";position:absolute;inset:-8px;border:1px dashed #E3728080;border-radius:17.8px;pointer-events:none}
 .feedback-selecting .project:hover::after,.feedback-selecting .project:focus-visible::after{border:2px dashed #E37280}
 .project.feedback-selected::after{border:2px solid #E37280}
+
+/* Reserve a real column for Comments instead of covering the portfolio. */
+body:has(#feedback-dialog[open]){--feedback-column:clamp(300px,28vw,440px);margin-right:var(--feedback-column)}
+body:has(#feedback-dialog[open]) #feedback-dialog{width:var(--feedback-column);box-shadow:none;animation:none}
+body:has(#feedback-dialog[open]) .hero h1{margin-left:clamp(26px,8vw,120px);max-width:calc(100% - 52px)}
+@media(max-width:1000px){body:has(#feedback-dialog[open]) .layout{grid-template-columns:200px minmax(0,1fr)}body:has(#feedback-dialog[open]) .projects{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:28px}body:has(#feedback-dialog[open]) .project{grid-column:auto;grid-row:auto}}
+@media(max-width:700px){body:has(#feedback-dialog[open]){--feedback-column:min(300px,42vw)}body:has(#feedback-dialog[open]) #feedback-dialog{padding:54px 16px 24px}body:has(#feedback-dialog[open]) #feedback-title{font-size:20px}body:has(#feedback-dialog[open]) #feedback-prompt p{font-size:14px}body:has(#feedback-dialog[open]) .layout{display:flex}body:has(#feedback-dialog[open]) .bio{max-width:100%}body:has(#feedback-dialog[open]) .hero h1{font-size:26px;margin-left:16px;max-width:calc(100% - 32px)}body:has(#feedback-dialog[open]) .current{left:16px;right:16px}body:has(#feedback-dialog[open]) .project h2{font-size:14px}}
