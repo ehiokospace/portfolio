@@ -7,7 +7,7 @@ if (['localhost', '127.0.0.1'].includes(location.hostname)) {
 }
 // Replace null destinations with your own URLs. Relative paths work on GitHub Pages.
 const destinations = {
-  Gallery: null, Resume: 'https://drive.google.com/file/d/11beu2HB285avA1R1cZX8E9XF8QlEzJ4y/view?usp=sharing',
+  Craft: null, Gallery: null, Resume: 'https://drive.google.com/file/d/11beu2HB285avA1R1cZX8E9XF8QlEzJ4y/view?usp=sharing',
   'Internal tooling case study': null,
   'AI mental health case study': null,
   'Course scheduling case study': null,
@@ -22,6 +22,7 @@ document.querySelectorAll('[data-missing]').forEach(button => {
     document.querySelector('#notice-title').textContent = label;
     document.querySelector('#notice-body').textContent = label.includes('case study')
       ? 'This case study has not been added to the portfolio yet.'
+      : label === 'Craft' ? 'The craft page is coming soon.'
       : label === 'Gallery' ? 'The gallery has not been added yet.'
       : 'This destination has not been connected yet.';
     dialog.showModal();
@@ -118,11 +119,11 @@ copyEmailButton.addEventListener('click', async () => {
     copyEmailButton.querySelector('.email-label').textContent = 'COPIED!';
     copyEmailButton.classList.add('is-copied');
     emailResetTimer = setTimeout(() => {
-      copyEmailButton.querySelector('.email-label').textContent = '04. Email';
+      copyEmailButton.querySelector('.email-label').textContent = '05. Email';
       copyEmailButton.classList.remove('is-copied');
     }, 2000);
   } catch {
-    document.querySelector('#notice-title').textContent = '04. Email';
+    document.querySelector('#notice-title').textContent = '05. Email';
     document.querySelector('#notice-body').textContent = 'Copy this address: ehigoko1@gmail.com';
     dialog.showModal();
   }
@@ -208,8 +209,9 @@ descriptionButton.addEventListener('click', scrambleDescription);
   palette.addEventListener('close',resetCopied);
   const items = [
     {name:'Work',key:'w',modifier:true,shortcut:'[⌘W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
-    {name:'Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
+    {name:'Craft',shortcut:'',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Craft"]').click()},
     {name:'Gallery',key:'g',modifier:true,shortcut:'[⌘G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
+    {name:'Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
     {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
     {name:'Copy email',keepOpen:true,aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
     {name:'LinkedIn',aliases:'https://www.linkedin.com/in/ehi-oko social',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
