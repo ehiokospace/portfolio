@@ -213,3 +213,19 @@ body:has(#feedback-dialog[open]) .hero h1{margin-left:clamp(26px,8vw,120px);max-
 body:has(#feedback-dialog[open]) #feedback-title{font:400 15px/1.5 var(--sans)}
 body:has(#feedback-dialog[open]) #feedback-prompt p{font:400 14px/1.5 var(--sans)}
 #feedback-dialog #feedback-general{font-size:11.5px}
+
+/* Hover only, with independent text and image targets. */
+.feedback-selecting [data-feedback-section]{outline:none;border-radius:4px}
+.feedback-selecting [data-feedback-section]:hover,.feedback-selecting [data-feedback-section]:focus-visible{outline:2px dashed #E37280!important;outline-offset:4px}
+.feedback-selected{outline:2px solid #E37280!important;border-radius:4px;outline-offset:4px}
+.feedback-selecting .media,.media.feedback-selected{border-radius:9.8px}
+.feedback-selecting .media:hover,.feedback-selecting .media:focus-visible,.media.feedback-selected{outline-offset:8px}
+#feedback-floating{min-height:64px;gap:12px;padding:10px 16px;border-radius:24px}
+#feedback-floating #feedback-form{display:contents}
+#feedback-floating #feedback-section{font-size:14px;line-height:22px;gap:6px}
+#feedback-floating #feedback-section::before{width:20px;height:20px}
+#feedback-floating #feedback-message{font:400 14px/22px var(--sans);height:22px;min-height:22px;align-self:center}
+#feedback-floating #feedback-send{align-self:center;width:40px;height:40px;font-size:22px}
+#feedback-floating #feedback-verification{position:absolute;top:calc(100% + 8px);left:16px;width:auto;line-height:0}
+#feedback-floating #feedback-status:not(:empty){position:absolute;top:calc(100% + 8px);left:0;width:100%;padding:8px 12px;background:var(--paper);border-radius:8px}
+.feedback-selecting .project::after{content:none}

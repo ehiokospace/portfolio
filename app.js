@@ -338,9 +338,9 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const bar=document.querySelector('#feedback-mode-bar'),status=document.querySelector('#feedback-status');
   const send=document.querySelector('#feedback-send'),message=document.querySelector('#feedback-message');
   let mode=false,selected=null,token='',widget=null,loading=null,previousFocus=null,submitting=false;
-  const targets=[['.hero','Introduction'],['.bio','Biography'],['nav[aria-label="Main navigation"]','Navigation'],['nav[aria-label="Social and contact"]','Contact links'],['.utility p','Location and weather']];
-  targets.forEach(([selector,label])=>{const el=document.querySelector(selector);if(el)el.dataset.feedbackSection=label;});
-  document.querySelectorAll('.project').forEach(el=>el.dataset.feedbackSection=el.querySelector('h2').textContent);
+  const targets=[['.hero h1','Introduction'],['.hero .current','Previous experience'],['.bio p','Biography'],['nav h2','Navigation heading'],['nav a,nav button:not(#leave-feedback)','Navigation link'],['.utility p','Location and weather']];
+  targets.forEach(([selector,label])=>document.querySelectorAll(selector).forEach(el=>el.dataset.feedbackSection=label));
+  document.querySelectorAll('.project').forEach(card=>{const title=card.querySelector('h2').textContent;card.querySelectorAll('.media,.category,h2').forEach(el=>el.dataset.feedbackSection=title);});
   function markTargets(enabled){
     document.querySelectorAll('[data-feedback-section]').forEach(el=>{
       if(enabled){el.dataset.feedbackTabindex=el.getAttribute('tabindex')??'none';el.tabIndex=0;}
