@@ -299,3 +299,5 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 #story-overlay #feedback-category option{background:#1c1c1c;color:#fcfcfa}
 #story-overlay #feedback-send,#story-overlay #feedback-done{color:#fcfcfa;border-color:#555}
 #story-overlay #feedback-send:hover,#story-overlay #feedback-done:hover{background:#333}
+
+@media(max-width:760px){#story-particles{display:none!important}.story-particle-stage #story-image-fallback{display:block!important;opacity:1!important;visibility:visible!important}#story-overlay,#story-overlay::backdrop{animation:none!important}}
