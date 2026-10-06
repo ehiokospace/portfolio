@@ -334,7 +334,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const floating=document.createElement('div');floating.id='feedback-floating';floating.hidden=true;document.body.append(floating);
   const section=document.querySelector('#feedback-section'),comments=document.querySelector('#feedback-comments');
   function placeFloating(){if(!selected||floating.hidden)return;const r=selected.getBoundingClientRect(),side=modal.getBoundingClientRect(),available=side.left>180?side.left:innerWidth;const width=Math.min(480,Math.max(220,available-32));floating.style.width=width+'px';floating.style.left=Math.max(16,Math.min(r.left,available-width-16))+'px';floating.style.top=Math.max(16,scrollY+r.top-floating.offsetHeight-12)+'px';}
-  window.addEventListener('resize',placeFloating);
+  window.addEventListener('resize',placeFloating);new ResizeObserver(placeFloating).observe(floating);
   const bar=document.querySelector('#feedback-mode-bar'),status=document.querySelector('#feedback-status');
   const send=document.querySelector('#feedback-send'),message=document.querySelector('#feedback-message');
   let mode=false,selected=null,token='',widget=null,loading=null,previousFocus=null,submitting=false;
