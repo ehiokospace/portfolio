@@ -178,3 +178,5 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .soon-cell>span{font-family:var(--sans)}
 
 .layout aside .bio p:not(.bio-intro){text-wrap:wrap;white-space:normal;max-width:none}
+
+.utility p{font-size:14px}
