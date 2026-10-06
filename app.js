@@ -719,7 +719,7 @@ class StoryPortrait {
 // Story is a modal layer; its image renderer is created only on first opening.
 (()=>{
 const overlay=document.querySelector('#story-overlay'),canvas=document.querySelector('#story-particles'),fallback=document.querySelector('#story-image-fallback');
-const names=["Flower study","Notion","ColorStack AAMU","Sullivan Foundation","JPMorganChase","Thrive","Cornell Tech","IBM SkillsBuild","HBCU Game Jam","HBCU Game Jam"];
+const names=["Flower study","Notion","ColorStack AAMU","Sullivan Foundation","JPMorganChase","Thrive","Cornell Tech","IBM SkillsBuild","HBCU Game Jam","HBCU Business Pitch Competition"];
 const sources=["hero-1.png","hero-2.png","community.png","sullivan-service-corps.jpg","internal-tooling.png","mental-health.png","450ff.png","434ca.png","eac7b.png","hero-1.png"].map(file=>'./assets/'+file);
 let portrait,clockTimer,opener;
 const rows=[...overlay.querySelectorAll('.story-experience')];
