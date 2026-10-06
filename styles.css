@@ -274,3 +274,8 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 
 /* Keep feedback beside the weather in the utility bar. */
 .utility-right{display:flex;align-items:center;gap:16px;margin-left:auto}.utility-right p{margin:0}.utility-right .feedback-entry{flex:none}.sidebar-footer .sidebar-copyright{margin-top:0}@media(max-width:700px){.utility-right{order:1;gap:12px}.utility-right p{display:none}#mobile-menu{order:2;margin-left:16px}.utility-right .feedback-entry{font-size:11.5px}}
+
+/* The particle frame follows the full biography and experience column. */
+.story-grid{align-items:stretch}.story-particle-frame{aspect-ratio:auto;align-self:stretch;min-height:0}.story-particle-stage{position:absolute;inset:13px;width:auto;height:auto}
+.story-logos{display:flex;align-items:center;justify-content:center;gap:3px;flex:none;width:20px;height:20px}.story-brand{display:block;width:18px;height:18px;object-fit:contain;border-radius:2px}.story-brand-light{filter:brightness(0) invert(1)}.story-logos-pair{width:39px}.story-logos-pair .story-brand{width:18px}.story-company{gap:8px;font-weight:500;min-width:0}.story-experience{grid-template-columns:minmax(0,1.55fr) minmax(0,.75fr) minmax(0,.85fr);min-height:33.4px;height:auto;padding-block:7px}.story-role{text-align:left}.story-experiences h2{margin-bottom:5px}
+@media(max-width:760px){.story-particle-frame{aspect-ratio:610/543;align-self:start}.story-experience{grid-template-columns:minmax(0,1.45fr) minmax(0,.85fr) minmax(0,.85fr);min-height:40px;gap:7px}.story-company{gap:6px}.story-logos-pair{width:20px;flex-direction:column;height:32px}.story-logos-pair .story-brand{width:14px;height:14px}.story-date{font-size:9px}.story-brand{width:16px;height:16px}}

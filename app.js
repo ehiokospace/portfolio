@@ -719,8 +719,8 @@ class StoryPortrait {
 // Story is a modal layer; its image renderer is created only on first opening.
 (()=>{
 const overlay=document.querySelector('#story-overlay'),canvas=document.querySelector('#story-particles'),fallback=document.querySelector('#story-image-fallback');
-const names=['Flower study','HP example','Robinhood example','Rivet example','ClairHealth example','NASA SUITS example','Futurity example','Turing example'];
-const sources=['hero-1.png','internal-tooling.png','hero-2.png','community.png','mental-health.png','sullivan-service-corps.jpg','450ff.png','7230c.png'].map(file=>'./assets/'+file);
+const names=["Flower study","Notion","ColorStack AAMU","Sullivan Foundation","JPMorganChase","Thrive","Cornell Tech","Bloomberg × Kode With Klossy","IBM SkillsBuild","HBCU Game Jam","HBCU Game Jam"];
+const sources=["hero-1.png","hero-2.png","community.png","sullivan-service-corps.jpg","internal-tooling.png","mental-health.png","450ff.png","7230c.png","434ca.png","eac7b.png","hero-1.png"].map(file=>'./assets/'+file);
 let portrait,clockTimer,opener;
 const rows=[...overlay.querySelectorAll('.story-experience')];
 function clock(){document.querySelector('#story-clock').textContent=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date());}
