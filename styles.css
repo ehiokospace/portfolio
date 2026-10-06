@@ -229,3 +229,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt p{font:400 14px/1.5 var(--sans
 #feedback-floating #feedback-verification{position:absolute;top:calc(100% + 8px);left:16px;width:auto;line-height:0}
 #feedback-floating #feedback-status:not(:empty){position:absolute;top:calc(100% + 8px);left:0;width:100%;padding:8px 12px;background:var(--paper);border-radius:8px}
 .feedback-selecting .project::after{content:none}
+
+/* Reflow the complete hero heading inside the space beside Comments. */
+body:has(#feedback-dialog[open]) .hero{padding:clamp(24px,5vw,72px)}
+body:has(#feedback-dialog[open]) .hero h1{margin:0;padding:0;width:100%;max-width:100%;white-space:normal;overflow-wrap:normal}
+body:has(#feedback-dialog[open]) .hero-line{display:inline;white-space:normal}
