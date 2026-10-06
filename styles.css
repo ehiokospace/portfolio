@@ -289,3 +289,13 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 #story-overlay:has(#feedback-dialog[open]) .story-shell{margin-right:var(--feedback-column);max-width:calc(100% - var(--feedback-column))}
 #story-overlay #feedback-floating{position:fixed}
 @media(max-width:700px){#story-feedback{margin-right:12px}.story-location{margin-right:12px}}
+
+/* Story comments follow the surrounding dark surface. */
+#story-overlay #feedback-dialog{--paper:#1c1c1c;--ink:#fcfcfa;--muted:#b5b5b2;background:#1c1c1c;color:#fcfcfa;border-left-color:#444}
+#story-overlay #feedback-title,#story-overlay #feedback-close{color:#fcfcfa}
+#story-overlay #feedback-prompt p,#story-overlay #feedback-general,#story-overlay .feedback-private{color:#b5b5b2}
+#story-overlay #feedback-message,#story-overlay #feedback-category{color:#fcfcfa;border-color:#555}
+#story-overlay #feedback-message::placeholder{color:#a5a5a2}
+#story-overlay #feedback-category option{background:#1c1c1c;color:#fcfcfa}
+#story-overlay #feedback-send,#story-overlay #feedback-done{color:#fcfcfa;border-color:#555}
+#story-overlay #feedback-send:hover,#story-overlay #feedback-done:hover{background:#333}
