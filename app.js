@@ -347,7 +347,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   function start(){
     const caseModal=document.querySelector('#case-study');
     if(caseModal.open){compose('Case study: '+document.querySelector('#case-title').textContent,null);return;}
-    if(mode)return;mode=true;bar.hidden=false;document.body.classList.add('feedback-selecting');markTargets(true);document.querySelector('#feedback-general').focus({preventScroll:true});
+    if(mode)return;previousFocus=document.activeElement;mode=true;document.body.classList.add('feedback-selecting');markTargets(true);form.hidden=true;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-section').textContent='';document.querySelector('#feedback-prompt').hidden=false;modal.show();modal.focus({preventScroll:true});
   }
   function loadTurnstile(){
     if(window.turnstile)return Promise.resolve();
@@ -356,9 +356,9 @@ descriptionButton.addEventListener('click', scrambleDescription);
     return loading;
   }
   async function compose(label,element){
-    previousFocus=document.activeElement;stop();selected=element;selected?.classList.add('feedback-selected');
+    if(!modal.open)previousFocus=document.activeElement;selected?.classList.remove('feedback-selected');selected=element;selected?.classList.add('feedback-selected');document.querySelector('#feedback-prompt').hidden=true;
     form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;status.textContent='';token='';send.disabled=true;
-    document.querySelector('#feedback-section').textContent=label;modal.showModal();modal.focus({preventScroll:true});
+    document.querySelector('#feedback-section').textContent=label;if(!modal.open)modal.show();modal.focus({preventScroll:true});
     try{
       await loadTurnstile();if(!modal.open)return;
       if(widget!==null)window.turnstile.remove(widget);
@@ -372,15 +372,16 @@ descriptionButton.addEventListener('click', scrambleDescription);
   document.querySelector('#feedback-close').addEventListener('click',()=>{if(!submitting)modal.close();});
   document.querySelector('#feedback-done').addEventListener('click',()=>modal.close());
   modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});
-  modal.addEventListener('close',()=>{selected?.classList.remove('feedback-selected');selected=null;if(widget!==null&&window.turnstile){window.turnstile.remove(widget);widget=null;}token='';previousFocus?.focus({preventScroll:true});});
+  modal.addEventListener('close',()=>{stop();selected?.classList.remove('feedback-selected');selected=null;if(widget!==null&&window.turnstile){window.turnstile.remove(widget);widget=null;}token='';previousFocus?.focus({preventScroll:true});});
   document.addEventListener('click',event=>{
-    if(!mode||event.target.closest('#feedback-mode-bar'))return;
+    if(!mode||event.target.closest('#feedback-dialog'))return;
     const element=event.target.closest('[data-feedback-section]');if(!element)return;
     event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);
   },true);
   document.addEventListener('keydown',event=>{
-    if(!mode)return;
-    if(event.key==='Escape'){event.preventDefault();stop();return;}
+    if(!modal.open)return;
+    if(event.key==='Escape'){event.preventDefault();if(!submitting)modal.close();return;}
+    if(!mode||event.target.closest('#feedback-dialog'))return;
     const element=event.target.closest('[data-feedback-section]');
     if(element&&(event.key==='Enter'||event.key===' ')){event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);}
   },true);
@@ -392,7 +393,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(submitting||!form.reportValidity()||!token)return;
     submitting=true;send.disabled=true;send.textContent='Sending…';status.textContent='';
-    const payload={message:message.value,page:location.href,section:document.querySelector('#feedback-section').textContent,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-47'};
+    const payload={message:message.value,page:location.href,section:document.querySelector('#feedback-section').textContent,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-48'};
     try{
       const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
       const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Feedback could not be sent. Please try again.');
