@@ -324,7 +324,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
 })();
 
 // Keep the credit after all work on mobile, and in the sidebar on desktop.
-(() => {const credit=document.querySelector("#scramble-description"),sidebar=document.querySelector(".layout aside"),main=document.querySelector("main"),mobile=matchMedia("(max-width:700px)");function placeCredit(){(mobile.matches?main:sidebar).append(credit);}mobile.addEventListener("change",placeCredit);placeCredit();})();
+(() => {const credit=document.querySelector(".sidebar-footer"),sidebar=document.querySelector(".layout aside"),main=document.querySelector("main"),mobile=matchMedia("(max-width:700px)");function placeCredit(){(mobile.matches?main:sidebar).append(credit);}mobile.addEventListener("change",placeCredit);placeCredit();})();
 
 // Private, section-based portfolio feedback.
 (() => {
