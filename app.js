@@ -360,12 +360,12 @@ descriptionButton.addEventListener('click', scrambleDescription);
     loading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.async=true;script.onload=resolve;script.onerror=()=>{loading=null;script.remove();reject(new Error('unavailable'));};document.head.append(script);});
     return loading;
   }
-  async function compose(label,element){
+  async function compose(label,element,type='p'){
     if(submitting)return;
 
     if(!modal.open)previousFocus=document.activeElement;selected?.classList.remove('feedback-selected');selected=element;selected?.classList.add('feedback-selected');document.querySelector('#feedback-prompt').hidden=true;
     form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;status.textContent='';token='';send.disabled=true;
-    section.textContent=label;if(!modal.open)modal.show();
+    section.dataset.label=label;section.textContent=type;section.setAttribute('aria-label',type==='img'?'Selected image':'Selected text');if(!modal.open)modal.show();
     if(element){floating.append(section,form);floating.hidden=false;placeFloating();const top=parseFloat(floating.style.top);if(top<scrollY||top+floating.offsetHeight>scrollY+innerHeight)window.scrollTo({top:Math.max(0,top-24),behavior:'smooth'});message.focus({preventScroll:true});}
     else{floating.hidden=true;modal.append(section,form);modal.focus({preventScroll:true});}
     try{
@@ -385,7 +385,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   document.addEventListener('click',event=>{
     if(!mode||event.target.closest('#feedback-dialog, #feedback-floating'))return;
     const element=event.target.closest('[data-feedback-section]');if(!element)return;
-    event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);
+    event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element,event.target.closest('img,.media')?'img':'p');
   },true);
   document.addEventListener('keydown',event=>{
     if(!modal.open)return;
@@ -399,10 +399,11 @@ descriptionButton.addEventListener('click', scrambleDescription);
     const content=document.querySelector('#case-content');if(!content.children.length||content.querySelector('.case-feedback'))return;
     const button=document.createElement('button');button.className='case-feedback';button.textContent='Leave feedback [+]';button.addEventListener('click',()=>compose('Case study: '+document.querySelector('#case-title').textContent,null));content.querySelector('.soon-wrap')?.append(button);
   }).observe(document.querySelector('#case-content'),{childList:true});
+  message.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();form.requestSubmit();}});
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(submitting||!form.reportValidity()||!token)return;
     submitting=true;send.disabled=true;send.textContent='Sending…';status.textContent='';
-    const payload={message:message.value,page:location.href,section:document.querySelector('#feedback-section').textContent,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-50'};
+    const payload={message:message.value,page:location.href,section:section.dataset.label,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-55'};
     try{
       const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
       const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Feedback could not be sent. Please try again.');
