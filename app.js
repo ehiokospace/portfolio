@@ -371,7 +371,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     try{
       await loadTurnstile();if(!modal.open||selected!==element)return;
       if(widget!==null)window.turnstile.remove(widget);
-      widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:'light',callback:value=>{token=value;send.disabled=submitting;},'expired-callback':()=>{token='';send.disabled=true;},'error-callback':()=>{token='';send.disabled=true;status.textContent='Spam check could not load. Close and try again.';}});placeFloating();
+      widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:'light',appearance:'interaction-only',callback:value=>{token=value;send.disabled=submitting;},'expired-callback':()=>{token='';send.disabled=true;},'error-callback':()=>{token='';send.disabled=true;status.textContent='Spam check could not load. Close and try again.';}});placeFloating();
     }catch{status.textContent='Spam check could not load. Please close and try again.';}
   }
   document.querySelector('#leave-feedback').addEventListener('click',start);
