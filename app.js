@@ -113,6 +113,7 @@ let emailResetTimer;
 copyEmailButton.addEventListener('click', async () => {
   try {
     await navigator.clipboard.writeText('ehigoko1@gmail.com');
+    document.dispatchEvent(new Event('email-copied'));
     clearTimeout(emailResetTimer);
     copyEmailButton.querySelector('.email-label').textContent = 'COPIED!';
     copyEmailButton.classList.add('is-copied');
@@ -195,12 +196,22 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const results = document.querySelector('#command-results');
   const empty = palette.querySelector('.command-empty');
   const trigger = document.querySelector('#open-search');
+  const closeButton = document.querySelector('#close-search');
+  const closeLabel = closeButton.textContent;
+  let copiedTimer;
+  function resetCopied(){clearTimeout(copiedTimer);closeButton.textContent=closeLabel;}
+  document.addEventListener('email-copied',()=>{
+    if(!palette.open)return;
+    resetCopied();closeButton.textContent='COPIED!';
+    copiedTimer=setTimeout(resetCopied,2000);
+  });
+  palette.addEventListener('close',resetCopied);
   const items = [
     {name:'Work',key:'w',modifier:true,shortcut:'[⌘W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
     {name:'Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
     {name:'Gallery',key:'g',modifier:true,shortcut:'[⌘G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
     {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
-    {name:'Copy email',aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
+    {name:'Copy email',keepOpen:true,aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
     {name:'LinkedIn',aliases:'https://www.linkedin.com/in/ehi-oko social',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
     {name:'X/Twitter',aliases:'https://www.x.com/ehigoko social twitter',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
   ];
@@ -229,7 +240,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   function highlight() {
     [...results.querySelectorAll('button')].forEach((button,index)=>button.classList.toggle('active',index===active));
   }
-  function choose(index) { const item=filtered[index]; if (!item) return; palette.close(); item.run(); }
+  function choose(index) { const item=filtered[index]; if (!item) return; if(!item.keepOpen)palette.close(); item.run(); }
   const normalizeSearch = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/⌘/g,' cmd command ctrl control ').replace(/[\[\]]/g,' ').trim();
   function render() {
     const terms=normalizeSearch(query.value).split(/\s+/).filter(Boolean);
@@ -264,7 +275,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     if(!palette.open||event.altKey||event.shiftKey||event.isComposing||event.repeat)return;
     const modifier=event.metaKey||event.ctrlKey;
     const item=items.find(item=>item.key===key&&Boolean(item.modifier)===Boolean(modifier));
-    if(item&&modifier){event.preventDefault();palette.close();item.run();}
+    if(item&&modifier){event.preventDefault();if(!item.keepOpen)palette.close();item.run();}
   });
 })();
 
