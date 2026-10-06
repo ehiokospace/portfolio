@@ -196,9 +196,9 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const empty = palette.querySelector('.command-empty');
   const trigger = document.querySelector('#open-search');
   const items = [
-    {name:'Work',key:'w',shortcut:'[W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
-    {name:'Story',aliases:'about bio biography',key:'s',shortcut:'[S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
-    {name:'Gallery',key:'g',shortcut:'[G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
+    {name:'Work',key:'w',modifier:true,shortcut:'[⌘W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
+    {name:'Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
+    {name:'Gallery',key:'g',modifier:true,shortcut:'[⌘G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
     {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
     {name:'Copy email',aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
     {name:'LinkedIn',aliases:'https://www.linkedin.com/in/ehi-oko social',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
@@ -261,10 +261,10 @@ descriptionButton.addEventListener('click', scrambleDescription);
   document.addEventListener('keydown',event=>{
     const key=event.key.toLowerCase();
     if((event.metaKey||event.ctrlKey)&&key==='k'){event.preventDefault();palette.open?palette.close():open();return;}
-    if(!palette.open||event.altKey||event.isComposing)return;
+    if(!palette.open||event.altKey||event.shiftKey||event.isComposing||event.repeat)return;
     const modifier=event.metaKey||event.ctrlKey;
     const item=items.find(item=>item.key===key&&Boolean(item.modifier)===Boolean(modifier));
-    if(item&&(modifier||!query.value)){event.preventDefault();palette.close();item.run();}
+    if(item&&modifier){event.preventDefault();palette.close();item.run();}
   });
 })();
 
