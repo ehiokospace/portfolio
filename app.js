@@ -211,7 +211,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     {name:'Work',key:'w',modifier:true,shortcut:'[⌘W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
     {name:'Craft',shortcut:'',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Craft"]').click()},
     {name:'Gallery',key:'g',modifier:true,shortcut:'[⌘G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
-    {name:'Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>location.hash='story'},
+    {name:'Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>document.dispatchEvent(new Event('open-story'))},
     {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
     {name:'Copy email',keepOpen:true,aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
     {name:'Leave feedback',aliases:'comment suggestion critique review',shortcut:'',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#leave-feedback').click()},
@@ -411,4 +411,325 @@ descriptionButton.addEventListener('click', scrambleDescription);
     }catch(error){status.textContent=error.name==='TimeoutError'?'The request timed out. Please check your connection and try again.':error.message==='Failed to fetch'?'Could not connect. Please try again.':error.message;}
     finally{submitting=false;send.textContent='→';token='';send.disabled=true;if(widget!==null&&window.turnstile)window.turnstile.reset(widget);}
   });
+})();
+
+/* Original renderer for the reference study. No libraries required.
+ * Each point samples one photograph pixel. A damped spring restores its
+ * position after cursor impulses; image changes blend colors while stirring.
+ */
+class StoryPortrait {
+  static defaults = {
+    gap: 4, size: 3, bleed: 100, stiffness: 170, damping: 9,
+    radius: 120, strength: 12, entrySpread: 1200,
+    entryStagger: 3000, entryFade: 250, swapDuration: 700,
+    scatter: 150, swirl: 1400, chaos: 700, maxParticles: 60000,
+    fit: 'cover', imageScale: 1, background: null, cornerRadius: 12,
+  };
+
+  constructor(canvas, sources, options = {}) {
+    this.canvas = canvas;
+    this.frame = canvas.parentElement;
+    this.config = {...StoryPortrait.defaults, ...options};
+    this.sources = sources;
+    this.images = [];
+    this.active = 0;
+    this.requested = 0;
+    this.paused = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.visible = true;
+    this.pointer = {x:-10000, y:-10000, vx:0, vy:0, time:0};
+    this.tick = this.tick.bind(this);
+    this.gl = canvas.getContext('webgl', {alpha:true, antialias:false, premultipliedAlpha:true, preserveDrawingBuffer:true});
+    if (this.gl) this.setupGL();
+    else this.context = canvas.getContext('2d');
+    this.ready = this.load();
+    this.observer = new ResizeObserver(() => {
+      clearTimeout(this.resizeTimer);
+      this.resizeTimer = setTimeout(() => {
+        if (this.images[0] && (this.width !== this.frame.clientWidth || this.height !== this.frame.clientHeight)) this.resize(false);
+      }, 100);
+    });
+    this.observer.observe(this.frame);
+    window.addEventListener('pointermove', event => this.move(event), {passive:true});
+    window.addEventListener('pointerdown', event => {
+      const r=this.frame.getBoundingClientRect();
+      if(event.clientX>=r.left && event.clientX<=r.right && event.clientY>=r.top && event.clientY<=r.bottom) this.impulse(event.clientX-r.left,event.clientY-r.top);
+    }, {passive:true});
+    window.addEventListener('blur', () => this.clearPointer());
+    document.addEventListener('visibilitychange', () => {
+      this.lastTime=0;
+      if(!document.hidden) this.wake();
+    });
+    this.motionQuery = matchMedia('(prefers-reduced-motion: reduce)');
+    this.motionQuery.addEventListener('change', e => this.setPaused(e.matches));
+    canvas.addEventListener('webglcontextlost', event => {
+      event.preventDefault(); cancelAnimationFrame(this.raf);this.raf=0;
+      this.frame.classList.remove('ready');
+    });
+    canvas.addEventListener('webglcontextrestored', () => {
+      this.setupGL();this.resize(false);
+    });
+  }
+
+  async load() {
+    this.images = await Promise.all(this.sources.map(src => new Promise(resolve => {
+      const img = new Image();img.onload=()=>resolve(img);img.onerror=()=>resolve(null);img.src=src;
+    })));
+    if(!this.images[0]) return false;
+    this.images=this.images.map(image=>image || this.images[0]);
+    this.resize(true);
+    if(this.requested) this.setImage(this.requested);
+    return true;
+  }
+
+  setupGL() {
+    const gl=this.gl;
+    const compile=(type,source)=>{
+      const shader=gl.createShader(type);gl.shaderSource(shader,source);gl.compileShader(shader);
+      if(!gl.getShaderParameter(shader,gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(shader));
+      return shader;
+    };
+    const vertex=compile(gl.VERTEX_SHADER,`
+      attribute vec3 aPosition;
+      attribute vec4 aFrom;
+      attribute vec4 aTo;
+      uniform vec2 uResolution;
+      uniform float uSize;
+      uniform float uMix;
+      varying vec4 vColor;
+      varying float vAlpha;
+      void main(){
+        vec2 p = aPosition.xy/uResolution*2.0-1.0;
+        gl_Position=vec4(p.x,-p.y,0.0,1.0);
+        gl_PointSize=uSize;
+        vColor=mix(aFrom,aTo,uMix);
+        vAlpha=aPosition.z;
+      }
+    `);
+    const fragment=compile(gl.FRAGMENT_SHADER,`
+      precision mediump float;
+      varying vec4 vColor;
+      varying float vAlpha;
+      void main(){
+        float distance=length(gl_PointCoord-vec2(0.5));
+        float alpha=1.0-smoothstep(0.42,0.5,distance);
+        gl_FragColor=vec4(vColor.rgb,alpha*vAlpha*vColor.a);
+      }
+    `);
+    this.program=gl.createProgram();gl.attachShader(this.program,vertex);gl.attachShader(this.program,fragment);gl.linkProgram(this.program);
+    if(!gl.getProgramParameter(this.program,gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(this.program));
+    gl.useProgram(this.program);gl.deleteShader(vertex);gl.deleteShader(fragment);
+    this.buffers={};
+    for(const name of ['aPosition','aFrom','aTo']){
+      this.buffers[name]=gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER,this.buffers[name]);
+      const location=gl.getAttribLocation(this.program,name);
+      gl.enableVertexAttribArray(location);gl.vertexAttribPointer(location,name==='aPosition'?3:4,gl.FLOAT,false,0,0);
+    }
+    this.uniforms={};
+    for(const name of ['uResolution','uSize','uMix'])this.uniforms[name]=gl.getUniformLocation(this.program,name);
+    gl.enable(gl.BLEND);gl.blendFuncSeparate(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA,gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+    gl.clearColor(0,0,0,0);
+  }
+
+  upload(name,data) {
+    if(!this.gl)return;
+    this.gl.bindBuffer(this.gl.ARRAY_BUFFER,this.buffers[name]);
+    this.gl.bufferData(this.gl.ARRAY_BUFFER,data,this.gl.DYNAMIC_DRAW);
+  }
+
+  sample(image,index) {
+    const options={...this.config,...this.config.imageOptions?.[index]};
+    const sample=document.createElement('canvas');sample.width=this.width;sample.height=this.height;
+    const ctx=sample.getContext('2d',{willReadFrequently:true});
+    if(options.background){ctx.fillStyle=options.background;ctx.fillRect(0,0,this.width,this.height);}
+    const fit=options.fit==='contain'?Math.min:Math.max;
+    const scale=fit(this.width/image.naturalWidth,this.height/image.naturalHeight)*options.imageScale;
+    const w=image.naturalWidth*scale,h=image.naturalHeight*scale;
+    ctx.drawImage(image,(this.width-w)/2,(this.height-h)/2,w,h);
+    const pixels=ctx.getImageData(0,0,this.width,this.height).data;
+    const colors=new Float32Array(this.count*4);
+    for(let i=0;i<this.count;i++){
+      const x=Math.min(this.width-1,Math.floor(this.homeX[i]-this.config.bleed));
+      const y=Math.min(this.height-1,Math.floor(this.homeY[i]-this.config.bleed));
+      const p=(y*this.width+x)*4;
+      colors[i*4]=pixels[p]/255;colors[i*4+1]=pixels[p+1]/255;colors[i*4+2]=pixels[p+2]/255;colors[i*4+3]=pixels[p+3]/255;
+    }
+    return colors;
+  }
+
+  resize(entrance=false) {
+    const width=this.frame.clientWidth,height=this.frame.clientHeight;
+    if(!width||!height)return;
+    const c=this.config,b=c.bleed;
+    this.width=width;this.height=height;
+    this.stageWidth=width+b*2;this.stageHeight=height+b*2;
+    this.dpr=Math.min(devicePixelRatio||1,2);
+    this.canvas.width=Math.round(this.stageWidth*this.dpr);this.canvas.height=Math.round(this.stageHeight*this.dpr);
+    Object.assign(this.canvas.style,{width:this.stageWidth+'px',height:this.stageHeight+'px',left:-b+'px',top:-b+'px'});
+    let gap=c.gap;
+    while(width*height/(gap*gap)>c.maxParticles)gap++;
+    // Keep coverage consistent when the particle budget increases spacing.
+    this.pointSize=Math.max(c.size,gap*(c.coverage||0));
+    const homes=[];
+    for(let y=gap/2;y<height;y+=gap)for(let x=gap/2;x<width;x+=gap){
+      // Clip just the corners of the settled image, while allowing motion to bleed out.
+      const radius=c.cornerRadius;
+      const dx=Math.max(radius-x,0,x-(width-radius)),dy=Math.max(radius-y,0,y-(height-radius));
+      if(dx*dx+dy*dy>radius*radius)continue;
+      homes.push(x+b,y+b);
+    }
+    this.count=homes.length/2;
+    for(const name of ['homeX','homeY','x','y','vx','vy','delay','spin'])this[name]=new Float32Array(this.count);
+    this.positions=new Float32Array(this.count*3);
+    for(let i=0;i<this.count;i++){
+      this.homeX[i]=homes[i*2];this.homeY[i]=homes[i*2+1];
+      this.spin[i]=(Math.random()<.5?-1:1)*(.4+Math.random()*.6);
+    }
+    this.colorSets=this.images.map((image,index)=>this.sample(image,index));
+    this.from=this.colorSets[this.active].slice();this.to=this.colorSets[this.active];
+    this.mix=1;this.swapping=false;
+    this.upload('aFrom',this.from);this.upload('aTo',this.to);
+    if(this.gl){this.gl.viewport(0,0,this.canvas.width,this.canvas.height);this.gl.uniform2f(this.uniforms.uResolution,this.stageWidth,this.stageHeight);this.gl.uniform1f(this.uniforms.uSize,this.pointSize*this.dpr);}
+    this.frame.classList.add('ready');
+    this.canvas.dataset.particles=this.count;
+    this.reset(entrance&&!this.paused);
+  }
+
+  reset(entrance=true) {
+    if(!this.count)return;
+    const c=this.config;this.entryStart=performance.now();this.entering=entrance;this.clearPointer();
+    for(let i=0;i<this.count;i++){
+      this.x[i]=this.homeX[i]+(entrance?(Math.random()-.5)*c.entrySpread*.15:0);
+      this.y[i]=this.homeY[i]-(entrance?c.entrySpread*(.5+Math.random()*.5):0);
+      this.vx[i]=this.vy[i]=0;
+      this.delay[i]=entrance?((this.homeY[i]-c.bleed)/this.height*.85+Math.random()*.15)*c.entryStagger:0;
+    }
+    this.lastTime=0;this.wake();
+  }
+
+  setImage(index) {
+    this.requested=index;
+    if(!this.colorSets || this.active===index)return;
+    this.from=Float32Array.from(this.from,(value,i)=>value+(this.to[i]-value)*this.mix);
+    this.to=this.colorSets[index]||this.colorSets[0];this.active=index;
+    this.upload('aFrom',this.from);this.upload('aTo',this.to);
+    this.swapStart=performance.now();this.mix=this.paused?1:0;this.swapping=!this.paused;
+    for(let i=0;i<this.count;i++){
+      const angle=Math.random()*Math.PI*2,speed=this.config.scatter*(.5+Math.random()*.5);
+      if(!this.paused){this.vx[i]+=Math.cos(angle)*speed;this.vy[i]+=Math.sin(angle)*speed;}
+    }
+    this.canvas.dataset.image=String(index);this.wake();
+  }
+
+  move(event) {
+    if(this.paused||!this.visible)return;
+    const r=this.frame.getBoundingClientRect(),now=performance.now(),p=this.pointer;
+    const x=event.clientX-r.left+this.config.bleed,y=event.clientY-r.top+this.config.bleed;
+    const dt=(now-p.time)/1000;
+    if(dt>0&&dt<.2){p.vx=p.vx*.5+Math.max(-3500,Math.min(3500,(x-p.x)/dt))*.5;p.vy=p.vy*.5+Math.max(-3500,Math.min(3500,(y-p.y)/dt))*.5;}
+    p.x=x;p.y=y;p.time=now;
+    if(x>0&&x<this.stageWidth&&y>0&&y<this.stageHeight)this.wake();
+  }
+
+  clearPointer(){this.pointer.vx=0;this.pointer.vy=0;this.pointer.time=0;}
+
+  impulse(x,y) {
+    if(this.paused||!this.count)return;
+    x+=this.config.bleed;y+=this.config.bleed;
+    for(let i=0;i<this.count;i++){
+      const dx=this.x[i]-x,dy=this.y[i]-y,d=Math.hypot(dx,dy);
+      if(d<this.config.radius){const f=(1-d/this.config.radius)*850;this.vx[i]+=dx/(d||1)*f;this.vy[i]+=dy/(d||1)*f;}
+    }
+    this.wake();
+  }
+
+  setPaused(paused) {
+    this.paused=paused;
+    if(paused){this.mix=1;this.swapping=false;this.reset(false);}
+    else this.wake();
+  }
+
+  setVisible(visible){this.visible=visible;if(visible){this.lastTime=0;this.wake();}else{cancelAnimationFrame(this.raf);this.raf=0;}}
+  wake(){if(!this.raf&&this.visible&&!document.hidden&&this.count)this.raf=requestAnimationFrame(this.tick);}
+
+  tick(now) {
+    this.raf=0;
+    const dt=Math.min(this.lastTime?(now-this.lastTime)/1000:1/60,1/30);this.lastTime=now;
+    const c=this.config,p=this.pointer,elapsed=now-this.entryStart;
+    const progress=this.swapping?Math.min(1,(now-this.swapStart)/c.swapDuration):1;
+    this.mix=1-Math.pow(1-progress,3);
+    if(progress===1)this.swapping=false;
+    const swapPower=this.swapping?(1-progress)**2:0;
+    const decay=Math.exp(-5*dt);p.vx*=decay;p.vy*=decay;
+    const stirring=!this.paused&&(Math.abs(p.vx)+Math.abs(p.vy)>1);
+    let maxEnergy=0,pending=false;
+    for(let i=0;i<this.count;i++){
+      const age=elapsed-this.delay[i];
+      if(this.entering&&age<0){this.positions[i*3+2]=0;pending=true;continue;}
+      if(!this.paused){
+        this.vx[i]+=(c.stiffness*(this.homeX[i]-this.x[i])-c.damping*this.vx[i])*dt;
+        this.vy[i]+=(c.stiffness*(this.homeY[i]-this.y[i])-c.damping*this.vy[i])*dt;
+        if(this.swapping){
+          const dx=this.x[i]-this.stageWidth/2,dy=this.y[i]-this.stageHeight/2,r=Math.hypot(dx,dy)||1;
+          const spin=c.swirl*swapPower*this.spin[i]*dt,noise=c.chaos*swapPower*dt;
+          this.vx[i]+=-dy/r*spin+Math.sin(this.homeY[i]*.035+now*.004)*noise;
+          this.vy[i]+=dx/r*spin+Math.cos(this.homeX[i]*.035+now*.004)*noise;
+        }
+        if(stirring){
+          const dx=this.x[i]-p.x,dy=this.y[i]-p.y,squared=dx*dx+dy*dy;
+          if(squared<c.radius*c.radius){
+            const r=Math.sqrt(squared)||1,force=c.strength*(1-r/c.radius)*dt;
+            const push=(Math.abs(p.vx)+Math.abs(p.vy))*force*.35;
+            this.vx[i]+=p.vx*force+dx/r*push;this.vy[i]+=p.vy*force+dy/r*push;
+          }
+        }
+        this.x[i]+=this.vx[i]*dt;this.y[i]+=this.vy[i]*dt;
+      }
+      const energy=Math.abs(this.vx[i])+Math.abs(this.vy[i])+Math.abs(this.homeX[i]-this.x[i])+Math.abs(this.homeY[i]-this.y[i]);
+      maxEnergy=Math.max(maxEnergy,energy);
+      this.positions[i*3]=this.x[i];this.positions[i*3+1]=this.y[i];
+      this.positions[i*3+2]=this.entering?Math.min(1,Math.max(0,age/c.entryFade)):1;
+      if(this.positions[i*3+2]<1)pending=true;
+    }
+    if(!pending)this.entering=false;
+    this.draw();
+    const moving=!this.paused&&(pending||maxEnergy>.3||stirring||this.swapping);
+    this.canvas.dataset.state=this.paused?'paused':moving?'animating':'settled';
+    if(moving)this.wake();else this.lastTime=0;
+  }
+
+  draw() {
+    if(this.gl){
+      const gl=this.gl;gl.clear(gl.COLOR_BUFFER_BIT);this.upload('aPosition',this.positions);
+      gl.uniform1f(this.uniforms.uMix,this.mix);gl.drawArrays(gl.POINTS,0,this.count);
+    }else if(this.context){
+      const ctx=this.context;ctx.setTransform(this.dpr,0,0,this.dpr,0,0);ctx.clearRect(0,0,this.stageWidth,this.stageHeight);
+      for(let i=0;i<this.count;i++){
+        const k=i*4;ctx.globalAlpha=this.positions[i*3+2]*(this.from[k+3]+(this.to[k+3]-this.from[k+3])*this.mix);
+        const r=(this.from[k]+(this.to[k]-this.from[k])*this.mix)*255;
+        const g=(this.from[k+1]+(this.to[k+1]-this.from[k+1])*this.mix)*255;
+        const b=(this.from[k+2]+(this.to[k+2]-this.from[k+2])*this.mix)*255;
+        ctx.fillStyle=`rgb(${r|0},${g|0},${b|0})`;ctx.beginPath();ctx.arc(this.x[i],this.y[i],this.pointSize/2,0,Math.PI*2);ctx.fill();
+      }
+      ctx.globalAlpha=1;
+    }
+  }
+}
+
+// Story is a modal layer; its image renderer is created only on first opening.
+(()=>{
+const overlay=document.querySelector('#story-overlay'),canvas=document.querySelector('#story-particles'),fallback=document.querySelector('#story-image-fallback');
+const names=['Flower study','HP example','Robinhood example','Rivet example','ClairHealth example','NASA SUITS example','Futurity example','Turing example'];
+const sources=['hero-1.png','internal-tooling.png','hero-2.png','community.png','mental-health.png','sullivan-service-corps.jpg','450ff.png','7230c.png'].map(file=>'./assets/'+file);
+let portrait,clockTimer,opener;
+const rows=[...overlay.querySelectorAll('.story-experience')];
+function clock(){document.querySelector('#story-clock').textContent=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date());}
+function select(index){fallback.src=sources[index];fallback.alt=names[index];canvas.setAttribute('aria-label','Interactive particle rendering: '+names[index]);canvas.dataset.image=index;portrait?.setImage(index);rows.forEach(row=>row.setAttribute('aria-pressed',String(Number(row.dataset.storyImage)===index)));}
+function openStory(){if(overlay.open)return;opener=document.activeElement;document.querySelector('#command-palette').close();overlay.showModal();overlay.scrollTop=0;clock();clockTimer=setInterval(clock,1000);if(!portrait){portrait=new StoryPortrait(canvas,sources,{gap:3.1,size:2.65,bleed:0,coverage:0,fit:'cover',maxParticles:65000,entrySpread:500,entryStagger:850,entryFade:180,scatter:90,swirl:600,chaos:230,cornerRadius:0,background:'#1c1c1c'});}else{portrait.setVisible(true);select(0);portrait.reset(true);}document.querySelector('#story-close').focus({preventScroll:true});}
+function closeStory(){overlay.close();}
+document.querySelectorAll('a[href="#story"]').forEach(link=>link.addEventListener('click',event=>{if(document.body.classList.contains('feedback-selecting'))return;event.preventDefault();openStory();}));
+document.addEventListener('open-story',openStory);
+document.querySelector('#story-home').addEventListener('click',closeStory);document.querySelector('#story-close').addEventListener('click',closeStory);
+overlay.addEventListener('close',()=>{clearInterval(clockTimer);portrait?.setVisible(false);rows.forEach(row=>row.setAttribute('aria-pressed','false'));opener?.focus({preventScroll:true});});
+rows.forEach(row=>{const index=Number(row.dataset.storyImage);row.addEventListener('pointerenter',()=>select(index));row.addEventListener('pointerleave',()=>select(0));row.addEventListener('focus',()=>select(index));row.addEventListener('blur',()=>select(0));row.addEventListener('click',()=>select(index));});
 })();
