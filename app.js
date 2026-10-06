@@ -721,7 +721,7 @@ class StoryPortrait {
 (()=>{
 const overlay=document.querySelector('#story-overlay'),canvas=document.querySelector('#story-particles'),fallback=document.querySelector('#story-image-fallback');
 const names=["Ehi Oko portrait","Notion","ColorStack AAMU","Sullivan Foundation","JPMorganChase","Thrive","Cornell Tech","IBM SkillsBuild","HBCU Game Jam","HBCU Business Pitch Competition"];
-const sources=["story-portrait.jpg","hero-2.png","story-colorstack.jpg","story-sullivan.jpg","internal-tooling.png","mental-health.png","450ff.png","434ca.png","eac7b.png","story-business-pitch.jpg"].map(file=>'./assets/'+file);
+const sources=["story-portrait.jpg","story-notion.jpg","story-colorstack.jpg","story-sullivan.jpg","story-jpm.jpg","mental-health.png","story-cornell.jpg","story-ibm.jpg","story-game-jam.jpg","story-business-pitch.jpg"].map(file=>'./assets/'+file);
 let portrait,clockTimer,opener;
 const rows=[...overlay.querySelectorAll('.story-experience')];
 function clock(){document.querySelector('#story-clock').textContent=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date());}
