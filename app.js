@@ -331,6 +331,10 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const endpoint='https://portfolio-feedback.ehigoko1.workers.dev/';
   const sitekey='0x4AAAAAAFPjn8y4ZI1OyhDS';
   const modal=document.querySelector('#feedback-dialog'),form=document.querySelector('#feedback-form');
+  const floating=document.createElement('div');floating.id='feedback-floating';floating.hidden=true;document.body.append(floating);
+  const section=document.querySelector('#feedback-section'),comments=document.querySelector('#feedback-comments');
+  function placeFloating(){if(!selected||floating.hidden)return;const r=selected.getBoundingClientRect(),side=modal.getBoundingClientRect(),available=side.left>180?side.left:innerWidth;const width=Math.min(480,Math.max(220,available-32));floating.style.width=width+'px';floating.style.left=Math.max(16,Math.min(r.left,available-width-16))+'px';floating.style.top=Math.max(16,scrollY+r.top-floating.offsetHeight-12)+'px';}
+  window.addEventListener('resize',placeFloating);
   const bar=document.querySelector('#feedback-mode-bar'),status=document.querySelector('#feedback-status');
   const send=document.querySelector('#feedback-send'),message=document.querySelector('#feedback-message');
   let mode=false,selected=null,token='',widget=null,loading=null,previousFocus=null,submitting=false;
@@ -344,7 +348,8 @@ descriptionButton.addEventListener('click', scrambleDescription);
     });
   }
   function stop(){if(!mode)return;mode=false;bar.hidden=true;document.body.classList.remove('feedback-selecting');markTargets(false);}
-  function start(){
+  function start(){floating.hidden=true;modal.append(section,form);
+
     const caseModal=document.querySelector('#case-study');
     if(caseModal.open){compose('Case study: '+document.querySelector('#case-title').textContent,null);return;}
     if(mode)return;previousFocus=document.activeElement;mode=true;document.body.classList.add('feedback-selecting');markTargets(true);form.hidden=true;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-section').textContent='';document.querySelector('#feedback-prompt').hidden=false;modal.show();modal.focus({preventScroll:true});
@@ -356,13 +361,17 @@ descriptionButton.addEventListener('click', scrambleDescription);
     return loading;
   }
   async function compose(label,element){
+    if(submitting)return;
+
     if(!modal.open)previousFocus=document.activeElement;selected?.classList.remove('feedback-selected');selected=element;selected?.classList.add('feedback-selected');document.querySelector('#feedback-prompt').hidden=true;
     form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;status.textContent='';token='';send.disabled=true;
-    document.querySelector('#feedback-section').textContent=label;if(!modal.open)modal.show();modal.focus({preventScroll:true});
+    section.textContent=label;if(!modal.open)modal.show();
+    if(element){floating.append(section,form);floating.hidden=false;placeFloating();const top=parseFloat(floating.style.top);if(top<scrollY||top+floating.offsetHeight>scrollY+innerHeight)window.scrollTo({top:Math.max(0,top-24),behavior:'smooth'});message.focus({preventScroll:true});}
+    else{floating.hidden=true;modal.append(section,form);modal.focus({preventScroll:true});}
     try{
-      await loadTurnstile();if(!modal.open)return;
+      await loadTurnstile();if(!modal.open||selected!==element)return;
       if(widget!==null)window.turnstile.remove(widget);
-      widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:'light',callback:value=>{token=value;send.disabled=submitting;},'expired-callback':()=>{token='';send.disabled=true;},'error-callback':()=>{token='';send.disabled=true;status.textContent='Spam check could not load. Close and try again.';}});
+      widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:'light',callback:value=>{token=value;send.disabled=submitting;},'expired-callback':()=>{token='';send.disabled=true;},'error-callback':()=>{token='';send.disabled=true;status.textContent='Spam check could not load. Close and try again.';}});placeFloating();
     }catch{status.textContent='Spam check could not load. Please close and try again.';}
   }
   document.querySelector('#leave-feedback').addEventListener('click',start);
@@ -372,16 +381,16 @@ descriptionButton.addEventListener('click', scrambleDescription);
   document.querySelector('#feedback-close').addEventListener('click',()=>{if(!submitting)modal.close();});
   document.querySelector('#feedback-done').addEventListener('click',()=>modal.close());
   modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});
-  modal.addEventListener('close',()=>{stop();selected?.classList.remove('feedback-selected');selected=null;if(widget!==null&&window.turnstile){window.turnstile.remove(widget);widget=null;}token='';previousFocus?.focus({preventScroll:true});});
+  modal.addEventListener('close',()=>{floating.hidden=true;modal.append(section,form);stop();selected?.classList.remove('feedback-selected');selected=null;if(widget!==null&&window.turnstile){window.turnstile.remove(widget);widget=null;}token='';previousFocus?.focus({preventScroll:true});});
   document.addEventListener('click',event=>{
-    if(!mode||event.target.closest('#feedback-dialog'))return;
+    if(!mode||event.target.closest('#feedback-dialog, #feedback-floating'))return;
     const element=event.target.closest('[data-feedback-section]');if(!element)return;
     event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);
   },true);
   document.addEventListener('keydown',event=>{
     if(!modal.open)return;
     if(event.key==='Escape'){event.preventDefault();if(!submitting)modal.close();return;}
-    if(!mode||event.target.closest('#feedback-dialog'))return;
+    if(!mode||event.target.closest('#feedback-dialog, #feedback-floating'))return;
     const element=event.target.closest('[data-feedback-section]');
     if(element&&(event.key==='Enter'||event.key===' ')){event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);}
   },true);
@@ -393,12 +402,12 @@ descriptionButton.addEventListener('click', scrambleDescription);
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(submitting||!form.reportValidity()||!token)return;
     submitting=true;send.disabled=true;send.textContent='Sending…';status.textContent='';
-    const payload={message:message.value,page:location.href,section:document.querySelector('#feedback-section').textContent,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-48'};
+    const payload={message:message.value,page:location.href,section:document.querySelector('#feedback-section').textContent,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-50'};
     try{
       const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
       const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Feedback could not be sent. Please try again.');
-      form.hidden=true;document.querySelector('#feedback-success').hidden=false;document.querySelector('#feedback-done').focus();
+      const card=document.createElement('article');card.className='feedback-comment';const context=document.createElement('p');context.className='feedback-comment-context';context.textContent=payload.section+' · '+payload.category;const text=document.createElement('p');text.textContent=payload.message;const saved=document.createElement('small');saved.textContent='Sent privately ✓';card.append(context,text,saved);comments.prepend(card);floating.hidden=true;form.hidden=true;section.textContent='';selected?.classList.remove('feedback-selected');selected=null;document.querySelector('#feedback-prompt').hidden=false;comments.tabIndex=-1;comments.focus({preventScroll:true});
     }catch(error){status.textContent=error.name==='TimeoutError'?'The request timed out. Please check your connection and try again.':error.message==='Failed to fetch'?'Could not connect. Please try again.':error.message;}
-    finally{submitting=false;send.textContent='Send feedback [→]';token='';send.disabled=true;if(widget!==null&&window.turnstile)window.turnstile.reset(widget);}
+    finally{submitting=false;send.textContent='→';token='';send.disabled=true;if(widget!==null&&window.turnstile)window.turnstile.reset(widget);}
   });
 })();
