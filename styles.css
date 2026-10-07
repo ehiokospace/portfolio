@@ -427,3 +427,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* Keep selection geometry attached to its target while scrolling. */
 #note-highlight{transition:background-color .18s}
+
+/* Project caption typography. */
+.project .project-caption-heading h2{font-size:15px}
+.project .project-description{font-size:13px}
