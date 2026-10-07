@@ -283,90 +283,60 @@ descriptionButton.addEventListener('click', scrambleDescription);
 // Keep the credit after all work on mobile, and in the sidebar on desktop.
 (() => {const credit=document.querySelector(".sidebar-footer"),sidebar=document.querySelector(".layout aside"),main=document.querySelector("main"),mobile=matchMedia("(max-width:700px)");function placeCredit(){(mobile.matches?main:sidebar).append(credit);}mobile.addEventListener("change",placeCredit);placeCredit();})();
 
-// Private, section-based portfolio feedback.
+// Private notes stay attached to human-readable sections; drafts stay in this tab only.
 (() => {
   const endpoint='https://portfolio-feedback.ehigoko1.workers.dev/';
   const sitekey='0x4AAAAAAFPjn8y4ZI1OyhDS';
-  const modal=document.querySelector('#feedback-dialog'),form=document.querySelector('#feedback-form');
-  const floating=document.createElement('div');floating.id='feedback-floating';floating.hidden=true;document.body.append(floating);
-  const section=document.querySelector('#feedback-section'),comments=document.querySelector('#feedback-comments');
-  function placeFloating(){if(!selected||floating.hidden)return;const r=selected.getBoundingClientRect(),side=modal.getBoundingClientRect(),available=side.left>180?side.left:innerWidth;const width=Math.min(340,Math.max(220,available-32));floating.style.width=width+'px';floating.style.left=Math.max(16,Math.min(r.left,available-width-16))+'px';floating.style.top=Math.max(16,scrollY+r.top-floating.offsetHeight-12)+'px';}
-  window.addEventListener('resize',placeFloating);new ResizeObserver(placeFloating).observe(floating);
-  const bar=document.querySelector('#feedback-mode-bar'),status=document.querySelector('#feedback-status');
-  const send=document.querySelector('#feedback-send'),message=document.querySelector('#feedback-message');
-  let mode=false,selected=null,token='',widget=null,loading=null,previousFocus=null,submitting=false;
-  const targets=[['.hero h1','Introduction'],['.hero .current','Previous experience'],['.bio p','Biography'],['nav h2','Navigation heading'],['nav a,nav button:not(#leave-feedback)','Navigation link'],['.utility p','Location and weather'],['.story-bio p','Story biography'],['.story-experience','Story experience'],['.story-particle-stage','Story image']];
-  targets.forEach(([selector,label])=>document.querySelectorAll(selector).forEach(el=>el.dataset.feedbackSection=label));
+  const modal=document.querySelector('#feedback-dialog'), form=document.querySelector('#feedback-form');
+  const section=document.querySelector('#feedback-section'), context=document.querySelector('#feedback-context');
+  const status=document.querySelector('#feedback-status'), send=document.querySelector('#feedback-send');
+  const message=document.querySelector('#feedback-message'), category=document.querySelector('#feedback-category');
+  const prompt=document.querySelector('#feedback-prompt'), success=document.querySelector('#feedback-success');
+  const step=document.querySelector('#feedback-step'), close=document.querySelector('#feedback-close');
+  const entries=[...document.querySelectorAll('#leave-feedback,#story-feedback,#feedback-mobile')];
+  const highlight=document.createElement('div');highlight.id='note-highlight';highlight.hidden=true;highlight.setAttribute('aria-hidden','true');
+  const hint=document.createElement('span');hint.id='note-highlight-label';highlight.append(hint);document.body.append(highlight);
+  const drafts=new Map();
+  let mode=false, selected=null, hovered=null, token='', widget=null, loading=null, previousFocus=null, submitting=false, revision=0, frame=0;
+  const targets=[['.hero h1','Introduction'],['.hero .current','Previous experience'],['.bio p','Biography'],['nav h2','Navigation heading'],['nav a,nav button','Navigation link'],['.utility p','Huntsville local time'],['.story-bio p','About biography'],['.story-experience','Experience'],['.story-particle-stage','About portrait']];
+  targets.forEach(([selector,label])=>document.querySelectorAll(selector).forEach(el=>el.dataset.feedbackSection=label==='Experience'?el.querySelector('.story-company')?.textContent.trim()||label:label));
   document.querySelectorAll('.project').forEach(card=>{const title=card.querySelector('h2').textContent;card.querySelectorAll('.media,.project-caption-heading,.project-description').forEach(el=>el.dataset.feedbackSection=title);});
-  function markTargets(enabled){
-    document.querySelectorAll('[data-feedback-section]').forEach(el=>{
-      if(enabled){el.dataset.feedbackTabindex=el.getAttribute('tabindex')??'none';el.tabIndex=0;}
-      else{const old=el.dataset.feedbackTabindex;if(old==='none')el.removeAttribute('tabindex');else if(old!==undefined)el.setAttribute('tabindex',old);delete el.dataset.feedbackTabindex;}
-    });
-  }
-  function stop(){if(!mode)return;mode=false;bar.hidden=true;document.body.classList.remove('feedback-selecting');markTargets(false);}
-  function start(){const story=document.querySelector('#story-overlay');const host=story.open?story:document.body;host.append(modal,floating);floating.hidden=true;modal.append(section,form);
-
-    const caseModal=document.querySelector('#case-study');
-    if(caseModal.open){compose('Case study: '+document.querySelector('#case-title').textContent,null);return;}
-    if(mode)return;previousFocus=document.activeElement;mode=true;document.body.classList.add('feedback-selecting');markTargets(true);form.hidden=true;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-exit').hidden=false;document.querySelector('#feedback-section').textContent='';document.querySelector('#feedback-prompt').hidden=false;modal.show();modal.focus({preventScroll:true});
-  }
-  function loadTurnstile(){
-    if(window.turnstile)return Promise.resolve();
-    if(loading)return loading;
-    loading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.async=true;script.onload=resolve;script.onerror=()=>{loading=null;script.remove();reject(new Error('unavailable'));};document.head.append(script);});
-    return loading;
-  }
-  async function compose(label,element,type='p'){
-    if(submitting)return;
-
-    if(!modal.open)previousFocus=document.activeElement;selected?.classList.remove('feedback-selected');selected=element;selected?.classList.add('feedback-selected');document.querySelector('#feedback-prompt').hidden=true;
-    form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-exit').hidden=false;status.textContent='';token='';send.disabled=true;
-    section.dataset.label=label;section.textContent='';section.hidden=true;section.removeAttribute('aria-label');if(!modal.open)modal.show();
-    floating.hidden=true;modal.append(section,form);message.focus({preventScroll:true});
-    try{
-      await loadTurnstile();if(!modal.open||selected!==element)return;
-      if(widget!==null)window.turnstile.remove(widget);
-      widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:document.querySelector('#story-overlay').open?'dark':'light',appearance:'interaction-only',callback:value=>{token=value;send.disabled=submitting;},'expired-callback':()=>{token='';send.disabled=true;},'error-callback':()=>{token='';send.disabled=true;status.textContent='Spam check could not load. Close and try again.';}});placeFloating();
-    }catch{status.textContent='Spam check could not load. Please close and try again.';}
-  }
-  document.querySelector('#leave-feedback').addEventListener('click',start);
-  document.querySelector('#story-feedback').addEventListener('click',start);
-  document.querySelector('#feedback-mobile').addEventListener('click',start);
-  document.querySelector('#feedback-exit').addEventListener('click',()=>{if(!submitting)modal.close();});
-  document.querySelector('#feedback-general').addEventListener('click',()=>compose('General note',null));
-  document.querySelector('#feedback-close').addEventListener('click',()=>{if(!submitting)modal.close();});
-  document.querySelector('#feedback-done').addEventListener('click',()=>modal.close());
-  modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});
-  modal.addEventListener('close',()=>{floating.hidden=true;modal.append(section,form);stop();document.body.append(modal,floating);selected?.classList.remove('feedback-selected');selected=null;if(widget!==null&&window.turnstile){window.turnstile.remove(widget);widget=null;}token='';previousFocus?.focus({preventScroll:true});});
-  document.addEventListener('click',event=>{
-    if(!mode||event.target.closest('#feedback-dialog, #feedback-floating'))return;
-    const element=event.target.closest('[data-feedback-section]');if(!element)return;
-    event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element,event.target.closest('img,.media')?'img':'p');
-  },true);
-  document.addEventListener('keydown',event=>{
-    if(!modal.open)return;
-    if(event.key==='Escape'){event.preventDefault();if(!submitting)modal.close();return;}
-    if(!mode||event.target.closest('#feedback-dialog, #feedback-floating'))return;
-    const element=event.target.closest('[data-feedback-section]');
-    if(element&&(event.key==='Enter'||event.key===' ')){event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);}
-  },true);
-  // Include dynamically rendered case studies without changing their normal navigation.
-  new MutationObserver(()=>{
-    const content=document.querySelector('#case-content');if(!content.children.length||content.querySelector('.case-feedback'))return;
-    const button=document.createElement('button');button.className='case-feedback';button.textContent='Leave a note';button.addEventListener('click',()=>compose('Case study: '+document.querySelector('#case-title').textContent,null));content.querySelector('.soon-wrap')?.append(button);
-  }).observe(document.querySelector('#case-content'),{childList:true});
-  message.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();form.requestSubmit();}});
-  form.addEventListener('submit',async event=>{
-    event.preventDefault();if(submitting||!form.reportValidity()||!token)return;
-    submitting=true;send.disabled=true;send.textContent='Posting…';status.textContent='';
-    const payload={message:message.value,page:location.href,section:section.dataset.label,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-55'};
-    try{
-      const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
-      const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Feedback could not be sent. Please try again.');
-      const card=document.createElement('article');card.className='feedback-comment';const context=document.createElement('p');context.className='feedback-comment-context';context.textContent=payload.section+' · '+payload.category;const text=document.createElement('p');text.textContent=payload.message;const saved=document.createElement('small');saved.textContent='Sent privately ✓';card.append(context,text,saved);comments.prepend(card);floating.hidden=true;form.hidden=true;section.textContent='';selected?.classList.remove('feedback-selected');selected=null;document.querySelector('#feedback-prompt').hidden=true;document.querySelector('#feedback-success').hidden=false;document.querySelector('#feedback-exit').hidden=true;document.querySelector('#feedback-success').setAttribute('role','status');document.querySelector('#feedback-close').focus({preventScroll:true});
-    }catch(error){status.textContent=error.name==='TimeoutError'?'The request timed out. Please check your connection and try again.':error.message==='Failed to fetch'?'Could not connect. Please try again.':error.message;}
-    finally{submitting=false;send.textContent='Post note';token='';send.disabled=true;if(widget!==null&&window.turnstile)window.turnstile.reset(widget);}
+  function activeHost(){const story=document.querySelector('#story-overlay'),caseStudy=document.querySelector('#case-study');return story.open?story:caseStudy.open?caseStudy:document.body;}
+  function mount(){const host=activeHost();host.append(modal,highlight);modal.classList.toggle('note-dark',host.id==='story-overlay');}
+  function saveDraft(){if(section.dataset.label&&!form.hidden)drafts.set(section.dataset.label,{message:message.value,category:category.value});}
+  function setState(state){modal.dataset.state=state;step.textContent=state==='choose'?'01 / SELECT':state==='write'?'02 / WRITE':'03 / SENT';prompt.hidden=state!=='choose';form.hidden=state!=='write';context.hidden=state!=='write';success.hidden=state!=='sent';queuePosition();}
+  function markTargets(enabled){document.querySelectorAll('[data-feedback-section]').forEach(el=>{if(enabled){el.dataset.feedbackTabindex=el.getAttribute('tabindex')??'none';el.tabIndex=0;}else{const old=el.dataset.feedbackTabindex;if(old==='none')el.removeAttribute('tabindex');else if(old!==undefined)el.setAttribute('tabindex',old);delete el.dataset.feedbackTabindex;}});}
+  function begin(){if(mode)return;mode=true;document.body.classList.add('feedback-selecting');markTargets(true);entries.forEach(el=>el.setAttribute('aria-pressed','true'));}
+  function releaseWidget(){revision++;token='';if(widget!==null&&window.turnstile)window.turnstile.remove(widget);widget=null;}
+  function choose(){if(submitting)return;saveDraft();releaseWidget();selected=null;hovered=null;highlight.hidden=true;status.textContent='';begin();setState('choose');if(!modal.open)modal.show();modal.focus({preventScroll:true});}
+  function start(){if(submitting)return;if(modal.open){modal.close();return;}previousFocus=document.activeElement;mount();choose();if(activeHost().id==='case-study')compose('Case study: '+document.querySelector('#case-title').textContent,document.querySelector('.case-intro'));}
+  function showHighlight(element){if(!mode||!element){highlight.hidden=true;return;}const r=element.getBoundingClientRect();highlight.hidden=r.bottom<0||r.top>innerHeight;highlight.style.left=(r.left-5)+'px';highlight.style.top=(r.top-5)+'px';highlight.style.width=(r.width+10)+'px';highlight.style.height=(r.height+10)+'px';highlight.classList.toggle('is-selected',element===selected);hint.textContent=element===selected?'Selected':element.dataset.feedbackSection;hint.hidden=element===selected;}
+  function position(){frame=0;if(!modal.open)return;showHighlight(selected||hovered);modal.style.removeProperty('left');modal.style.removeProperty('top');if(innerWidth<=700||!selected||modal.dataset.state!=='write')return;const r=selected.getBoundingClientRect(),w=modal.offsetWidth,h=modal.offsetHeight;let x=r.right+16,y=r.top;if(x+w>innerWidth-16){x=r.left-w-16;if(x<16){x=Math.min(Math.max(r.left,16),innerWidth-w-16);y=r.bottom+16;if(y+h>innerHeight-16)y=r.top-h-16;}}modal.style.left=Math.max(16,Math.min(x,innerWidth-w-16))+'px';modal.style.top=Math.max(16,Math.min(y,innerHeight-h-16))+'px';}
+  function queuePosition(){if(!frame)frame=requestAnimationFrame(position);}
+  new ResizeObserver(queuePosition).observe(modal);window.addEventListener('resize',queuePosition);document.addEventListener('scroll',queuePosition,true);window.visualViewport?.addEventListener('resize',queuePosition);
+  function loadTurnstile(){if(window.turnstile)return Promise.resolve();if(loading)return loading;loading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.async=true;script.onload=()=>window.turnstile?resolve():reject(new Error('unavailable'));script.onerror=()=>{loading=null;script.remove();reject(new Error('unavailable'));};document.head.append(script);});return loading;}
+  function updateCount(){document.querySelector('#feedback-count').textContent=message.value.length.toLocaleString('en-US')+' / 2,000';saveDraft();}
+  async function verify(){const current=revision;try{await loadTurnstile();if(current!==revision||!modal.open||form.hidden)return;widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:modal.classList.contains('note-dark')?'dark':'light',appearance:'interaction-only',callback:value=>{if(current===revision){token=value;if(status.dataset.kind==='verification'){status.textContent='';delete status.dataset.kind;}}},'expired-callback':()=>{if(current===revision)token='';},'error-callback':()=>{if(current===revision){token='';status.dataset.kind='verification';status.textContent='The spam check couldn’t load. Use Retry to try again.';retry.hidden=false;}}});}catch{if(current===revision){status.dataset.kind='verification';status.textContent='The spam check couldn’t load. Use Retry to try again.';retry.hidden=false;}}}
+  const retry=document.createElement('button');retry.type='button';retry.id='feedback-retry';retry.textContent='Retry';retry.hidden=true;status.after(retry);retry.addEventListener('click',()=>{releaseWidget();loading=null;retry.hidden=true;status.textContent='';verify();});
+  function compose(label,element){if(submitting)return;saveDraft();releaseWidget();mount();begin();selected=element;hovered=null;section.dataset.label=label;section.textContent=label;const draft=drafts.get(label);form.reset();message.value=draft?.message||'';category.value=draft?.category||'General';message.removeAttribute('aria-invalid');status.textContent='';delete status.dataset.kind;retry.hidden=true;send.disabled=false;setState('write');if(!modal.open)modal.show();updateCount();message.focus({preventScroll:true});verify();}
+  entries.forEach(el=>el.addEventListener('click',start));close.addEventListener('click',()=>{if(!submitting)modal.close();});document.querySelector('#feedback-reselect').addEventListener('click',choose);document.querySelector('#feedback-another').addEventListener('click',choose);
+  modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});modal.addEventListener('close',()=>{saveDraft();releaseWidget();mode=false;selected=null;hovered=null;highlight.hidden=true;document.body.classList.remove('feedback-selecting');markTargets(false);entries.forEach(el=>el.setAttribute('aria-pressed','false'));document.body.append(modal,highlight);previousFocus?.focus({preventScroll:true});});
+  function targetFor(event){return event.target.closest('[data-feedback-section]');}
+  document.addEventListener('pointerover',event=>{if(!mode||selected)return;hovered=event.target.closest('#feedback-dialog')?null:targetFor(event);queuePosition();});
+  document.addEventListener('pointerout',event=>{if(!mode||selected)return;if(!event.relatedTarget?.closest?.('[data-feedback-section]')){hovered=null;queuePosition();}});
+  document.addEventListener('focusin',event=>{if(mode&&!selected&&!event.target.closest('#feedback-dialog')){hovered=targetFor(event);queuePosition();}});
+  document.addEventListener('click',event=>{if(!mode||event.target.closest('#feedback-dialog'))return;const element=targetFor(event);if(!element)return;event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);},true);
+  document.addEventListener('keydown',event=>{if(!modal.open)return;if(event.key==='Escape'){event.preventDefault();if(!submitting)modal.close();return;}if(!mode||event.target.closest('#feedback-dialog'))return;const element=targetFor(event);if(element&&(event.key==='Enter'||event.key===' ')){event.preventDefault();event.stopImmediatePropagation();compose(element.dataset.feedbackSection,element);}},true);
+  new MutationObserver(()=>{const content=document.querySelector('#case-content');if(!content.children.length||content.querySelector('.case-feedback'))return;const button=document.createElement('button');button.className='case-feedback';button.textContent='Leave a note';button.addEventListener('click',()=>{previousFocus=document.activeElement;compose('Case study: '+document.querySelector('#case-title').textContent,content.querySelector('.case-intro'));});content.querySelector('.soon-wrap')?.append(button);}).observe(document.querySelector('#case-content'),{childList:true});
+  message.addEventListener('input',()=>{updateCount();message.removeAttribute('aria-invalid');if(status.dataset.kind==='validation'){status.textContent='';delete status.dataset.kind;}});category.addEventListener('change',saveDraft);
+  message.addEventListener('keydown',event=>{if(event.key==='Enter'&&(event.metaKey||event.ctrlKey)){event.preventDefault();form.requestSubmit();}});
+  form.addEventListener('submit',async event=>{event.preventDefault();if(submitting)return;const text=message.value.trim();if(text.length<10||text.length>2000){status.dataset.kind='validation';status.textContent=text.length<10?'Please write at least 10 characters so I can understand your suggestion.':'Please keep your note under 2,000 characters.';message.setAttribute('aria-invalid','true');message.focus({preventScroll:true});return;}if(!token){status.dataset.kind='verification';status.textContent='Finishing the spam check. Please try posting again in a moment.';return;}
+    submitting=true;send.disabled=true;close.disabled=true;document.querySelector('#feedback-reselect').disabled=true;message.readOnly=true;category.disabled=true;send.textContent='Posting…';status.textContent='';modal.setAttribute('aria-busy','true');
+    const version=new URL(document.querySelector('script[src*="app.js"]').src).searchParams.get('v');
+    const payload={message:text,page:location.href,section:section.dataset.label,category:category.value,website:form.elements.website.value,token,version};
+    try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Your note couldn’t be sent. Please try again.');drafts.delete(payload.section);message.value='';selected=null;highlight.hidden=true;releaseWidget();setState('sent');document.querySelector('#feedback-another').focus({preventScroll:true});}
+    catch(error){status.textContent=error.name==='TimeoutError'?'The connection timed out. Your draft is still here—please try again.':error.message==='Failed to fetch'?'Couldn’t connect. Your draft is still here—please try again.':error.message;releaseWidget();verify();}
+    finally{submitting=false;send.disabled=false;close.disabled=false;document.querySelector('#feedback-reselect').disabled=false;message.readOnly=false;category.disabled=false;send.innerHTML='Post note <span aria-hidden="true">↗</span>';modal.removeAttribute('aria-busy');}
   });
 })();
 
