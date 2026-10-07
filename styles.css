@@ -397,3 +397,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 @keyframes note-check{from{opacity:0;transform:scale(.6)}to{opacity:1;transform:scale(1)}}
 @media(max-width:700px){#feedback-dialog,#feedback-dialog[data-state=write]{inset:auto 12px 12px;width:calc(100vw - 24px);max-height:min(66dvh,calc(100dvh - 24px));padding:20px;border-radius:20px}#feedback-message{font-size:16px;min-height:96px}.note-shortcut{display:none}.note-submit-row{justify-content:flex-end}body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{font-size:12px}#note-highlight-label{display:none}}
 @media(prefers-reduced-motion:reduce){#feedback-dialog,#feedback-dialog[data-state=write],#feedback-dialog[data-state=sent],#feedback-status:not(:empty),.note-success-mark{animation:none}#note-highlight,#feedback-close,#feedback-message,#feedback-send,#feedback-another{transition:none}}
+
+/* Close the project-grid gap while the course planner is unpublished. */
+.projects{grid-template-rows:auto auto}.community{grid-row:2}
