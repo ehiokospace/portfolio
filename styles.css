@@ -401,3 +401,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* Close the project-grid gap while the course planner is unpublished. */
 .projects{grid-template-rows:auto auto}.community{grid-row:2}
+
+/* Bio body and location/time typography. */
+.layout aside .bio p:not(.bio-intro),.utility p{font-size:13px}
