@@ -424,3 +424,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 #note-highlight.is-selected .note-corner{display:block}
 #note-highlight .note-corner-top-right{top:-4px;right:-4px}
 #note-highlight .note-corner-bottom-left{bottom:-4px;left:-4px}
+
+/* Keep selection geometry attached to its target while scrolling. */
+#note-highlight{transition:background-color .18s}
