@@ -301,3 +301,6 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 #story-overlay #feedback-send:hover,#story-overlay #feedback-done:hover{background:#333}
 
 @media(max-width:760px){#story-particles{display:none!important}.story-particle-stage #story-image-fallback{display:block!important;opacity:1!important;visibility:visible!important}#story-overlay,#story-overlay::backdrop{animation:none!important}}
+
+.story-experience[data-story-image="1"] .story-brand{filter:grayscale(1) brightness(.55)}
+.story-experience[data-story-image="1"]:hover .story-brand,.story-experience[data-story-image="1"]:focus-visible .story-brand{filter:grayscale(1) brightness(1)}
