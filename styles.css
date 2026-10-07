@@ -300,11 +300,10 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 
 #feedback-general,#feedback-exit,#feedback-done{display:none!important}
 
-/* Keep the next section visible and text readable throughout the video. */
-.hero{height:calc(90svh - 120px);min-height:360px}
+/* The hero fills the viewport with the original video colors. */
+.hero{height:calc(100dvh - 41px);min-height:0}
 .hero-art{z-index:0}
-.hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,#0009 0%,#0009 43%,#0003 63%,#0009 82%,#0009 100%)}
-.hero h1,.hero .current,.command-trigger{z-index:2;text-shadow:0 1px 3px #0005}
+.hero h1,.hero .current,.command-trigger{z-index:2}
 .project-org{font:500 13px/1.4 var(--sans);margin:0 0 5px;color:var(--ink)}
 /* Notes float over the portfolio without changing page dimensions. */
 #feedback-dialog{inset:auto 20px 20px auto;width:min(360px,calc(100vw - 40px));height:auto;max-width:none;max-height:calc(100svh - 40px);padding:26px 24px 22px;border:1px solid #deded9;border-radius:16px;box-shadow:0 8px 36px #0002;animation:none}
@@ -317,7 +316,7 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 #feedback-comments{max-height:160px;overflow:auto}
 #story-overlay #feedback-dialog{border-color:#444;box-shadow:0 8px 36px #0005}
 @media(max-width:700px){
- .hero{height:60svh;min-height:280px}
+ .hero{height:calc(100dvh - 24px);min-height:0}
  .bio-intro{display:none}
  .bio p+p{margin-top:0}
  #feedback-dialog{inset:auto 12px 12px;width:calc(100vw - 24px);max-height:55svh;padding:22px 20px 18px}
@@ -333,3 +332,9 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 .project-description{margin-top:3px;font:400 16px/1.4 var(--sans);color:var(--muted)}
 .mental .media{margin-bottom:10px}
 #home-clock{font-variant-numeric:tabular-nums}
+
+.hero-scroll{position:absolute;left:50%;bottom:22px;z-index:2;display:flex;align-items:center;justify-content:center;width:44px;height:44px;transform:translateX(-50%);color:#111}
+.hero-scroll svg{width:28px;height:28px;animation:hero-chevron-bounce 1.7s ease-in-out infinite}
+@keyframes hero-chevron-bounce{0%,100%{transform:translateY(-4px)}50%{transform:translateY(5px)}}
+@media(max-width:700px){.hero .current{bottom:88px}.hero-scroll{bottom:20px}}
+@media(prefers-reduced-motion:reduce){.hero-scroll svg{animation:none}html{scroll-behavior:auto}}
