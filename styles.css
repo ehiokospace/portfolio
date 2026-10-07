@@ -435,3 +435,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 /* Keep the selection outline without corner handles. */
 #note-highlight.is-selected::before,#note-highlight.is-selected::after{content:none;display:none}
 #note-highlight .note-corner,#note-highlight.is-selected .note-corner{display:none}
+
+/* Leave annotated content unobstructed. */
+#note-highlight-label{display:none!important}
