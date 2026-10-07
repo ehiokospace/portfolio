@@ -366,7 +366,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
 
     if(!modal.open)previousFocus=document.activeElement;selected?.classList.remove('feedback-selected');selected=element;selected?.classList.add('feedback-selected');document.querySelector('#feedback-prompt').hidden=true;
     form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-exit').hidden=false;status.textContent='';token='';send.disabled=true;
-    section.dataset.label=label;section.textContent=type;section.setAttribute('aria-label',type==='img'?'Selected image':'Selected text');if(!modal.open)modal.show();
+    section.dataset.label=label;section.textContent='';section.hidden=true;section.removeAttribute('aria-label');if(!modal.open)modal.show();
     if(element){floating.append(section,form);floating.hidden=false;placeFloating();const top=parseFloat(floating.style.top);if(top<scrollY||top+floating.offsetHeight>scrollY+innerHeight)window.scrollTo({top:Math.max(0,top-24),behavior:'smooth'});message.focus({preventScroll:true});}
     else{floating.hidden=true;modal.append(section,form);modal.focus({preventScroll:true});}
     try{
