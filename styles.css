@@ -418,3 +418,9 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 :root{--video-frame-radius:10px}
 .hero{border-radius:var(--video-frame-radius)}
 #feedback-dialog,#feedback-dialog[data-state=choose],#feedback-dialog[data-state=write],#feedback-dialog[data-state=sent]{border-radius:var(--video-frame-radius)}
+
+/* Complete the four selection handles. */
+#note-highlight .note-corner{display:none;position:absolute;width:7px;height:7px;background:var(--paper);border:1.5px solid #e37280}
+#note-highlight.is-selected .note-corner{display:block}
+#note-highlight .note-corner-top-right{top:-4px;right:-4px}
+#note-highlight .note-corner-bottom-left{bottom:-4px;left:-4px}

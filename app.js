@@ -295,6 +295,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   const step=document.querySelector('#feedback-step'), close=document.querySelector('#feedback-close');
   const entries=[...document.querySelectorAll('#leave-feedback,#story-feedback,#feedback-mobile')];
   const highlight=document.createElement('div');highlight.id='note-highlight';highlight.hidden=true;highlight.setAttribute('aria-hidden','true');
+  for(const corner of ['top-right','bottom-left']){const handle=document.createElement('span');handle.className='note-corner note-corner-'+corner;highlight.append(handle);}
   const hint=document.createElement('span');hint.id='note-highlight-label';highlight.append(hint);document.body.append(highlight);
   const drafts=new Map();
   let mode=false, selected=null, hovered=null, token='', widget=null, loading=null, previousFocus=null, submitting=false, revision=0, frame=0;
