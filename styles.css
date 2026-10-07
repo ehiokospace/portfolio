@@ -409,4 +409,4 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .layout aside .links h2,.links a,.links button{font-size:13px}
 
 /* Align the rotating footer with the final project description. */
-@media(min-width:701px){.layout{align-items:stretch}.layout aside{height:auto;align-self:stretch;position:relative;top:auto;padding-bottom:20px}.sidebar-footer .sidebar-copyright{line-height:16.1px}}
+@media(min-width:701px){.layout{align-items:stretch}.layout aside{height:auto;align-self:stretch;position:relative;top:auto;padding-bottom:44px}.sidebar-footer .sidebar-copyright{line-height:16.1px}}
