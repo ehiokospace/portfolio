@@ -333,7 +333,7 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 .mental .media{margin-bottom:10px}
 #home-clock{font-variant-numeric:tabular-nums}
 
-.hero-scroll{position:absolute;left:50%;bottom:22px;z-index:2;display:flex;align-items:center;justify-content:center;width:44px;height:44px;transform:translateX(-50%);color:#111}
+.hero-scroll{position:absolute;left:50%;bottom:22px;z-index:2;display:flex;align-items:center;justify-content:center;width:44px;height:44px;transform:translateX(-50%);color:#FCFCFA}
 .hero-scroll svg{width:28px;height:28px;animation:hero-chevron-bounce 1.7s ease-in-out infinite}
 @keyframes hero-chevron-bounce{0%,100%{transform:translateY(-4px)}50%{transform:translateY(5px)}}
 @media(max-width:700px){.hero .current{bottom:88px}.hero-scroll{bottom:20px}}
