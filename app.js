@@ -53,37 +53,18 @@ function updateHeroPlayback() {
 reducedMotion.addEventListener('change', updateHeroPlayback);
 updateHeroPlayback();
 
-// Weather describes Ehi's home base, never the visitor's location.
-const weatherLabel = document.querySelector('#viewer-weather');
-function weatherDescription(code) {
-  if (code === 0) return 'Clear';
-  if (code === 1) return 'Mostly clear';
-  if (code === 2) return 'Partly cloudy';
-  if (code === 3) return 'Overcast';
-  if ([45,48].includes(code)) return 'Fog';
-  if ([51,53,55,56,57].includes(code)) return 'Drizzle';
-  if ([61,63,65,66,67,80,81,82].includes(code)) return 'Rain';
-  if ([71,73,75,77,85,86].includes(code)) return 'Snow';
-  if ([95,96,99].includes(code)) return 'Thunderstorms';
-  return 'Current weather';
+// Use Huntsville's local time, including daylight saving changes.
+const homeClock = document.querySelector('#home-clock');
+const homeTimeFormat = new Intl.DateTimeFormat('en-US', {
+  timeZone: 'America/Chicago', hour: 'numeric', minute: '2-digit', second: '2-digit'
+});
+function updateHomeClock() {
+  const now = new Date();
+  homeClock.textContent = homeTimeFormat.format(now);
+  homeClock.dateTime = now.toISOString();
 }
-async function fetchJSON(url) {
-  const response = await fetch(url, {
-    signal: AbortSignal.timeout(8000), credentials: 'omit', referrerPolicy: 'no-referrer'
-  });
-  if (!response.ok) throw new Error('Lookup unavailable');
-  return response.json();
-}
-async function updateHomeWeather() {
-  try {
-    const params=new URLSearchParams({latitude:'34.73',longitude:'-86.59',current:'temperature_2m,weather_code',temperature_unit:'fahrenheit',timezone:'America/Chicago'});
-    const data=await fetchJSON('https://api.open-meteo.com/v1/forecast?'+params);
-    if(!Number.isFinite(data.current?.temperature_2m))throw new Error('Weather unavailable');
-    weatherLabel.textContent=Math.round(data.current.temperature_2m)+'°F · '+weatherDescription(data.current.weather_code);
-  } catch {weatherLabel.textContent='Weather unavailable';}
-}
-updateHomeWeather();
-setInterval(updateHomeWeather,15*60*1000);
+updateHomeClock();
+setInterval(updateHomeClock, 1000);
 
 const copyEmailButton = document.querySelector('#copy-email');
 let emailResetTimer;
@@ -316,7 +297,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
   let mode=false,selected=null,token='',widget=null,loading=null,previousFocus=null,submitting=false;
   const targets=[['.hero h1','Introduction'],['.hero .current','Previous experience'],['.bio p','Biography'],['nav h2','Navigation heading'],['nav a,nav button:not(#leave-feedback)','Navigation link'],['.utility p','Location and weather'],['.story-bio p','Story biography'],['.story-experience','Story experience'],['.story-particle-stage','Story image']];
   targets.forEach(([selector,label])=>document.querySelectorAll(selector).forEach(el=>el.dataset.feedbackSection=label));
-  document.querySelectorAll('.project').forEach(card=>{const title=card.querySelector('h2').textContent;card.querySelectorAll('.media,.category,h2').forEach(el=>el.dataset.feedbackSection=title);});
+  document.querySelectorAll('.project').forEach(card=>{const title=card.querySelector('h2').textContent;card.querySelectorAll('.media,.project-caption-heading,.project-description').forEach(el=>el.dataset.feedbackSection=title);});
   function markTargets(enabled){
     document.querySelectorAll('[data-feedback-section]').forEach(el=>{
       if(enabled){el.dataset.feedbackTabindex=el.getAttribute('tabindex')??'none';el.tabIndex=0;}
