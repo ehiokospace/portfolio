@@ -329,7 +329,7 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 .project-caption-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px}
 .project .project-caption-heading h2{min-width:0;font:500 16px/1.4 var(--sans)}
 .project-year{flex:none;font:400 16px/1.4 var(--sans);font-variant-numeric:tabular-nums}
-.project-description{margin-top:3px;font:400 16px/1.4 var(--sans);color:var(--muted)}
+.project-description{margin-top:3px;font:400 11.5px/1.4 var(--sans);color:var(--muted)}
 .mental .media{margin-bottom:10px}
 #home-clock{font-variant-numeric:tabular-nums}
 
