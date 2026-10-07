@@ -199,13 +199,6 @@ html:has(#case-study[open]),body:has(#case-study[open]){overflow:hidden;overscro
 .feedback-selecting .project:hover::after,.feedback-selecting .project:focus-visible::after{border:2px dashed #E37280}
 .project.feedback-selected::after{border:2px solid #E37280}
 
-/* Reserve a real column for Comments instead of covering the portfolio. */
-body:has(#feedback-dialog[open]){--feedback-column:clamp(300px,28vw,440px);margin-right:var(--feedback-column)}
-body:has(#feedback-dialog[open]) #feedback-dialog{width:var(--feedback-column);box-shadow:none;animation:none}
-body:has(#feedback-dialog[open]) .hero h1{margin-left:clamp(26px,8vw,120px);max-width:calc(100% - 52px)}
-@media(max-width:1000px){body:has(#feedback-dialog[open]) .layout{grid-template-columns:200px minmax(0,1fr)}body:has(#feedback-dialog[open]) .projects{grid-template-columns:minmax(0,1fr);grid-template-rows:auto;gap:28px}body:has(#feedback-dialog[open]) .project{grid-column:auto;grid-row:auto}}
-@media(max-width:700px){body:has(#feedback-dialog[open]){--feedback-column:min(300px,42vw)}body:has(#feedback-dialog[open]) #feedback-dialog{padding:54px 16px 24px}body:has(#feedback-dialog[open]) #feedback-title{font-size:20px}body:has(#feedback-dialog[open]) #feedback-prompt p{font-size:14px}body:has(#feedback-dialog[open]) .layout{display:flex}body:has(#feedback-dialog[open]) .bio{max-width:100%}body:has(#feedback-dialog[open]) .hero h1{font-size:26px;margin-left:16px;max-width:calc(100% - 32px)}body:has(#feedback-dialog[open]) .current{left:16px;right:16px}body:has(#feedback-dialog[open]) .project h2{font-size:14px}}
-
 /* Single-row inline comment pill. */
 #feedback-floating{display:flex;align-items:center;gap:14px;min-height:76px;padding:16px 18px;border:0;border-radius:28px;background:#fff;box-shadow:0 4px 24px #0000000a}#feedback-floating #feedback-section{display:flex;align-items:center;gap:6px;flex:none;margin:0;color:#E37280;font:18px var(--sans)}#feedback-floating #feedback-section::before{content:"";width:22px;height:22px;background:currentColor;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 20H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v7M11 10l2 12 3-5 5-3-10-4Z' fill='none' stroke='black' stroke-width='1.8' stroke-linejoin='round'/%3E%3C/svg%3E") center/contain no-repeat}#feedback-floating #feedback-form{display:flex;align-items:center;flex:1;min-width:0;gap:14px;flex-wrap:wrap}#feedback-floating #feedback-message{flex:1;width:0;min-width:0;min-height:26px;height:26px;padding:0;border:0;border-radius:0;resize:none;font:18px/26px var(--sans)}#feedback-floating #feedback-message:focus{outline:none}#feedback-floating #feedback-category,#feedback-floating .feedback-private{display:none}#feedback-floating #feedback-send{position:static;flex:none;width:44px;height:44px;border-radius:12px;background:#999;color:white}#feedback-floating #feedback-send:disabled{opacity:.7;cursor:default}#feedback-floating #feedback-send:not(:disabled):hover{background:var(--ink)}#feedback-floating #feedback-verification{order:3;width:100%;line-height:0}#feedback-floating #feedback-status{order:4;width:100%;margin:0;font-size:12px}#feedback-floating #feedback-verification:has(iframe[style*="display: none"]){display:none}
 
@@ -230,10 +223,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt p{font:400 14px/1.5 var(--sans
 #feedback-floating #feedback-status:not(:empty){position:absolute;top:calc(100% + 8px);left:0;width:100%;padding:8px 12px;background:var(--paper);border-radius:8px}
 .feedback-selecting .project::after{content:none}
 
-/* Reflow the complete hero heading inside the space beside Comments. */
-body:has(#feedback-dialog[open]) .hero{padding:clamp(24px,5vw,72px)}
-body:has(#feedback-dialog[open]) .hero h1{margin:0;padding:0;width:100%;max-width:100%;white-space:normal;overflow-wrap:normal}
-body:has(#feedback-dialog[open]) .hero-line{display:inline;white-space:normal}
 #feedback-floating{min-height:50px;padding:10px 14px;gap:10px;border-radius:20px}
 #feedback-floating #feedback-send{width:30px;height:30px;border-radius:9px;font-size:19px}
 
@@ -286,7 +275,7 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 /* Keep the Story header utility in the same order as the portfolio. */
 #story-feedback{flex:none;margin-right:24px}
 .story-location{margin-right:16px}
-#story-overlay:has(#feedback-dialog[open]) .story-shell{margin-right:var(--feedback-column);max-width:calc(100% - var(--feedback-column))}
+
 #story-overlay #feedback-floating{position:fixed}
 @media(max-width:700px){#story-feedback{margin-right:12px}.story-location{margin-right:12px}}
 
@@ -310,3 +299,29 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 #feedback-floating{display:block}#feedback-floating #feedback-section{margin-bottom:8px}#feedback-floating #feedback-form{display:flex;flex-direction:column;align-items:stretch;gap:8px}#feedback-floating label[for=feedback-message]{position:static;width:auto;height:auto;overflow:visible;clip-path:none;display:block;font:12px/1.4 var(--sans);margin:0}#feedback-floating #feedback-message{width:100%;min-height:64px;height:64px;resize:vertical;align-self:stretch}#feedback-floating #feedback-send{width:auto;height:auto;padding:8px 12px;align-self:flex-end;font:12px/1.4 var(--mono)}#story-overlay .feedback-finish{color:#fcfcfa;border-color:#555}#feedback-success p{font:14px/1.5 var(--sans)}
 
 #feedback-general,#feedback-exit,#feedback-done{display:none!important}
+
+/* Keep the next section visible and text readable throughout the video. */
+.hero{height:calc(90svh - 40px);min-height:440px}
+.hero-art{z-index:0}
+.hero::before{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(to bottom,#0009 0%,#0009 43%,#0003 63%,#0009 82%,#0009 100%)}
+.hero h1,.hero .current,.command-trigger{z-index:2;text-shadow:0 1px 3px #0005}
+.project-org{font:500 13px/1.4 var(--sans);margin:0 0 5px;color:var(--ink)}
+/* Notes float over the portfolio without changing page dimensions. */
+#feedback-dialog{inset:auto 20px 20px auto;width:min(360px,calc(100vw - 40px));height:auto;max-width:none;max-height:calc(100svh - 40px);padding:26px 24px 22px;border:1px solid #deded9;border-radius:16px;box-shadow:0 8px 36px #0002;animation:none}
+#feedback-close{top:16px;right:16px}
+#feedback-title{padding-right:22px;margin-bottom:16px}
+#feedback-prompt p{margin-bottom:14px}
+#feedback-prompt .feedback-selection-help{margin:16px 0 0}
+#feedback-form label{margin-top:12px}
+#feedback-message{min-height:92px;resize:vertical}
+#feedback-comments{max-height:160px;overflow:auto}
+#story-overlay #feedback-dialog{border-color:#444;box-shadow:0 8px 36px #0005}
+@media(max-width:700px){
+ .hero{height:60svh;min-height:280px}
+ .bio-intro{display:none}
+ .bio p+p{margin-top:0}
+ #feedback-dialog{inset:auto 12px 12px;width:calc(100vw - 24px);max-height:55svh;padding:22px 20px 18px}
+ #feedback-close{top:12px;right:12px}
+ #feedback-title{font-size:15px}
+ #feedback-prompt p{font-size:13px}
+}

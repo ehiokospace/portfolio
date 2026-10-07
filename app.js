@@ -53,7 +53,7 @@ function updateHeroPlayback() {
 reducedMotion.addEventListener('change', updateHeroPlayback);
 updateHeroPlayback();
 
-// Use a city-level network estimate rather than requesting precise GPS coordinates.
+// Weather describes Ehi's home base, never the visitor's location.
 const weatherLabel = document.querySelector('#viewer-weather');
 function weatherDescription(code) {
   if (code === 0) return 'Clear';
@@ -74,41 +74,16 @@ async function fetchJSON(url) {
   if (!response.ok) throw new Error('Lookup unavailable');
   return response.json();
 }
-async function updateViewerWeather() {
+async function updateHomeWeather() {
   try {
-    let location;
-    for (const url of ['https://ipinfo.io/json', 'https://ipwho.is/', 'https://ipapi.co/json/']) {
-      try {
-        const result = await fetchJSON(url);
-        if (typeof result.loc === 'string') {
-          [result.latitude, result.longitude] = result.loc.split(',').map(Number);
-          result.country_code = result.country;
-        }
-        if (Number.isFinite(result.latitude) && Number.isFinite(result.longitude)) {
-          location = result; break;
-        }
-      } catch (error) { console.warn('City lookup:', error.message); }
-    }
-    if (!location) throw new Error('Location unavailable');
-    if (typeof location.city === 'string' && location.city.trim()) {
-      document.querySelector('#viewer-location').textContent = location.city.trim() + '.';
-    }
-    const fahrenheit = location.country_code === 'US';
-    const params = new URLSearchParams({
-      latitude: location.latitude.toFixed(1), longitude: location.longitude.toFixed(1),
-      current: 'temperature_2m,weather_code', temperature_unit: fahrenheit ? 'fahrenheit' : 'celsius',
-      timezone: 'auto'
-    });
-    const data = await fetchJSON('https://api.open-meteo.com/v1/forecast?' + params);
-    if (!Number.isFinite(data.current?.temperature_2m)) throw new Error('Weather unavailable');
-    weatherLabel.textContent = Math.round(data.current.temperature_2m) + '°' +
-      (fahrenheit ? 'F' : 'C') + ' · ' + weatherDescription(data.current.weather_code);
-  } catch {
-    weatherLabel.textContent = 'Weather unavailable';
-  }
+    const params=new URLSearchParams({latitude:'34.73',longitude:'-86.59',current:'temperature_2m,weather_code',temperature_unit:'fahrenheit',timezone:'America/Chicago'});
+    const data=await fetchJSON('https://api.open-meteo.com/v1/forecast?'+params);
+    if(!Number.isFinite(data.current?.temperature_2m))throw new Error('Weather unavailable');
+    weatherLabel.textContent=Math.round(data.current.temperature_2m)+'°F · '+weatherDescription(data.current.weather_code);
+  } catch {weatherLabel.textContent='Weather unavailable';}
 }
-updateViewerWeather();
-setInterval(updateViewerWeather, 15 * 60 * 1000);
+updateHomeWeather();
+setInterval(updateHomeWeather,15*60*1000);
 
 const copyEmailButton = document.querySelector('#copy-email');
 let emailResetTimer;
@@ -367,12 +342,11 @@ descriptionButton.addEventListener('click', scrambleDescription);
     if(!modal.open)previousFocus=document.activeElement;selected?.classList.remove('feedback-selected');selected=element;selected?.classList.add('feedback-selected');document.querySelector('#feedback-prompt').hidden=true;
     form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-exit').hidden=false;status.textContent='';token='';send.disabled=true;
     section.dataset.label=label;section.textContent='';section.hidden=true;section.removeAttribute('aria-label');if(!modal.open)modal.show();
-    if(element){floating.append(section,form);floating.hidden=false;placeFloating();const top=parseFloat(floating.style.top);if(top<scrollY||top+floating.offsetHeight>scrollY+innerHeight)window.scrollTo({top:Math.max(0,top-24),behavior:'smooth'});message.focus({preventScroll:true});}
-    else{floating.hidden=true;modal.append(section,form);modal.focus({preventScroll:true});}
+    floating.hidden=true;modal.append(section,form);message.focus({preventScroll:true});
     try{
       await loadTurnstile();if(!modal.open||selected!==element)return;
       if(widget!==null)window.turnstile.remove(widget);
-      widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:'light',appearance:'interaction-only',callback:value=>{token=value;send.disabled=submitting;},'expired-callback':()=>{token='';send.disabled=true;},'error-callback':()=>{token='';send.disabled=true;status.textContent='Spam check could not load. Close and try again.';}});placeFloating();
+      widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:document.querySelector('#story-overlay').open?'dark':'light',appearance:'interaction-only',callback:value=>{token=value;send.disabled=submitting;},'expired-callback':()=>{token='';send.disabled=true;},'error-callback':()=>{token='';send.disabled=true;status.textContent='Spam check could not load. Close and try again.';}});placeFloating();
     }catch{status.textContent='Spam check could not load. Please close and try again.';}
   }
   document.querySelector('#leave-feedback').addEventListener('click',start);
