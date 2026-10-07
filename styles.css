@@ -431,3 +431,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 /* Project caption typography. */
 .project .project-caption-heading h2{font-size:15px}
 .project .project-description{font-size:13px}
+
+/* Keep the selection outline without corner handles. */
+#note-highlight.is-selected::before,#note-highlight.is-selected::after{content:none;display:none}
+#note-highlight .note-corner,#note-highlight.is-selected .note-corner{display:none}
