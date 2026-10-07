@@ -370,7 +370,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 #feedback-message[aria-invalid=true]{border-color:#c74455}
 .note-options{display:flex;align-items:center;gap:8px;margin:12px 0}
 #feedback-form .note-category-label{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%);margin:0}
-#feedback-category{width:auto;max-width:160px;font:12px/1.4 var(--sans);border:1px solid var(--note-border);border-radius:8px;padding:6px 26px 6px 10px;background:transparent;color:var(--muted)}
+#feedback-category{width:auto;max-width:160px;font:12px/1.4 var(--sans);border:1px solid var(--note-border);border-radius:8px;padding:6px 36px 6px 12px;appearance:none;-webkit-appearance:none;background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23626260' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 12px center;color:var(--muted)}
+#feedback-dialog.note-dark #feedback-category{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23fcfcfa' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E")}
 #feedback-count{margin-left:auto;font:10px/1.4 var(--mono);color:var(--muted);font-variant-numeric:tabular-nums}
 #feedback-status:empty{display:none}
 #feedback-status:not(:empty){margin:12px 0;padding:10px 12px;border:1px solid #e3728050;border-radius:10px;background:#e372800c;color:var(--note-accent);font:12px/1.5 var(--sans);animation:note-enter .2s ease}
