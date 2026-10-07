@@ -413,3 +413,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* One size for Departure Mono throughout the portfolio. */
 .current,.category,.links a,.links button,.links #copy-email .email-label,.sidebar-copyright,.command-trigger,#command-palette,#command-palette .command-header,#command-palette .command-header input,#command-query::placeholder,#command-palette .command-result,#command-palette .command-footer,#command-palette #close-search,.case-toolbar button,#mobile-menu,.case-meta dt,.case-eyebrow,.case-category,.case-next-label,.case-next-category,.feedback-entry,.story-readmore,.story-experiences h2,.story-bottom h2,.story-date,#note-highlight-label,#feedback-step,#feedback-count,.note-shortcut,#feedback-form .note-category-label,#feedback-form .feedback-trap label{font-size:12px!important}
+
+/* Match the note popup corners to the hero video frame. */
+:root{--video-frame-radius:10px}
+.hero{border-radius:var(--video-frame-radius)}
+#feedback-dialog,#feedback-dialog[data-state=choose],#feedback-dialog[data-state=write],#feedback-dialog[data-state=sent]{border-radius:var(--video-frame-radius)}
