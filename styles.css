@@ -406,4 +406,4 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .layout aside .bio p:not(.bio-intro),.utility p{font-size:13px}
 
 /* Navigation and contact typography. */
-.links h2,.links a,.links button{font-size:13px}
+.layout aside .links h2,.links a,.links button{font-size:13px}
