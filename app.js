@@ -212,7 +212,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     {name:'Work',key:'w',modifier:true,shortcut:'[⌘W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
     {name:'Craft',shortcut:'',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Craft"]').click()},
     {name:'Gallery',key:'g',modifier:true,shortcut:'[⌘G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
-    {name:'Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>document.dispatchEvent(new Event('open-story'))},
+    {name:'My Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>document.dispatchEvent(new Event('open-story'))},
     {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
     {name:'Copy email',keepOpen:true,aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
     {name:'Leave feedback',aliases:'comment suggestion critique review',shortcut:'',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#leave-feedback').click()},
@@ -723,7 +723,7 @@ class StoryPortrait {
 // Story is a modal layer; its image renderer is created only on first opening.
 (()=>{
 const overlay=document.querySelector('#story-overlay'),canvas=document.querySelector('#story-particles'),fallback=document.querySelector('#story-image-fallback');
-const names=["Ehi Oko portrait","Notion","ColorStack AAMU","Sullivan Foundation","JPMorganChase","Thrive","Cornell Tech","IBM SkillsBuild","HBCU Game Jam","HBCU Business Pitch Competition"];
+const names=["Ehi Oko portrait","Notion","ColorStack AAMU","Sullivan Foundation","JPMorganChase","Thrive","Cornell Tech","IBM SkillsBuild","HBCU Game Jam","HBCU Pitch Competition"];
 const sources=["story-portrait.jpg","story-notion.jpg","story-colorstack.jpg","story-sullivan-fixed.jpg","story-jpm.jpg","mental-health.png","story-cornell.jpg","story-ibm.jpg","story-game-jam.jpg","story-business-pitch.jpg"].map(file=>'./assets/'+file);
 let portrait,clockTimer,opener;
 const storyPhone=matchMedia("(max-width:760px)");
