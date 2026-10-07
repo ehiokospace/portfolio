@@ -215,7 +215,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     {name:'My Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>document.dispatchEvent(new Event('open-story'))},
     {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
     {name:'Copy email',keepOpen:true,aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
-    {name:'Leave feedback',aliases:'comment suggestion critique review',shortcut:'',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#leave-feedback').click()},
+    {name:'Leave a note',aliases:'comment suggestion critique review',shortcut:'',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#leave-feedback').click()},
     {name:'LinkedIn',aliases:'https://www.linkedin.com/in/ehi-oko social',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
     {name:'X/Twitter',aliases:'https://www.x.com/ehigoko social twitter',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
   ];
@@ -353,7 +353,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
 
     const caseModal=document.querySelector('#case-study');
     if(caseModal.open){compose('Case study: '+document.querySelector('#case-title').textContent,null);return;}
-    if(mode)return;previousFocus=document.activeElement;mode=true;document.body.classList.add('feedback-selecting');markTargets(true);form.hidden=true;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-section').textContent='';document.querySelector('#feedback-prompt').hidden=false;modal.show();modal.focus({preventScroll:true});
+    if(mode)return;previousFocus=document.activeElement;mode=true;document.body.classList.add('feedback-selecting');markTargets(true);form.hidden=true;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-exit').hidden=false;document.querySelector('#feedback-section').textContent='';document.querySelector('#feedback-prompt').hidden=false;modal.show();modal.focus({preventScroll:true});
   }
   function loadTurnstile(){
     if(window.turnstile)return Promise.resolve();
@@ -365,7 +365,7 @@ descriptionButton.addEventListener('click', scrambleDescription);
     if(submitting)return;
 
     if(!modal.open)previousFocus=document.activeElement;selected?.classList.remove('feedback-selected');selected=element;selected?.classList.add('feedback-selected');document.querySelector('#feedback-prompt').hidden=true;
-    form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;status.textContent='';token='';send.disabled=true;
+    form.reset();form.hidden=false;document.querySelector('#feedback-success').hidden=true;document.querySelector('#feedback-exit').hidden=false;status.textContent='';token='';send.disabled=true;
     section.dataset.label=label;section.textContent=type;section.setAttribute('aria-label',type==='img'?'Selected image':'Selected text');if(!modal.open)modal.show();
     if(element){floating.append(section,form);floating.hidden=false;placeFloating();const top=parseFloat(floating.style.top);if(top<scrollY||top+floating.offsetHeight>scrollY+innerHeight)window.scrollTo({top:Math.max(0,top-24),behavior:'smooth'});message.focus({preventScroll:true});}
     else{floating.hidden=true;modal.append(section,form);modal.focus({preventScroll:true});}
@@ -378,8 +378,8 @@ descriptionButton.addEventListener('click', scrambleDescription);
   document.querySelector('#leave-feedback').addEventListener('click',start);
   document.querySelector('#story-feedback').addEventListener('click',start);
   document.querySelector('#feedback-mobile').addEventListener('click',start);
-  document.querySelector('#feedback-exit').addEventListener('click',stop);
-  document.querySelector('#feedback-general').addEventListener('click',()=>compose('General feedback',null));
+  document.querySelector('#feedback-exit').addEventListener('click',()=>{if(!submitting)modal.close();});
+  document.querySelector('#feedback-general').addEventListener('click',()=>compose('General note',null));
   document.querySelector('#feedback-close').addEventListener('click',()=>{if(!submitting)modal.close();});
   document.querySelector('#feedback-done').addEventListener('click',()=>modal.close());
   modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});
@@ -399,19 +399,19 @@ descriptionButton.addEventListener('click', scrambleDescription);
   // Include dynamically rendered case studies without changing their normal navigation.
   new MutationObserver(()=>{
     const content=document.querySelector('#case-content');if(!content.children.length||content.querySelector('.case-feedback'))return;
-    const button=document.createElement('button');button.className='case-feedback';button.textContent='Leave feedback [+]';button.addEventListener('click',()=>compose('Case study: '+document.querySelector('#case-title').textContent,null));content.querySelector('.soon-wrap')?.append(button);
+    const button=document.createElement('button');button.className='case-feedback';button.textContent='Leave a note';button.addEventListener('click',()=>compose('Case study: '+document.querySelector('#case-title').textContent,null));content.querySelector('.soon-wrap')?.append(button);
   }).observe(document.querySelector('#case-content'),{childList:true});
   message.addEventListener('keydown',event=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();form.requestSubmit();}});
   form.addEventListener('submit',async event=>{
     event.preventDefault();if(submitting||!form.reportValidity()||!token)return;
-    submitting=true;send.disabled=true;send.textContent='Sending…';status.textContent='';
+    submitting=true;send.disabled=true;send.textContent='Posting…';status.textContent='';
     const payload={message:message.value,page:location.href,section:section.dataset.label,category:document.querySelector('#feedback-category').value,website:form.elements.website.value,token,version:'feedback-55'};
     try{
       const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});
       const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Feedback could not be sent. Please try again.');
-      const card=document.createElement('article');card.className='feedback-comment';const context=document.createElement('p');context.className='feedback-comment-context';context.textContent=payload.section+' · '+payload.category;const text=document.createElement('p');text.textContent=payload.message;const saved=document.createElement('small');saved.textContent='Sent privately ✓';card.append(context,text,saved);comments.prepend(card);floating.hidden=true;form.hidden=true;section.textContent='';selected?.classList.remove('feedback-selected');selected=null;document.querySelector('#feedback-prompt').hidden=false;comments.tabIndex=-1;comments.focus({preventScroll:true});
+      const card=document.createElement('article');card.className='feedback-comment';const context=document.createElement('p');context.className='feedback-comment-context';context.textContent=payload.section+' · '+payload.category;const text=document.createElement('p');text.textContent=payload.message;const saved=document.createElement('small');saved.textContent='Sent privately ✓';card.append(context,text,saved);comments.prepend(card);floating.hidden=true;form.hidden=true;section.textContent='';selected?.classList.remove('feedback-selected');selected=null;document.querySelector('#feedback-prompt').hidden=true;document.querySelector('#feedback-success').hidden=false;document.querySelector('#feedback-exit').hidden=true;document.querySelector('#feedback-success').setAttribute('role','status');document.querySelector('#feedback-done').focus({preventScroll:true});
     }catch(error){status.textContent=error.name==='TimeoutError'?'The request timed out. Please check your connection and try again.':error.message==='Failed to fetch'?'Could not connect. Please try again.':error.message;}
-    finally{submitting=false;send.textContent='→';token='';send.disabled=true;if(widget!==null&&window.turnstile)window.turnstile.reset(widget);}
+    finally{submitting=false;send.textContent='Post note';token='';send.disabled=true;if(widget!==null&&window.turnstile)window.turnstile.reset(widget);}
   });
 })();
 
