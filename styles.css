@@ -338,3 +338,6 @@ html:has(#story-overlay[open]),body:has(#story-overlay[open]){overflow:hidden}
 @keyframes hero-chevron-bounce{0%,100%{transform:translateY(-4px)}50%{transform:translateY(5px)}}
 @media(max-width:700px){.hero .current{bottom:88px}.hero-scroll{bottom:20px}}
 @media(prefers-reduced-motion:reduce){.hero-scroll svg{animation:none}html{scroll-behavior:auto}}
+
+/* Leave room for the phone navigation bar while keeping the scroll cue visible. */
+@media(max-width:700px){.hero{height:calc(100dvh - 73px)}}
