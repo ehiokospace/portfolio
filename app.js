@@ -601,11 +601,12 @@ class StoryPortrait {
     if(!this.count)return;
     const c=this.config;this.entryStart=performance.now();this.entering=entrance;this.clearPointer();
     for(let i=0;i<this.count;i++){
-      this.x[i]=this.homeX[i]+(entrance?(Math.random()-.5)*c.entrySpread:0);
-      this.y[i]=this.homeY[i]+(entrance?(Math.random()-.5)*c.entrySpread:0);
+      this.x[i]=this.homeX[i]+(entrance?(Math.random()-.5)*c.entrySpread*.15:0);
+      this.y[i]=this.homeY[i]-(entrance?c.entrySpread*(.5+Math.random()*.5):0);
       this.vx[i]=this.vy[i]=0;
-      // The bottom rows arrive first; a soft band climbs toward the top.
-      this.delay[i]=entrance?350+(1-(this.homeY[i]-c.bleed)/this.height)*c.entryStagger+Math.random()*160:0;
+      // Row-weighted delays create the travelling cloud and spring rebound.
+      const row=(this.homeY[i]-c.bleed-c.gap/2)/Math.max(c.gap,this.height-c.gap);
+      this.delay[i]=entrance?row*c.entryStagger*.85+Math.random()*c.entryStagger*.15:0;
     }
     this.lastTime=0;this.wake();
   }
@@ -668,13 +669,7 @@ class StoryPortrait {
     let maxEnergy=0,pending=false;
     for(let i=0;i<this.count;i++){
       const age=elapsed-this.delay[i];
-      if(this.entering&&age<0){
-        // A sparse cloud drifts briefly before each row joins the image.
-        this.positions[i*3]=this.x[i]+Math.sin(now*.002+this.spin[i]*10)*8;
-        this.positions[i*3+1]=this.y[i]+Math.cos(now*.002+this.spin[i]*10)*8;
-        this.positions[i*3+2]=i%18===0?Math.min(1,elapsed/250)*.65:0;
-        pending=true;continue;
-      }
+      if(this.entering&&age<0){this.positions[i*3+2]=0;pending=true;continue;}
       if(!this.paused){
         this.vx[i]+=(c.stiffness*(this.homeX[i]-this.x[i])-c.damping*this.vx[i])*dt;
         this.vy[i]+=(c.stiffness*(this.homeY[i]-this.y[i])-c.damping*this.vy[i])*dt;
@@ -735,7 +730,7 @@ const storyPhone=matchMedia("(max-width:760px)");
 const rows=[...overlay.querySelectorAll('.story-experience')];
 function clock(){document.querySelector('#story-clock').textContent=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',hour:'numeric',minute:'2-digit',second:'2-digit'}).format(new Date());}
 function select(index){if(storyPhone.matches)index=0;fallback.src=sources[index];fallback.alt=names[index];canvas.setAttribute('aria-label','Interactive particle rendering: '+names[index]);canvas.dataset.image=index;portrait?.setImage(index);rows.forEach(row=>row.setAttribute('aria-pressed',String(Number(row.dataset.storyImage)===index)));}
-function openStory(){if(overlay.open)return;opener=document.activeElement;document.querySelector('#command-palette').close();overlay.showModal();overlay.scrollTop=0;clock();clockTimer=setInterval(clock,1000);if(storyPhone.matches){select(0);portrait?.setVisible(false);}else if(!portrait){portrait=new StoryPortrait(canvas,sources,{gap:3.1,size:2.65,bleed:0,coverage:0,fit:'cover',maxParticles:65000,entrySpread:90,entryStagger:1800,entryFade:160,scatter:90,swirl:600,chaos:230,cornerRadius:0,background:'#1c1c1c'});}else{portrait.setVisible(true);select(0);portrait.reset(true);}document.querySelector('#story-close').focus({preventScroll:true});}
+function openStory(){if(overlay.open)return;opener=document.activeElement;document.querySelector('#command-palette').close();overlay.showModal();overlay.scrollTop=0;clock();clockTimer=setInterval(clock,1000);if(storyPhone.matches){select(0);portrait?.setVisible(false);}else if(!portrait){portrait=new StoryPortrait(canvas,sources,{gap:3.1,size:2.65,bleed:0,coverage:0,fit:'cover',maxParticles:65000,entrySpread:1200,entryStagger:3000,entryFade:250,scatter:90,swirl:600,chaos:230,cornerRadius:0,background:'#1c1c1c'});}else{portrait.setVisible(true);select(0);portrait.reset(true);}document.querySelector('#story-close').focus({preventScroll:true});}
 function closeStory(){document.querySelector('#feedback-dialog').close();overlay.close();}
 document.querySelectorAll('a[href="#story"]').forEach(link=>link.addEventListener('click',event=>{if(document.body.classList.contains('feedback-selecting'))return;event.preventDefault();openStory();}));
 document.addEventListener('open-story',openStory);
