@@ -210,9 +210,9 @@ descriptionButton.addEventListener('click', scrambleDescription);
   palette.addEventListener('close',resetCopied);
   const items = [
     {name:'Work',key:'w',modifier:true,shortcut:'[⌘W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
+    {name:'About',aliases:'story my story bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/ABOUT',run:()=>document.dispatchEvent(new Event('open-story'))},
     {name:'Craft',shortcut:'',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Craft"]').click()},
     {name:'Gallery',key:'g',modifier:true,shortcut:'[⌘G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
-    {name:'My Story',aliases:'about bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/STORY',run:()=>document.dispatchEvent(new Event('open-story'))},
     {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
     {name:'Copy email',keepOpen:true,aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
     {name:'Leave a note',aliases:'comment suggestion critique review',shortcut:'',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#leave-feedback').click()},
