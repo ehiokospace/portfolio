@@ -503,7 +503,7 @@ body.portfolio-entered .hero{display:none}
 .projects .media{transition:border-radius .3s cubic-bezier(.22,1,.36,1)}
 .project-tags{position:absolute;left:14px;bottom:14px;z-index:2;display:flex;flex-wrap:wrap;gap:8px;max-width:calc(100% - 28px);opacity:0;transform:translateY(8px);pointer-events:none;transition:opacity .22s ease,transform .3s cubic-bezier(.22,1,.36,1)}
 .project-tag{display:block;padding:10px 13px;border-radius:16px;background:rgba(252,252,250,.95);color:var(--ink);font:400 13px/1.35 var(--sans);white-space:nowrap}
-.projects .media:hover,.projects .media:focus-visible{border-radius:30px}
+.projects .media:hover,.projects .media:focus-visible{border-radius:18px}
 .projects .media:hover .project-tags,.projects .media:focus-visible .project-tags{opacity:1;transform:translateY(0)}
 .feedback-selecting .projects .media{border-radius:9.8px}
 .feedback-selecting .project-tags{opacity:0;transform:translateY(8px)}
