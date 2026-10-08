@@ -508,3 +508,15 @@ body.portfolio-entered .hero{display:none}
 .feedback-selecting .projects .media{border-radius:9.8px}
 .feedback-selecting .project-tags{opacity:0;transform:translateY(8px)}
 @media(prefers-reduced-motion:reduce){.projects .media,.project-tags{transition:none}}
+
+/* A single in-image project caption, revealed on hover or keyboard focus. */
+.project-accessible-title{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip-path:inset(50%);white-space:nowrap}
+.projects .media{margin-bottom:0}
+.project-tags{left:12px;right:12px;bottom:12px;max-width:none;display:block}
+.project-tag{width:100%;display:flex;align-items:center;justify-content:space-between;gap:14px;padding:12px;border-radius:7px;background:rgba(252,252,250,.93);white-space:normal}
+.project-tag-heading{flex:0 1 auto;min-width:0;font:400 13px/1.4 var(--sans)}
+.project-tag-title{font-size:15px;font-weight:500}
+.project-tag-year{color:#969692;white-space:nowrap;font-variant-numeric:tabular-nums}
+.project-tag-description{flex:0 1 48%;min-width:0;text-align:right;font:400 13px/1.4 var(--sans)}
+@media(max-width:700px){.project-tag{gap:10px;padding:10px}.project-tag-title{font-size:13px}.project-tag-description{font-size:12px}}
+@media(hover:none){.project-tags{opacity:1;transform:none}}
