@@ -469,3 +469,10 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .writing-card-copy p{margin:6px 0 0;font:400 15px/1.4 var(--sans);color:#fcfcfab3}
 @media(max-width:1100px) and (min-width:701px){.writing{margin-left:222px}}
 @media(max-width:700px){.writing{margin:0 0 64px 20px}.writing>h2{margin-bottom:28px}.writing-list{gap:16px}.writing-card{flex-basis:82%;min-width:0}.writing-card-copy{left:20px;right:20px;bottom:20px}}
+
+/* Keep the sidebar alongside every portfolio section as the page scrolls. */
+.portfolio-content{min-width:0}
+.portfolio-content .honors{margin-left:20px}
+.portfolio-content .writing{margin-left:20px}
+@media(min-width:701px){.utility{position:sticky;top:0;z-index:5;height:73px;background:var(--paper)}.layout{align-items:start}.layout aside{position:sticky;top:73px;align-self:start;height:calc(100dvh - 73px);padding-bottom:24px;overflow-y:auto;scrollbar-width:thin}.sidebar-footer{margin-top:auto}}
+@media(max-width:700px){.portfolio-content{width:100%}.layout aside{position:static;height:auto;overflow:visible}}
