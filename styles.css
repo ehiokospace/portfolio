@@ -482,3 +482,11 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* The intro is restored only through the butterfly or a fresh page load. */
 body.portfolio-entered .hero{display:none}
+
+/* Reference award format: title, light source line, and up-right arrow. */
+.honor-row{gap:16px;padding:18px 0;border-bottom:1px solid #403f3f14}
+.honor-copy h3{font:400 18px/1.4 var(--sans)}
+.honor-copy p{margin-top:0;font:400 18px/1.4 var(--sans);color:#b9b9b9}
+.honor-arrow{display:block;flex:none;margin-top:3px;color:var(--ink);line-height:0}
+.honor-arrow svg{display:block}
+@media(max-width:700px){.honor-row{padding:14px 0}.honor-arrow{margin-top:2px}}
