@@ -520,3 +520,9 @@ body.portfolio-entered .hero{display:none}
 .project-tag-description{flex:0 1 48%;min-width:0;text-align:right;font:400 13px/1.4 var(--sans)}
 @media(max-width:700px){.project-tag{gap:10px;padding:10px}.project-tag-title{font-size:13px}.project-tag-description{font-size:12px}}
 @media(hover:none){.project-tags{opacity:1;transform:none}}
+
+/* Independent columns keep image spacing equal in both directions. */
+.projects{gap:20px;grid-template-rows:auto}
+.project-column{display:flex;flex-direction:column;gap:20px;min-width:0;grid-column:1;grid-row:1}
+.projects .mental{grid-column:2;grid-row:1}
+@media(max-width:700px){.project-column{display:contents}.projects{gap:20px}.projects .internal{order:0}.projects .mental{order:1}.projects .community{order:2}}
