@@ -438,3 +438,16 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* Leave annotated content unobstructed. */
 #note-highlight-label{display:none!important}
+
+/* Honors follow the project grid with the reference's open, divided rows. */
+.honors{order:3;margin:64px 20px 96px 283px;scroll-margin-top:32px}
+.honors>h2{margin:0 0 40px;font:400 18px/1.4 var(--sans)}
+.honors-list{list-style:none;padding:0;margin:0}
+.honor-row{display:flex;justify-content:space-between;align-items:flex-start;gap:24px;padding:22px 0;border-bottom:1px solid #403f3f1a}
+.honor-row:last-child{border-bottom:0}
+.honor-copy{min-width:0}
+.honor-copy h3{margin:0;font:400 15px/1.5 var(--sans);text-wrap:pretty}
+.honor-copy p{margin:4px 0 0;font:400 13px/1.5 var(--sans);color:#858580}
+.honor-date{flex:none;padding-top:2px;font:400 13px/1.5 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
+@media(max-width:1100px) and (min-width:701px){.honors{margin-left:222px}}
+@media(max-width:700px){.honors{margin:40px 20px 64px}.honors>h2{margin-bottom:28px}.honor-row{gap:12px;padding:20px 0}.honor-date{max-width:72px;text-align:right}}
