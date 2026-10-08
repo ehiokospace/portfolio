@@ -1,4 +1,4 @@
-document.querySelector('[aria-label="Back to top"]').addEventListener('click',event=>{event.preventDefault();window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});
+document.querySelector('[aria-label="Back to top"]').addEventListener('click',event=>{event.preventDefault();returnToVideo();});
 // Trial fonts are available only in the local preview.
 if (['localhost', '127.0.0.1'].includes(location.hostname)) {
   const fonts = document.createElement('link');
@@ -675,7 +675,7 @@ function closeStory(){document.querySelector('#feedback-dialog').close();overlay
 document.querySelectorAll('a[href="#story"]').forEach(link=>link.addEventListener('click',event=>{if(document.body.classList.contains('feedback-selecting'))return;event.preventDefault();openStory();}));
 document.addEventListener('open-story',openStory);
 storyPhone.addEventListener('change',()=>{if(!overlay.open)return;if(storyPhone.matches){portrait?.setVisible(false);select(0);}else{overlay.close();openStory();}});
-document.querySelector('#story-home').addEventListener('click',()=>{closeStory();window.scrollTo({top:0,behavior:'instant'});});document.querySelector('#story-close').addEventListener('click',closeStory);
+document.querySelector('#story-home').addEventListener('click',()=>{closeStory();returnToVideo();});document.querySelector('#story-close').addEventListener('click',closeStory);
 overlay.addEventListener('close',()=>{document.querySelector('#feedback-dialog').close();clearInterval(clockTimer);portrait?.setVisible(false);rows.forEach(row=>row.setAttribute('aria-pressed','false'));opener?.focus({preventScroll:true});});
 rows.forEach(row=>{const index=Number(row.dataset.storyImage);row.addEventListener('pointerenter',()=>select(index));row.addEventListener('pointerleave',()=>select(0));row.addEventListener('focus',()=>select(index));row.addEventListener('blur',()=>select(0));row.addEventListener('click',()=>select(index));});
 })();
@@ -721,4 +721,39 @@ rows.forEach(row=>{const index=Number(row.dataset.storyImage);row.addEventListen
     }
   });
   document.querySelectorAll('.writing-card').forEach(card=>observer.observe(card));
+})();
+
+// Once the intro leaves view, the portfolio becomes the page's scroll boundary.
+let portfolioScrollLocked=false;
+function returnToVideo(){
+  portfolioScrollLocked=false;
+  document.body.classList.remove('portfolio-entered');
+  history.replaceState(history.state,'',location.pathname+location.search);
+  window.scrollTo({top:0,behavior:'instant'});
+  document.querySelector('.hero video')?.play().catch(()=>{});
+}
+(function enterPortfolio(){
+  const hero=document.querySelector('.hero');
+  if(!hero)return;
+  const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
+  let ready=!reloading;
+  history.scrollRestoration='manual';
+  if(reloading){
+    history.replaceState(history.state,'',location.pathname+location.search);
+    window.scrollTo({top:0,behavior:'instant'});
+    window.addEventListener('pageshow',()=>{returnToVideo();requestAnimationFrame(()=>{ready=true;});},{once:true});
+  }
+  function checkEntry(){
+    if(!ready||portfolioScrollLocked||hero.getBoundingClientRect().bottom>0)return;
+    const style=getComputedStyle(hero);
+    const removed=hero.getBoundingClientRect().height+parseFloat(style.marginTop)+parseFloat(style.marginBottom);
+    const nextScroll=Math.max(0,window.scrollY-removed);
+    portfolioScrollLocked=true;
+    document.body.classList.add('portfolio-entered');
+    hero.querySelector('video')?.pause();
+    window.scrollTo({top:nextScroll,behavior:'instant'});
+  }
+  window.addEventListener('scroll',checkEntry,{passive:true});
+  window.addEventListener('resize',checkEntry);
+  window.addEventListener('pageshow',checkEntry);
 })();

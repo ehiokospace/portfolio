@@ -479,3 +479,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* The responsive path supplies the full smoothed corner silhouette. */
 .writing-card.has-smooth-corners{border-radius:0}
+
+/* The intro is restored only through the butterfly or a fresh page load. */
+body.portfolio-entered .hero{display:none}
