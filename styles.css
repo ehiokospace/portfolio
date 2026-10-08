@@ -494,3 +494,7 @@ body.portfolio-entered .hero{display:none}
 /* Match Honors row typography to the project title/subtitle hierarchy. */
 .honor-copy h3{font:500 15px/1.4 var(--sans)}
 .honor-copy p{margin-top:3px;font:400 13px/1.4 var(--sans);color:var(--muted)}
+
+/* Match the section heading size to the biography introduction. */
+.honors>h2{font-size:15px}
+@media(max-width:700px){.honors>h2{font-size:22px}}
