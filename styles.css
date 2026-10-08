@@ -532,3 +532,5 @@ body.portfolio-entered .hero{display:none}
 
 /* Match Thrive to the combined height of the two cards beside it. */
 @media(min-width:701px){.projects{position:relative}.projects .mental{position:absolute;top:20px;right:20px;bottom:28px;width:calc((100% - 60px)/2);height:auto}.projects .mental .media{height:100%;flex:1;min-height:0}.projects .mental .media>img{height:100%;object-fit:cover}}
+
+@media(min-width:701px){.projects .mental{grid-column:auto;grid-row:auto}}
