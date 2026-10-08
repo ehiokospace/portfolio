@@ -526,3 +526,6 @@ body.portfolio-entered .hero{display:none}
 .project-column{display:flex;flex-direction:column;gap:20px;min-width:0;grid-column:1;grid-row:1}
 .projects .mental{grid-column:2;grid-row:1}
 @media(max-width:700px){.project-column{display:contents}.projects{gap:20px}.projects .internal{order:0}.projects .mental{order:1}.projects .community{order:2}}
+
+.project-tag-year{font-size:15px}
+@media(max-width:700px){.project-tag-year{font-size:13px}}
