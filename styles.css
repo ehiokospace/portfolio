@@ -476,3 +476,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .portfolio-content .writing{margin-left:20px}
 @media(min-width:701px){.utility{position:sticky;top:0;z-index:5;height:73px;background:var(--paper)}.layout{align-items:start}.layout aside{position:sticky;top:73px;align-self:start;height:calc(100dvh - 73px);padding-bottom:24px;overflow-y:auto;scrollbar-width:thin}.sidebar-footer{margin-top:auto}}
 @media(max-width:700px){.portfolio-content{width:100%}.layout aside{position:static;height:auto;overflow:visible}}
+
+/* The responsive path supplies the full smoothed corner silhouette. */
+.writing-card.has-smooth-corners{border-radius:0}

@@ -679,3 +679,46 @@ document.querySelector('#story-home').addEventListener('click',()=>{closeStory()
 overlay.addEventListener('close',()=>{document.querySelector('#feedback-dialog').close();clearInterval(clockTimer);portrait?.setVisible(false);rows.forEach(row=>row.setAttribute('aria-pressed','false'));opener?.focus({preventScroll:true});});
 rows.forEach(row=>{const index=Number(row.dataset.storyImage);row.addEventListener('pointerenter',()=>select(index));row.addEventListener('pointerleave',()=>select(0));row.addEventListener('focus',()=>select(index));row.addEventListener('blur',()=>select(0));row.addEventListener('click',()=>select(index));});
 })();
+
+// Responsive Writing covers with a 20px radius and 50% corner smoothing.
+// Geometry follows Figma's arc-and-Bezier construction:
+// https://www.figma.com/blog/desperately-seeking-squircles/
+(function smoothWritingCorners(){
+  function coverPath(width,height){
+    const radius=Math.min(20,width/3,height/3),smoothing=.5;
+    const extent=(1+smoothing)*radius;
+    const radians=degrees=>degrees*Math.PI/180;
+    const arc=90*(1-smoothing),length=Math.sin(radians(arc/2))*radius*Math.SQRT2;
+    const tangent=radius*Math.tan(radians((90-arc)/4));
+    const c=tangent*Math.cos(radians(45*smoothing)),d=c*Math.tan(radians(45*smoothing));
+    const b=(extent-length-c-d)/3,a=2*b;
+    return `M ${width-extent} 0
+      c ${a} 0 ${a+b} 0 ${a+b+c} ${d}
+      a ${radius} ${radius} 0 0 1 ${length} ${length}
+      c ${d} ${c} ${d} ${b+c} ${d} ${a+b+c}
+      L ${width} ${height-extent}
+      c 0 ${a} 0 ${a+b} ${-d} ${a+b+c}
+      a ${radius} ${radius} 0 0 1 ${-length} ${length}
+      c ${-c} ${d} ${-(b+c)} ${d} ${-(a+b+c)} ${d}
+      L ${extent} ${height}
+      c ${-a} 0 ${-(a+b)} 0 ${-(a+b+c)} ${-d}
+      a ${radius} ${radius} 0 0 1 ${-length} ${-length}
+      c ${-d} ${-c} ${-d} ${-(b+c)} ${-d} ${-(a+b+c)}
+      L 0 ${extent}
+      c 0 ${-a} 0 ${-(a+b)} ${d} ${-(a+b+c)}
+      a ${radius} ${radius} 0 0 1 ${length} ${-length}
+      c ${c} ${-d} ${b+c} ${-d} ${a+b+c} ${-d} Z`.replace(/\s+/g,' ');
+  }
+  const observer=new ResizeObserver(entries=>{
+    for(const {target} of entries){
+      const {width,height}=target.getBoundingClientRect();
+      if(!width||!height)continue;
+      const clip=`path('${coverPath(width,height)}')`;
+      if(CSS.supports('clip-path',clip)){
+        target.style.clipPath=clip;
+        target.classList.add('has-smooth-corners');
+      }
+    }
+  });
+  document.querySelectorAll('.writing-card').forEach(card=>observer.observe(card));
+})();
