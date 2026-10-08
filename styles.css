@@ -451,3 +451,21 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .honor-date{flex:none;padding-top:2px;font:400 13px/1.5 var(--sans);color:var(--muted);font-variant-numeric:tabular-nums}
 @media(max-width:1100px) and (min-width:701px){.honors{margin-left:222px}}
 @media(max-width:700px){.honors{margin:40px 20px 64px}.honors>h2{margin-bottom:28px}.honor-row{gap:12px;padding:20px 0}.honor-date{max-width:72px;text-align:right}}
+
+/* Writing previews: rounded cover cards in a horizontal, snapping strip. */
+.writing{order:4;min-width:0;margin:0 0 96px 283px;scroll-margin-top:32px}
+.writing>h2{margin:0 20px 40px 0;font:400 18px/1.4 var(--sans)}
+.writing-scroll{overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:#d6d6d0 transparent;padding:0 20px 16px 0}
+.writing-scroll:focus-visible{outline:2px solid #e37280;outline-offset:5px}
+.writing-list{display:flex;gap:20px;list-style:none;margin:0;padding:0}
+.writing-card{position:relative;flex:0 0 31%;min-width:240px;aspect-ratio:4/5;overflow:hidden;border-radius:20px;scroll-snap-align:start;background:#deddd4;color:#fcfcfa}
+.writing-placeholder-art{position:absolute;inset:0;background:radial-gradient(ellipse at 20% 20%,#eeeae1 0,transparent 55%),radial-gradient(ellipse at 85% 40%,#bac5c7 0,transparent 60%),#d4cec3}
+.writing-card-2 .writing-placeholder-art{background:radial-gradient(ellipse at 75% 20%,#e5d5d2 0,transparent 65%),radial-gradient(ellipse at 25% 55%,#b5a5a3 0,transparent 60%),#c8bcbb}
+.writing-card-3 .writing-placeholder-art{background:radial-gradient(ellipse at 25% 25%,#e4e2c9 0,transparent 60%),radial-gradient(ellipse at 80% 50%,#a9b099 0,transparent 60%),#c9cbb8}
+.writing-card-4 .writing-placeholder-art{background:radial-gradient(ellipse at 75% 25%,#d6e5eb 0,transparent 65%),radial-gradient(ellipse at 20% 55%,#91acba 0,transparent 60%),#b2c3cf}
+.writing-card::after{content:"";position:absolute;inset:0;background:linear-gradient(transparent 35%,#1c1c1c18 50%,#1c1c1ce8 100%);pointer-events:none}
+.writing-card-copy{position:absolute;z-index:1;bottom:24px;left:24px;right:24px}
+.writing-card-copy h3{margin:0;font:400 20px/1.3 var(--sans)}
+.writing-card-copy p{margin:6px 0 0;font:400 15px/1.4 var(--sans);color:#fcfcfab3}
+@media(max-width:1100px) and (min-width:701px){.writing{margin-left:222px}}
+@media(max-width:700px){.writing{margin:0 0 64px 20px}.writing>h2{margin-bottom:28px}.writing-list{gap:16px}.writing-card{flex-basis:82%;min-width:0}.writing-card-copy{left:20px;right:20px;bottom:20px}}
