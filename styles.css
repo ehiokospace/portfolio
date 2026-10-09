@@ -548,3 +548,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .utility{padding:8px 20px}
 .hero{margin-bottom:8px}
 @media(min-width:701px){.utility{height:49px}.hero{height:calc(100dvh - 78px)}.layout aside{top:49px;height:calc(100dvh - 49px)}}
+
+/* Balance the utility controls against the 20px content inset below. */
+@media(min-width:701px){.utility{height:69px;padding:28px 20px 8px}.hero{margin-bottom:0;height:calc(100dvh - 90px)}.layout aside{top:69px;height:calc(100dvh - 69px)}}
