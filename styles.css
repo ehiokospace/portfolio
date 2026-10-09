@@ -551,3 +551,6 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* Balance the utility controls against the 20px content inset below. */
 @media(min-width:701px){.utility{height:69px;padding:28px 20px 8px}.hero{margin-bottom:0;height:calc(100dvh - 110px)}.layout aside{top:69px;height:calc(100dvh - 69px)}}
+
+/* Match the reference: a complete 64px utility band inside the first screen. */
+@media(min-width:701px){.utility{height:64px;padding:15.5px 20px}.hero{height:calc(100dvh - 85px)}.layout aside{top:64px;height:calc(100dvh - 64px);padding-top:0}.projects{padding-top:0}.projects .mental{top:0}}
