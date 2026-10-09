@@ -543,3 +543,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 /* Reserve the first-screen footer for the butterfly and location row. */
 @media(min-width:701px){.hero{height:calc(100dvh - 114px)}}
 @media(max-width:700px){.hero{height:calc(100dvh - 97px)}}
+
+/* A compact utility row, with the sticky sidebar aligned beneath it. */
+.utility{padding:8px 20px}
+.hero{margin-bottom:8px}
+@media(min-width:701px){.utility{height:49px}.hero{height:calc(100dvh - 78px)}.layout aside{top:49px;height:calc(100dvh - 49px)}}
