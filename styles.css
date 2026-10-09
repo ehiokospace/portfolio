@@ -554,3 +554,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* Match the reference: a complete 64px utility band inside the first screen. */
 @media(min-width:701px){.utility{height:64px;padding:15.5px 20px}.hero{height:calc(100dvh - 85px)}.layout aside{top:64px;height:calc(100dvh - 64px);padding-top:0}.projects{padding-top:0}.projects .mental{top:0}}
+
+/* Match caption text sizes and distinguish the year with Departure Mono. */
+.project-tag-title,.project-tag-year{font-size:13px}.project-tag-year{font-family:var(--mono)}
+@media(max-width:700px){.project-tag-title,.project-tag-year{font-size:12px}}
