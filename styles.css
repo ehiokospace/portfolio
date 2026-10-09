@@ -481,7 +481,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .writing-card.has-smooth-corners{border-radius:0}
 
 /* The intro is restored only through the butterfly or a fresh page load. */
-body.portfolio-entered .hero{display:none}
+
 
 /* Reference award format: title, light source line, and up-right arrow. */
 .honor-row{gap:16px;padding:18px 0;border-bottom:1px solid #403f3f14}

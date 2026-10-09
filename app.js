@@ -723,37 +723,9 @@ rows.forEach(row=>{const index=Number(row.dataset.storyImage);row.addEventListen
   document.querySelectorAll('.writing-card').forEach(card=>observer.observe(card));
 })();
 
-// Once the intro leaves view, the portfolio becomes the page's scroll boundary.
-let portfolioScrollLocked=false;
+// The butterfly returns to the intro; ordinary scrolling stays unrestricted.
 function returnToVideo(){
-  portfolioScrollLocked=false;
-  document.body.classList.remove('portfolio-entered');
   history.replaceState(history.state,'',location.pathname+location.search);
-  window.scrollTo({top:0,behavior:'instant'});
+  window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   document.querySelector('.hero video')?.play().catch(()=>{});
 }
-(function enterPortfolio(){
-  const hero=document.querySelector('.hero');
-  if(!hero)return;
-  const reloading=performance.getEntriesByType('navigation')[0]?.type==='reload';
-  let ready=!reloading;
-  history.scrollRestoration='manual';
-  if(reloading){
-    history.replaceState(history.state,'',location.pathname+location.search);
-    window.scrollTo({top:0,behavior:'instant'});
-    window.addEventListener('pageshow',()=>{returnToVideo();requestAnimationFrame(()=>{ready=true;});},{once:true});
-  }
-  function checkEntry(){
-    if(!ready||portfolioScrollLocked||hero.getBoundingClientRect().bottom>0)return;
-    const style=getComputedStyle(hero);
-    const removed=hero.getBoundingClientRect().height+parseFloat(style.marginTop)+parseFloat(style.marginBottom);
-    const nextScroll=Math.max(0,window.scrollY-removed);
-    portfolioScrollLocked=true;
-    document.body.classList.add('portfolio-entered');
-    hero.querySelector('video')?.pause();
-    window.scrollTo({top:nextScroll,behavior:'instant'});
-  }
-  window.addEventListener('scroll',checkEntry,{passive:true});
-  window.addEventListener('resize',checkEntry);
-  window.addEventListener('pageshow',checkEntry);
-})();
