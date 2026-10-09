@@ -729,3 +729,68 @@ function returnToVideo(){
   window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   document.querySelector('.hero video')?.play().catch(()=>{});
 }
+
+// Project category cursor: independent damped springs give each label a soft trail.
+(function projectCategoryCursor(){
+  const fine=matchMedia('(hover: hover) and (pointer: fine)');
+  const reduced=matchMedia('(prefers-reduced-motion: reduce)');
+  const categories={
+    'internal-tooling':['Product design','Summer internship'],
+    thrive:['Winning pitch','Startup'],
+    colorstack:['Community','Graphic design']
+  };
+  const cursor=document.createElement('div');
+  cursor.id='project-category-cursor';cursor.setAttribute('aria-hidden','true');
+  document.body.append(cursor);
+  let active=null,labels=[],pointer={x:0,y:0},frame=0,previous=0;
+  const blocked=()=>!fine.matches||document.body.classList.contains('feedback-selecting')||document.querySelector('dialog[open]');
+  function start(){if(!frame){previous=performance.now();frame=requestAnimationFrame(tick);}}
+  function hide(){if(!active)return;active=null;document.body.classList.remove('category-cursor-active');start();}
+  function show(card){
+    if(card===active)return;
+    active=card;document.body.classList.add('category-cursor-active');
+    cursor.replaceChildren();
+    labels=categories[card.dataset.case].map((text,i)=>{
+      const el=document.createElement('span');el.className='cursor-category';el.textContent=text;cursor.append(el);
+      return {el,x:pointer.x,y:pointer.y,vx:0,vy:0,scale:0,vs:0,index:i};
+    });start();
+  }
+  function update(){
+    if(blocked()){hide();return;}
+    const card=document.elementFromPoint(pointer.x,pointer.y)?.closest('.projects .media');
+    if(card&&categories[card.dataset.case])show(card);else hide();
+  }
+  function tick(now){
+    frame=0;const dt=Math.min((now-previous)/1000,.032);previous=now;
+    let moving=false;
+    const width=Math.max(0,...labels.map(l=>l.el.offsetWidth));
+    const x=pointer.x+16+width>innerWidth-12?pointer.x-width-16:pointer.x+16;
+    const y=Math.max(12,Math.min(pointer.y+16,innerHeight-labels.length*36-12));
+    for(const l of labels){
+      const tx=Math.max(12,x),ty=y+l.index*36,goal=active?1:0;
+      if(reduced.matches){l.x=tx;l.y=ty;l.scale=goal;l.vx=l.vy=l.vs=0;}
+      else{
+        const stiffness=240/(1+l.index*.22),damping=22;
+        l.vx+=((tx-l.x)*stiffness-l.vx*damping)*dt;
+        l.vy+=((ty-l.y)*stiffness-l.vy*damping)*dt;
+        l.x+=l.vx*dt;l.y+=l.vy*dt;
+        l.vs+=((goal-l.scale)*300-l.vs*20)*dt;l.scale+=l.vs*dt;
+      }
+      l.el.style.transform=`translate3d(${l.x}px,${l.y}px,0) scale(${Math.max(0,l.scale)})`;
+      l.el.style.opacity=Math.min(1,Math.max(0,l.scale));
+      moving ||= Math.abs(tx-l.x)+Math.abs(ty-l.y)+Math.abs(goal-l.scale)+Math.abs(l.vx)+Math.abs(l.vy)+Math.abs(l.vs)>.05;
+    }
+    if(moving)start();
+  }
+  window.addEventListener('pointermove',event=>{
+    if(event.pointerType==='touch'){hide();return;}
+    pointer={x:event.clientX,y:event.clientY};update();if(active)start();
+  },{passive:true});
+  window.addEventListener('scroll',update,{passive:true});
+  window.addEventListener('resize',hide);
+  window.addEventListener('blur',hide);
+  document.documentElement.addEventListener('pointerleave',hide);
+  document.addEventListener('pointerdown',hide,{capture:true});
+  new MutationObserver(()=>{if(blocked())hide();}).observe(document.body,{attributes:true,attributeFilter:['class']});
+  fine.addEventListener('change',hide);reduced.addEventListener('change',hide);
+})();
