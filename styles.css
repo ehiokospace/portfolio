@@ -539,3 +539,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .cursor-category{position:absolute;top:0;left:0;display:block;width:max-content;padding:9px 13px;border-radius:6px;background:#334aff;color:#fcfcfa;font:400 12px/1.2 var(--mono);text-transform:uppercase;white-space:nowrap;transform-origin:top left;opacity:0;will-change:transform,opacity}
 @media(hover:hover) and (pointer:fine){body.category-cursor-active .projects .media:hover{cursor:none}}
 @media(hover:none),(pointer:coarse){#project-category-cursor{display:none}}
+
+/* Reserve the first-screen footer for the butterfly and location row. */
+@media(min-width:701px){.hero{height:calc(100dvh - 114px)}}
+@media(max-width:700px){.hero{height:calc(100dvh - 97px)}}
