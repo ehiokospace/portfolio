@@ -562,3 +562,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 /* Align the sidebar footer with the project cards at the end of the page. */
 @media(min-width:701px){.layout aside{padding-bottom:44px}}
+
+/* Let hovered card corners paint above the sticky utility row. */
+.project-column .project{position:relative}
+.projects .project:hover,.projects .project:focus-within{z-index:6}
