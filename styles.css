@@ -617,3 +617,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 #story-overlay .story-sidebar{gap:28px}
 @media(max-width:1000px){.story-experience{grid-template-columns:36px minmax(0,1fr);gap:5px 12px}.story-date{display:none}}
 @media(max-width:760px){.story-sidebar-credit{margin:0}.story-sidebar-links{margin-top:0}.story-experience .story-logos-pair{flex-direction:row}}
+/* Dates align on the right of the simpler experience rows. */
+.story-experience{grid-template-columns:40px minmax(0,1fr) auto}
+.story-date{display:block;grid-column:3;grid-row:1 / span 2;align-self:center;text-align:right;white-space:nowrap;color:#999996;font:400 12px/1.5 var(--sans)}
+@media(max-width:1000px){.story-experience{grid-template-columns:36px minmax(0,1fr) auto}.story-date{display:block;grid-column:3;grid-row:1 / span 2;text-align:right;font-size:11px}}
+@media(max-width:400px){.story-experience{column-gap:8px}.story-date{font-size:10px}}
