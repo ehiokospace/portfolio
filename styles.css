@@ -577,3 +577,22 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .story-design-more[open] .story-design-reveal{animation:story-paragraph-reveal .22s ease-out}
 @keyframes story-paragraph-reveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){.story-design-more[open] .story-design-reveal{animation:none}.story-readmore-dot{transition:none}}
+
+/* Three-column About: sidebar, design and experience, portrait. */
+.story-shell{max-width:none;padding:20px;min-height:100dvh}
+.story-toolbar{margin-bottom:28px}
+.story-grid{grid-template-columns:minmax(150px,1fr) minmax(0,2.2fr) minmax(0,2.6fr);gap:40px;align-items:start}
+.story-sidebar{position:sticky;top:20px;min-height:calc(100dvh - 112px);display:flex;flex-direction:column;justify-content:space-between;gap:60px;padding-bottom:24px}
+.story-sidebar-bio p,.story-history p{font:400 13px/1.9 var(--sans);margin:0 0 12px}
+.story-sidebar-bio a{text-decoration:underline;text-underline-offset:3px}
+.story-sidebar-links{display:flex;flex-direction:column;gap:30px}
+.story-sidebar h2,.story-bio h2,.story-history h2{font:400 12px/1.6 var(--mono);margin:0 0 14px}
+.story-sidebar-links a,.story-sidebar-links button{display:flex;align-items:center;justify-content:space-between;width:100%;padding:5px 0;color:inherit;text-align:left;font:400 13px/1.6 var(--sans)}
+.story-copy{padding-right:0;gap:32px}
+#story-overlay .story-bio p{font:400 13px/1.9 var(--sans)}
+.story-bio{gap:0}
+.story-design-more{margin-top:16px;margin-bottom:0}
+.story-history{margin-top:12px}
+.story-particle-frame{align-self:start;aspect-ratio:610/630;position:sticky;top:20px}
+@media(max-width:1000px) and (min-width:761px){.story-grid{gap:24px;grid-template-columns:minmax(140px,1fr) minmax(0,2fr) minmax(0,2fr)}.story-experience{grid-template-columns:1fr .7fr;gap:6px}.story-date{grid-column:1/-1;text-align:left}.story-particle-frame{aspect-ratio:4/5}}
+@media(max-width:760px){.story-grid{grid-template-columns:1fr;gap:32px}.story-sidebar{position:static;min-height:0;padding:0;gap:24px}.story-sidebar-links{flex-direction:row;gap:28px}.story-sidebar-links nav{flex:1}.story-particle-frame{position:relative;top:auto;grid-row:auto;aspect-ratio:610/630}.story-copy{gap:28px}.story-toolbar{margin-bottom:24px}.story-location{margin-right:12px}}
