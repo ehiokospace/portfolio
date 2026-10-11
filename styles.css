@@ -639,3 +639,4 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .story-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 @media(max-width:1000px) and (min-width:761px){.story-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 @media(max-width:760px){.story-grid{grid-template-columns:1fr}}
+@media(min-width:761px){.story-grid{grid-template-columns:minmax(0,2fr) minmax(0,3fr)}}
