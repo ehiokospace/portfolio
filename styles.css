@@ -558,3 +558,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 /* Match caption text sizes and distinguish the year with Departure Mono. */
 .project-tag-title,.project-tag-year{font-size:13px}.project-tag-year{font-family:var(--mono)}
 @media(max-width:700px){.project-tag-title,.project-tag-year{font-size:12px}}
+
+/* Let the utility row scroll away rather than mask project corners. */
+.utility{position:relative;top:auto}
+@media(min-width:701px){.layout aside{top:20px;height:calc(100dvh - 20px)}}
