@@ -811,3 +811,6 @@ function returnToVideo(){
   new MutationObserver(()=>{if(blocked())hide();}).observe(document.body,{attributes:true,attributeFilter:['class']});
   fine.addEventListener('change',hide);reduced.addEventListener('change',hide);
 })();
+
+// Expand the paragraph above its Read less control.
+document.querySelector('.story-design-toggle').addEventListener('click',function(){const expanded=this.getAttribute('aria-expanded')!=='true';this.setAttribute('aria-expanded',String(expanded));this.querySelector('span').textContent=expanded?'Read less':'Read more';this.closest('.story-design-more').classList.toggle('is-expanded',expanded);document.querySelector('#story-design-paragraph').hidden=!expanded;});
