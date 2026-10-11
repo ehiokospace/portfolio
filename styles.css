@@ -566,3 +566,14 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 /* Let project corners paint above the sticky utility row in every state. */
 .project-column .project{position:relative}
 .projects .project{z-index:6}
+
+/* About design paragraph disclosure. */
+.story-design-more{border-block:1px solid #ffffff35;margin-block:8px;color:inherit}
+.story-design-more summary{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:16px 0;list-style:none;cursor:pointer;font:400 13px/22px var(--sans)}
+.story-design-more summary::-webkit-details-marker{display:none}
+.story-readmore-dot{width:8px;height:8px;flex:none;border-radius:50%;background:currentColor;transition:transform .2s ease}
+.story-design-more[open] .story-readmore-dot{transform:scale(.65)}
+.story-design-reveal{padding:0 0 16px}
+.story-design-more[open] .story-design-reveal{animation:story-paragraph-reveal .22s ease-out}
+@keyframes story-paragraph-reveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){.story-design-more[open] .story-design-reveal{animation:none}.story-readmore-dot{transition:none}}
