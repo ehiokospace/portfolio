@@ -1,3 +1,17 @@
+// A brief entrance, independent of slow video or network requests.
+(function portfolioEntrance(){
+ const loader=document.getElementById('intro-loader');
+ if(!loader||!document.documentElement.classList.contains('is-loading'))return;
+ const main=document.querySelector('main');if(main)main.inert=true;
+ const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const duration=reduced?450:1100;
+ setTimeout(()=>{
+  loader.classList.add('is-leaving');
+  if(main)main.inert=false;
+  setTimeout(()=>{loader.remove();document.documentElement.classList.remove('is-loading');clearTimeout(window.portfolioBootFallback);},reduced?0:240);
+ },Math.max(0,duration-(performance.now()-(window.portfolioBootStarted||0))));
+})();
+
 document.querySelector('[aria-label="Back to top"]').addEventListener('click',event=>{event.preventDefault();returnToVideo();});
 // Trial fonts are available only in the local preview.
 if (['localhost', '127.0.0.1'].includes(location.hostname)) {
