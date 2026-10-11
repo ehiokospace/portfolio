@@ -598,3 +598,22 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 @media(max-width:760px){.story-grid{grid-template-columns:1fr;gap:32px}.story-sidebar{position:static;min-height:0;padding:0;gap:24px}.story-sidebar-links{flex-direction:row;gap:28px}.story-sidebar-links nav{flex:1}.story-particle-frame{position:relative;top:auto;grid-row:auto;aspect-ratio:610/630}.story-copy{gap:28px}.story-toolbar{margin-bottom:24px}.story-location{margin-right:12px}}
 #story-overlay .story-sidebar{height:auto;padding:0 0 24px;color:#fcfcfa}
 @media(max-width:760px){#story-overlay .story-sidebar{padding:0}}
+
+/* Calm experience list with logo, name and role. */
+.story-experience{display:grid;grid-template-columns:40px minmax(0,1fr);column-gap:14px;row-gap:5px;padding:14px 0;border:0;min-height:68px;text-align:left}
+.story-company{display:contents;font-weight:400}
+.story-experience .story-logos{grid-column:1;grid-row:1 / span 2;width:36px;height:36px;align-self:center;justify-self:start}
+.story-experience .story-brand{width:36px;height:36px;border-radius:8px}
+.story-experience .story-logos-pair{position:relative}
+.story-experience .story-logos-pair .story-brand{width:25px;height:25px}
+.story-role{grid-column:2;grid-row:2;color:#999996;font:400 13px/1.5 var(--sans)}
+.story-date{display:none}
+.story-experience{font:400 15px/1.5 var(--sans)}
+.story-experiences h2{margin-bottom:10px}
+.story-experience:hover,.story-experience[aria-pressed="true"]{background:transparent}
+.story-sidebar{justify-content:flex-start}
+.story-sidebar-links{margin-top:auto}
+.story-sidebar-credit{font:400 12px/1.6 var(--mono);color:#b5b5b2;margin:24px 0 0}
+#story-overlay .story-sidebar{gap:28px}
+@media(max-width:1000px){.story-experience{grid-template-columns:36px minmax(0,1fr);gap:5px 12px}.story-date{display:none}}
+@media(max-width:760px){.story-sidebar-credit{margin:0}.story-sidebar-links{margin-top:0}.story-experience .story-logos-pair{flex-direction:row}}
