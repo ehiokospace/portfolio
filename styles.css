@@ -622,3 +622,10 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .story-date{display:block;grid-column:3;grid-row:1 / span 2;align-self:center;text-align:right;white-space:nowrap;color:#999996;font:400 12px/1.5 var(--sans)}
 @media(max-width:1000px){.story-experience{grid-template-columns:36px minmax(0,1fr) auto}.story-date{display:block;grid-column:3;grid-row:1 / span 2;text-align:right;font-size:11px}}
 @media(max-width:400px){.story-experience{column-gap:8px}.story-date{font-size:10px}}
+/* Tighter page endings, with footer and project bottoms aligned. */
+.projects{padding-bottom:20px}
+@media(min-width:701px){.layout aside{padding-bottom:20px}.projects .mental{bottom:20px}}
+.story-shell{padding-bottom:12px}
+#story-overlay .story-sidebar{padding-bottom:12px}
+.story-history:last-child p{margin-bottom:0}
+@media(max-width:760px){#story-overlay .story-sidebar{padding-bottom:0}}
