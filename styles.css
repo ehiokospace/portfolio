@@ -651,3 +651,5 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 }
 .story-copy{scrollbar-width:none}
 .story-copy::-webkit-scrollbar{display:none}
+/* Allow portrait frame handles to extend beyond the grid edge. */
+@media(min-width:761px){.story-grid{overflow:visible}}
