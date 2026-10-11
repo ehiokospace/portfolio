@@ -662,3 +662,5 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 
 .story-design-toggle{width:100%;text-align:left;color:inherit}
 .story-design-reveal[hidden]{display:none}
+/* Breathing room after the About text. */
+.story-copy{padding-bottom:20px}
