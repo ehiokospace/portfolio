@@ -629,3 +629,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 #story-overlay .story-sidebar{padding-bottom:12px}
 .story-history:last-child p{margin-bottom:0}
 @media(max-width:760px){#story-overlay .story-sidebar{padding-bottom:0}}
+/* Consistent page endings and a viewport-height About portrait. */
+.projects{padding-bottom:12px}
+@media(min-width:701px){.layout aside{padding-bottom:12px}.projects .mental{bottom:12px}}
+.story-shell{padding-bottom:12px}
+@media(min-width:761px){.story-particle-frame{aspect-ratio:auto;height:calc(100dvh - 93px);top:81px}.story-sidebar{min-height:calc(100dvh - 93px)}}
