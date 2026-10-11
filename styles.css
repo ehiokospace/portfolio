@@ -634,3 +634,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 @media(min-width:701px){.layout aside{padding-bottom:12px}.projects .mental{bottom:12px}}
 .story-shell{padding-bottom:12px}
 @media(min-width:761px){.story-particle-frame{aspect-ratio:auto;height:calc(100dvh - 93px);top:81px}.story-sidebar{min-height:calc(100dvh - 93px)}}
+/* About preview without its sidebar. */
+#story-overlay .story-sidebar{display:none}
+.story-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+@media(max-width:1000px) and (min-width:761px){.story-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+@media(max-width:760px){.story-grid{grid-template-columns:1fr}}
