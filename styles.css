@@ -596,3 +596,5 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .story-particle-frame{align-self:start;aspect-ratio:610/630;position:sticky;top:20px}
 @media(max-width:1000px) and (min-width:761px){.story-grid{gap:24px;grid-template-columns:minmax(140px,1fr) minmax(0,2fr) minmax(0,2fr)}.story-experience{grid-template-columns:1fr .7fr;gap:6px}.story-date{grid-column:1/-1;text-align:left}.story-particle-frame{aspect-ratio:4/5}}
 @media(max-width:760px){.story-grid{grid-template-columns:1fr;gap:32px}.story-sidebar{position:static;min-height:0;padding:0;gap:24px}.story-sidebar-links{flex-direction:row;gap:28px}.story-sidebar-links nav{flex:1}.story-particle-frame{position:relative;top:auto;grid-row:auto;aspect-ratio:610/630}.story-copy{gap:28px}.story-toolbar{margin-bottom:24px}.story-location{margin-right:12px}}
+#story-overlay .story-sidebar{height:auto;padding:0 0 24px;color:#fcfcfa}
+@media(max-width:760px){#story-overlay .story-sidebar{padding:0}}
