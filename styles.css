@@ -675,3 +675,5 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 @media(hover:hover){.story-experience:hover{padding-left:8px}}
 .feedback-selecting .story-experience:hover{padding-left:0}
 @media(prefers-reduced-motion:reduce){.story-experience{transition:none}}
+/* Match the About page's outer top and bottom insets. */
+.story-shell{padding-bottom:20px}
