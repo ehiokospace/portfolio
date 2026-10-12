@@ -814,3 +814,18 @@ function returnToVideo(){
 
 // Expand the paragraph above its Read less control.
 document.querySelector('.story-design-toggle').addEventListener('click',function(){const expanded=this.getAttribute('aria-expanded')!=='true';this.setAttribute('aria-expanded',String(expanded));this.querySelector('span').textContent=expanded?'Read less':'Read more';this.closest('.story-design-more').classList.toggle('is-expanded',expanded);document.querySelector('#story-design-paragraph').hidden=!expanded;});
+
+// About experience destinations and a pink hover callout.
+(function storyExperienceLinks(){
+ const overlay=document.querySelector('#story-overlay'),badge=document.createElement('span');badge.className='story-link-callout';badge.setAttribute('aria-hidden','true');overlay.append(badge);
+ let row=null,x=0,y=0,tx=0,ty=0,vx=0,vy=0,frame=0,previous=0;
+ const reduced=matchMedia('(prefers-reduced-motion:reduce)');
+ function tick(now){frame=0;const dt=Math.min((now-previous)/1000,.032);previous=now;if(reduced.matches){x=tx;y=ty;}else{vx+=((tx-x)*240-vx*22)*dt;vy+=((ty-y)*240-vy*22)*dt;x+=vx*dt;y+=vy*dt;}badge.style.transform='translate3d('+x+'px,'+y+'px,0)';if(row&&(Math.abs(tx-x)+Math.abs(ty-y)+Math.abs(vx)+Math.abs(vy)>.1))frame=requestAnimationFrame(tick);}
+ function move(px,py){tx=Math.max(12,Math.min(px+16,innerWidth-badge.offsetWidth-12));ty=Math.max(12,Math.min(py+16,innerHeight-badge.offsetHeight-12));if(!frame){previous=performance.now();frame=requestAnimationFrame(tick);}}
+ function hide(){row=null;badge.classList.remove('is-visible');}
+ overlay.querySelectorAll('.story-experience').forEach(el=>{
+  el.addEventListener('pointerenter',event=>{if(event.pointerType==='touch'||document.body.classList.contains('feedback-selecting'))return;row=el;badge.textContent=el.querySelector('.story-company').textContent.trim()+' '+(el.dataset.storyCase?'→':'↗');badge.classList.add('is-visible');x=event.clientX+16;y=event.clientY+16;move(event.clientX,event.clientY);});
+  el.addEventListener('pointermove',event=>{if(row===el)move(event.clientX,event.clientY);});el.addEventListener('pointerleave',hide);
+  if(el.dataset.storyCase)el.addEventListener('click',()=>{hide();overlay.close();document.querySelector('.projects .media[data-case="'+el.dataset.storyCase+'"]').click();});
+ });overlay.addEventListener('close',hide);document.querySelector('#story-feedback').addEventListener('click',hide);overlay.querySelector('.story-copy').addEventListener('scroll',hide,{passive:true});
+})();

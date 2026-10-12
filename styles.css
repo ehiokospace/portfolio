@@ -666,3 +666,8 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .story-copy{padding-bottom:20px}
 .story-date{font-family:var(--mono);font-size:12px}
 #story-overlay #note-highlight.is-selected{border-style:dashed}
+
+.story-link-callout{position:fixed;top:0;left:0;z-index:220;pointer-events:none;padding:10px 14px;border-radius:6px;background:#FD919C;color:#fcfcfa;font:400 12px/1.3 var(--mono);text-transform:uppercase;white-space:nowrap;opacity:0;transition:opacity .15s;will-change:transform}
+.story-link-callout.is-visible{opacity:1}
+.feedback-selecting .story-link-callout{display:none}
+@media(hover:none){.story-link-callout{display:none}}
