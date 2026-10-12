@@ -677,3 +677,5 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 @media(prefers-reduced-motion:reduce){.story-experience{transition:none}}
 /* Match the About page's outer top and bottom insets. */
 .story-shell{padding-bottom:20px}
+/* Broken outlines for every note target, before and after selection. */
+#note-highlight,#note-highlight.is-selected{border-style:dashed}
