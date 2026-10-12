@@ -671,3 +671,7 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .story-link-callout.is-visible{opacity:1}
 .feedback-selecting .story-link-callout{display:none}
 @media(hover:none){.story-link-callout{display:none}}
+.story-experience{transition:padding-left .22s ease,color .18s ease}
+@media(hover:hover){.story-experience:hover{padding-left:8px}}
+.feedback-selecting .story-experience:hover{padding-left:0}
+@media(prefers-reduced-motion:reduce){.story-experience{transition:none}}
