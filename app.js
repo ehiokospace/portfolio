@@ -100,30 +100,41 @@ copyEmailButton.addEventListener('click', async () => {
   }
 });
 
-const descriptionButton = document.querySelector('#scramble-description');
-const descriptions = ['DESIGNED AND CODED WITH ♥︎','ALWAYS BUILDING','DESIGNING FOR HUMANS','TRAVELING THE WORLD','TYPOGRAPHY ENTHUSIAST','SPARKING DELIGHT'];
-let descriptionIndex = 0;
-let scrambleFrame;
-function scrambleDescription() {
-  cancelAnimationFrame(scrambleFrame);
-  descriptionIndex = (descriptionIndex + 1) % descriptions.length;
-  const target = descriptions[descriptionIndex];
-  descriptionButton.setAttribute('aria-label', target + '. Show another description');
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { descriptionButton.textContent = target; return; }
-  const start = performance.now();
-  const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789:%$#*&@^?!';
-  function animate(now) {
-    const progress = Math.min((now - start) / 650, 1);
-    const resolved = Math.floor(progress * target.length);
-    descriptionButton.textContent = Array.from(target, (character, index) => character === ' ' || index < resolved ? character : characters[Math.floor(Math.random() * characters.length)]).join('');
-    if (progress < 1) scrambleFrame = requestAnimationFrame(animate);
-    else descriptionButton.textContent = target;
-  }
-  scrambleFrame = requestAnimationFrame(animate);
+const descriptionButton=document.querySelector('#scramble-description');
+const descriptions=['DESIGNED AND CODED WITH ♥︎'];
+let descriptionIndex=0,scrambleFrame,visitStats=null,visitError=false;
+const visitsEndpoint='https://portfolio-visits.ehigoko1.workers.dev/';
+function previousVisitText(){
+ if(!visitStats.lastVisit)return 'You’re the first visit';
+ const elapsed=Math.max(0,Date.now()-visitStats.lastVisit),minutes=Math.floor(elapsed/60000);
+ if(minutes<1)return 'Last visit just now';
+ if(minutes<60)return 'Last visit '+minutes+' minute'+(minutes===1?'':'s')+' ago';
+ const hours=Math.floor(minutes/60);if(hours<24)return 'Last visit '+hours+' hour'+(hours===1?'':'s')+' ago';
+ const days=Math.floor(hours/24);return 'Last visit '+days+' day'+(days===1?'':'s')+' ago';
 }
-descriptionButton.addEventListener('pointerenter', scrambleDescription);
-descriptionButton.addEventListener('focus', scrambleDescription);
-descriptionButton.addEventListener('click', scrambleDescription);
+function footerText(){return descriptionIndex===0?descriptions[0]:!visitStats?(visitError?'Visit stats unavailable':'Loading visit stats…'):descriptionIndex===1?visitStats.visits.toLocaleString('en-US')+' visit'+(visitStats.visits===1?'':'s')+' and counting':previousVisitText();}
+function paintFooter(animate=false){
+ cancelAnimationFrame(scrambleFrame);const target=footerText();descriptionButton.setAttribute('aria-label',target+'. Click to cycle site stats');
+ if(!animate||matchMedia('(prefers-reduced-motion: reduce)').matches){descriptionButton.textContent=target;return;}
+ const start=performance.now(),characters='ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+ function tick(now){const progress=Math.min((now-start)/450,1),resolved=Math.floor(progress*target.length);descriptionButton.textContent=Array.from(target,(c,i)=>c===' '||i<resolved?c:characters[Math.floor(Math.random()*characters.length)]).join('');if(progress<1)scrambleFrame=requestAnimationFrame(tick);else descriptionButton.textContent=target;}
+ scrambleFrame=requestAnimationFrame(tick);
+}
+descriptionButton.title='Click to cycle credit, visit count and last visit';
+descriptionButton.addEventListener('click',()=>{descriptionIndex=(descriptionIndex+1)%3;paintFooter(true);});
+paintFooter();
+(async()=>{
+ const key='portfolio-visit-v1';let saved=null;try{saved=JSON.parse(localStorage.getItem(key));}catch{}
+ const recent=saved&&Date.now()-saved.recordedAt<30*60*1000;
+ try{
+  const response=await fetch(visitsEndpoint,{method:recent?'GET':'POST',mode:'cors',credentials:'omit',cache:'no-store',signal:AbortSignal.timeout(8000)});
+  if(!response.ok)throw Error('Unavailable');const data=await response.json();if(!Number.isInteger(data.visits)||data.visits<0)throw Error('Invalid count');
+  visitStats={visits:data.visits,lastVisit:recent?saved.lastVisit:data.lastVisit};
+  if(!recent)try{localStorage.setItem(key,JSON.stringify({recordedAt:Date.now(),lastVisit:data.lastVisit}));}catch{}
+ }catch{visitError=true;}
+ if(descriptionIndex)paintFooter();
+})();
+setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
 
 // Keep native selection and copying, and paint a rounded ink layer behind it.
 (() => {

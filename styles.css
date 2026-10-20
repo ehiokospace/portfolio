@@ -679,3 +679,5 @@ body:has(#feedback-dialog[open]) #feedback-prompt .feedback-selection-help{margi
 .story-shell{padding-bottom:20px}
 /* Broken outlines for every note target, before and after selection. */
 #note-highlight,#note-highlight.is-selected{border-style:dashed}
+
+#scramble-description{white-space:nowrap;min-height:0}
