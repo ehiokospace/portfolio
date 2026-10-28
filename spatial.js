@@ -6,34 +6,119 @@
  let yaw=-.35,pitch=-.12,vx=0,vy=0,width=0,height=0,raf=0,last=0,zoom=0,targetZoom=0;
  let selected=null,hovered=null,dragging=false,moved=false,previous=null,focusMove=null,pinchDistance=0;
  const pointers=new Map();
- // Each entry is one media piece. Detail crops are labeled as details; empty slots
- // remain explicit placeholders until the corresponding deliverables are supplied.
+ // A continuous depth ruler, synchronized with pinch and keyboard zoom.
+ const ruler=document.createElement('div');ruler.className='spatial-depth-ruler';
+ ruler.innerHTML='<span class="depth-label depth-max">IMMERSION</span><span class="depth-label depth-mid">EXPLORATION</span><span class="depth-label depth-min">CONSTELLATION</span><div class="depth-ticks" aria-hidden="true">'+Array.from({length:31},()=>'<i></i>').join('')+'</div><input class="spatial-depth-range" type="range" min="0" max="100" step="1" value="0" aria-label="Spatial zoom" aria-orientation="vertical" aria-valuetext="0 percent, Constellation">';
+ view.append(ruler);
+ const depthRange=ruler.querySelector('input'),depthTicks=[...ruler.querySelectorAll('i')],depthLabels=[...ruler.querySelectorAll('.depth-label')];
+ depthRange.addEventListener('input',()=>{targetZoom=Number(depthRange.value)/100*1.2;focusMove=null;selected=null;vx=vy=0;delete scene.dataset.focusedProject;start();});
+ function updateDepthRuler(){
+  const fraction=Math.max(0,Math.min(1,zoom/1.2));
+  depthTicks.forEach((tick,index)=>{const distance=(1-index/30-fraction)/.085;const strength=Math.exp(-distance*distance/2);tick.style.width=(9+24*strength)+'px';tick.style.opacity=String(.18+.58*strength);});
+  depthLabels.forEach((label,index)=>{const position=1-index*.5;label.style.opacity=String(.65*Math.exp(-Math.pow((fraction-position)/.22,2)));});
+  if(document.activeElement!==depthRange)depthRange.value=String(Math.round(fraction*100));
+  const state=fraction<.25?'Constellation':fraction<.75?'Exploration':'Immersion';
+  depthRange.setAttribute('aria-valuetext',Math.round(fraction*100)+' percent, '+state);
+ }
+ // Supplied deliverables, grouped by project for relationship highlights and galleries.
  const media=[
-  {group:'thrive',title:'App mockup',src:'mental-health.png'},
-  {group:'sullivan',title:'Dashboard',src:'internal-tooling.png'},
-  {group:'notion',title:'Campus materials',src:'story-notion.jpg'},
-  {group:'colorstack',title:'Community artwork',src:'community.png'},
-  {group:'thrive',title:'Winning pitch',src:'story-business-pitch.jpg'},
-  {group:'sullivan',title:'Dashboard detail',src:'internal-tooling.png',detail:true,position:'65% 35%'},
-  {group:'notion',title:'Campus detail',src:'story-notion.jpg',detail:true,position:'45% 65%'},
-  {group:'colorstack',title:'Chapter gathering',src:'story-colorstack.jpg'},
-  {group:'thrive',title:'Media 03'},
-  {group:'sullivan',title:'Service Corps',src:'sullivan-service-corps.jpg'},
-  {group:'notion',title:'Media 03'},
-  {group:'colorstack',title:'Artwork detail',src:'community.png',detail:true,position:'50% 80%'},
-  {group:'thrive',title:'Media 04'},
-  {group:'sullivan',title:'Media 04'},
-  {group:'notion',title:'Media 04'},
-  {group:'colorstack',title:'Media 04'},
-  {group:'sullivan',title:'Media 05'},
-  {group:'colorstack',title:'Media 05'}
- ];
- const groups={
-  thrive:{name:'Thrive',color:'195,130,162'},
-  sullivan:{name:'Sullivan Foundation',color:'109,155,181'},
-  notion:{name:'Notion',color:'139,125,184'},
-  colorstack:{name:'ColorStack AAMU',color:'153,143,104'}
- };
+  {
+    "group": "thrive",
+    "title": "Winning Pitch",
+    "src": "thrive-pitch-winners.png"
+  },
+  {
+    "group": "notion",
+    "title": "Campus Community",
+    "src": "spatial-notion.gif"
+  },
+  {
+    "group": "colorstack",
+    "title": "Chapter Gathering",
+    "src": "spatial-colorstack-gathering.jpg"
+  },
+  {
+    "group": "apron",
+    "title": "Cooking Assistant",
+    "src": "spatial-apron-assistant.png"
+  },
+  {
+    "group": "aven",
+    "title": "My Insights",
+    "src": "aven-thumbnail.png"
+  },
+  {
+    "group": "sullivan",
+    "title": "Dashboard",
+    "src": "sullivan-thumbnail.jpg"
+  },
+  {
+    "group": "thrive",
+    "title": "Focus Challenge",
+    "src": "thrive-focus.png"
+  },
+  {
+    "group": "ibm",
+    "title": "Skillsbuild Ambassador",
+    "src": "ibm-thumbnail.gif"
+  },
+  {
+    "group": "colorstack",
+    "title": "Community Workshop",
+    "src": "spatial-colorstack-workshop.jpg"
+  },
+  {
+    "group": "thrive",
+    "title": "Birthday Onboarding",
+    "src": "thrive-birthday.png"
+  },
+  {
+    "group": "apron",
+    "title": "Brand Identity",
+    "src": "spatial-apron-brand.png"
+  },
+  {
+    "group": "thrive",
+    "title": "Name Onboarding",
+    "src": "thrive-name.png"
+  },
+  {
+    "group": "sullivan",
+    "title": "Service Corps",
+    "src": "sullivan-service-corps.jpg"
+  },
+  {
+    "group": "thrive",
+    "title": "Stay Connected",
+    "src": "thrive-notifications.png"
+  },
+  {
+    "group": "thrive",
+    "title": "Website",
+    "src": "thrive-website.png"
+  },
+  {
+    "group": "thrive",
+    "title": "Wordmark",
+    "src": "thrive-brand-1.png"
+  },
+  {
+    "group": "thrive",
+    "title": "Typography",
+    "src": "thrive-brand-2.png"
+  },
+  {
+    "group": "thrive",
+    "title": "Product Preview",
+    "src": "thrive-thumbnail.jpg"
+  },
+  {
+    "group": "thrive",
+    "title": "App Icon",
+    "src": "thrive-brand-4.png"
+  }
+];
+ const groups={thrive:{name:"Thrive",color:"73,145,124"},sullivan:{name:"Sullivan Foundation",color:"41,119,183"},notion:{name:"Notion",color:"226,116,151"},colorstack:{name:"ColorStack AAMU",color:"137,24,67"},apron:{name:"Apron",color:"172,113,91"},aven:{name:"Aven",color:"151,161,111"},ibm:{name:"IBM",color:"24,24,24"}};
  const nodes=media.map((item,i)=>{
   const panel=document.querySelector('.panel-'+item.group),launch=panel.querySelector('.project-launch');
   const title=groups[item.group].name+' · '+item.title;
@@ -44,7 +129,9 @@
   const art=document.createElement('span');art.className='spatial-node-art';art.setAttribute('aria-hidden','true');
   if(item.src){
    const image=document.createElement('img');image.src='./assets/'+item.src;image.alt='';image.draggable=false;
+   if(/^thrive-(focus|birthday|name|notifications)\.png$/.test(item.src)){image.style.objectFit='contain';}
    image.style.objectPosition=item.position||'center';
+   image.addEventListener('load',()=>{art.style.aspectRatio=String(Math.max(.8,Math.min(1.8,image.naturalWidth/image.naturalHeight)));});
    if(item.detail)image.className='spatial-detail';
    art.append(image);
   }else{
@@ -56,7 +143,7 @@
   const captionText=document.createElement('span');captionText.className='spatial-node-title';captionText.textContent=item.title;
   caption.append(captionText);button.append(art,caption);holder.append(button);
   // Equal-area latitude bands paired with the golden angle cover the whole sphere.
-  const pointIndex=(i*7)%media.length;
+  const pointIndex=i;
   const y=1-2*(pointIndex+.5)/media.length,angle=pointIndex*Math.PI*(3-Math.sqrt(5)),ring=Math.sqrt(1-y*y);
   const node={button,launch,item,group:item.group,point:[Math.cos(angle)*ring,y,Math.sin(angle)*ring],index:i};
   button.addEventListener('pointerenter',()=>{hovered=i;});
@@ -87,30 +174,24 @@
  function project(point){
   const[x,y,z]=rotate(point),radius=Math.min(width*.36,height*.37),distance=3.8-zoom*.65;
   const perspective=distance/(distance-z),magnification=1+zoom*1.4;
-  return{x:x*radius*perspective*magnification,y:y*radius*perspective*magnification,z,scale:perspective*(1+zoom*.42)};
+  return{x:x*radius*perspective*magnification,y:y*radius*perspective*magnification,z,scale:perspective*(1+zoom*1.25)};
  }
  function arc(a,b,t){const cosine=Math.max(-.9999,Math.min(.9999,dot(a,b))),angle=Math.acos(cosine),sin=Math.sin(angle);return a.map((v,i)=>(v*Math.sin((1-t)*angle)+b[i]*Math.sin(t*angle))/sin);}
  function draw(){
+  updateDepthRuler();
   ctx.clearRect(0,0,width,height);
   const active=hovered??selected;
-  const paths=edges.map(edge=>({...edge,highlight:false}));
-  if(active!==null){
-   const group=nodes[active].group;
-   nodes.filter(node=>node.index!==active&&node.group===group).forEach(node=>{
-    const existing=paths.find(edge=>(edge.a===active&&edge.b===node.index)||(edge.b===active&&edge.a===node.index));
-    if(existing)existing.highlight=true;
-    else paths.push({a:active,b:node.index,group,color:groups[group].color,highlight:true});
-   });
-  }
+  const activeGroup=active===null?null:nodes[active].group;
+  const paths=edges.map(edge=>({...edge,highlight:activeGroup!==null&&edge.group===activeGroup}));
   paths.forEach(edge=>{
    const a=nodes[edge.a].point,b=nodes[edge.b].point;
    const angle=Math.acos(Math.max(-1,Math.min(1,dot(a,b))));
    const steps=Math.max(12,Math.min(74,Math.round(angle*Math.min(width,height)*.37/8)));
    for(let step=1;step<steps;step++){
     const p=project(arc(a,b,step/steps));
-    const alpha=edge.highlight ? .32+(p.z+1)*.1 : (active===null ? .2 : .055)*(.7+(p.z+1)*.15);
+    const alpha=edge.highlight ? .65+(p.z+1)*.12 : (active===null ? .2 : .055)*(.7+(p.z+1)*.15);
     ctx.fillStyle=`rgba(${edge.color},${alpha})`;
-    ctx.beginPath();ctx.arc(width/2+p.x,height/2+p.y,edge.highlight ? 1.1 : .95,0,Math.PI*2);ctx.fill();
+    ctx.beginPath();ctx.arc(width/2+p.x,height/2+p.y,edge.highlight ? 1.3 : .95,0,Math.PI*2);ctx.fill();
    }
   });
   scene.dataset.activeConnections=String(paths.filter(edge=>edge.highlight).length);
@@ -186,6 +267,7 @@
   host.replaceChildren();host.style.background=getComputedStyle(document.querySelector('.panel-'+item.group)).getPropertyValue('--project-surface');
   if(item.src){
    const image=document.createElement('img');image.src='./assets/'+item.src;image.alt=groups[item.group].name+' — '+item.title;image.draggable=false;
+   if(/^thrive-(focus|birthday|name|notifications)\.png$/.test(item.src)){image.style.objectFit='contain';}
    image.style.objectPosition=item.position||'center';if(item.detail)image.className='spatial-gallery-detail';host.append(image);
   }else{
    const placeholder=document.createElement('div');placeholder.className='spatial-gallery-placeholder';
@@ -196,6 +278,7 @@
  function showMedia(index){
   galleryIndex=index;const item=media[index],group=groups[item.group];
   gallery.querySelector('h2').textContent=group.name;
+  caseButton.hidden=item.group!=='thrive';
   gallery.querySelector('figcaption').textContent=item.title;
   paintMedia(galleryArt,item);galleryStrip.replaceChildren();galleryStrip.setAttribute('aria-label','More from '+group.name);
   media.forEach((other,i)=>{

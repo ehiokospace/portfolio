@@ -68,14 +68,14 @@ copyEmailButton.addEventListener('click', async () => {
     await navigator.clipboard.writeText('ehigoko1@gmail.com');
     document.dispatchEvent(new Event('email-copied'));
     clearTimeout(emailResetTimer);
-    copyEmailButton.querySelector('.email-label').textContent = 'COPIED!';
+    copyEmailButton.querySelector('.email-label').textContent = 'Copied!';
     copyEmailButton.classList.add('is-copied');
     emailResetTimer = setTimeout(() => {
-      copyEmailButton.querySelector('.email-label').textContent = '05. Email';
+      copyEmailButton.querySelector('.email-label').textContent = 'Email';
       copyEmailButton.classList.remove('is-copied');
     }, 2000);
   } catch {
-    document.querySelector('#notice-title').textContent = '05. Email';
+    document.querySelector('#notice-title').textContent = 'Email';
     document.querySelector('#notice-body').textContent = 'Copy this address: ehigoko1@gmail.com';
     dialog.showModal();
   }
@@ -85,8 +85,8 @@ const sidebarEmail=document.querySelector('#sidebar-copy-email');
 sidebarEmail?.addEventListener('click',()=>copyEmailButton.click());
 document.addEventListener('email-copied',()=>{
   if(!sidebarEmail)return;
-  const label=sidebarEmail.querySelector('.email-label');label.textContent='COPIED!';
-  clearTimeout(sidebarEmail.resetTimer);sidebarEmail.resetTimer=setTimeout(()=>{label.textContent='05. EMAIL';},2000);
+  const label=sidebarEmail.querySelector('.email-label');label.textContent='Copied!';
+  clearTimeout(sidebarEmail.resetTimer);sidebarEmail.resetTimer=setTimeout(()=>{label.textContent='Email';},2000);
 });
 
 const descriptionButton=document.querySelector('#scramble-description');

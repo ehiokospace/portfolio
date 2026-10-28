@@ -9,5 +9,5 @@ for (const file of ['index.html', 'styles.css', 'next.css', 'navigation.js', 'sp
 await mkdir('dist/local-fonts', { recursive: true });
 await cp('local-fonts/TWKLausannePan-400.otf', 'dist/local-fonts/TWKLausannePan-400.otf');
 await cp('local-fonts/TWKLausannePan-500.woff2', 'dist/local-fonts/TWKLausannePan-500.woff2');
-for(const page of ['dist/index.html','dist/projects/sullivanfoundation/index.html']){await writeFile(page,(await readFile('dist/index.html','utf8')).replace(/(styles\.css|app\.js)\?v=[^"]+/g,'$1?v=next-layout-2'));}
+for(const page of ['dist/index.html','dist/projects/sullivanfoundation/index.html']){await writeFile(page,(await readFile('dist/index.html','utf8')).replace(/(styles\.css|app\.js)\?v=[^"]+/g,'$1?v=email-case-fix-3'));}
 console.log('Built portable static website in dist/');

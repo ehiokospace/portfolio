@@ -745,3 +745,20 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
 @media(max-width:650px){#case-study .thrive-story-modal{width:calc(100vw - 24px);height:calc(100dvh - 32px);border-radius:18px}.thrive-story-modal>header{padding:20px}.thrive-story-body{padding:8px 20px 28px;height:calc(100% - 74px)}.thrive-story-body section{grid-template-columns:1fr;gap:18px}.thrive-story-body p{font-size:16px}}
 
 .portfolio-menu .menu-enter{font:400 16px/20px 'Departure Mono',monospace;color:inherit;background:none;padding:0}
+.header-brand span,#story-overlay #story-home.about-brand span{font-size:11px;line-height:16px}
+
+#sidebar-copy-email,#sidebar-copy-email .email-label{text-transform:none!important}
+
+.header-brand span,#story-overlay #story-home.about-brand span{position:relative;top:1px}
+
+.spatial-depth-ruler{position:absolute;z-index:4;right:18px;top:50%;transform:translateY(-50%);width:112px;height:clamp(220px,40vh,360px);color:#171717;user-select:none;pointer-events:auto}
+.depth-ticks{position:absolute;inset:0 0 0 auto;width:33px;display:flex;flex-direction:column;justify-content:space-between;align-items:flex-end;pointer-events:none}
+.depth-ticks i{display:block;width:9px;height:1px;background:currentColor;opacity:.18;transition:width 180ms ease,opacity 180ms ease}
+.spatial-depth-ruler .depth-label{position:absolute;right:43px;font:400 10px/1 'Departure Mono',monospace;text-transform:uppercase;white-space:nowrap;opacity:0;transition:opacity 180ms ease;pointer-events:none}
+.depth-max{top:0;transform:translateY(-50%)}.depth-mid{top:50%;transform:translateY(-50%)}.depth-min{bottom:0;transform:translateY(50%)}
+.spatial-depth-range{position:absolute;inset:-8px -10px;width:calc(100% + 20px);height:calc(100% + 16px);margin:0;writing-mode:vertical-lr;direction:rtl;opacity:0;cursor:ns-resize;touch-action:none}
+.spatial-depth-ruler:has(input:focus-visible){outline:1px solid #8885;outline-offset:8px;border-radius:4px}
+@media(max-width:700px){.spatial-depth-ruler{right:10px;width:88px;height:clamp(180px,32vh,260px)}.spatial-depth-ruler .depth-label{font-size:9px;right:37px}}
+@media(prefers-reduced-motion:reduce){.depth-ticks i,.spatial-depth-ruler .depth-label{transition:none}}
+
+.spatial-depth-ruler{z-index:300;width:145px}
