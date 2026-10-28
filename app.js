@@ -1,25 +1,5 @@
-// A brief entrance, independent of slow video or network requests.
-(function portfolioEntrance(){
- const loader=document.getElementById('intro-loader');
- if(!loader||!document.documentElement.classList.contains('is-loading'))return;
- const main=document.querySelector('main');if(main)main.inert=true;
- const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
- const duration=reduced?450:1100;
- setTimeout(()=>{
-  loader.classList.add('is-leaving');
-  if(main)main.inert=false;
-  setTimeout(()=>{loader.remove();document.documentElement.classList.remove('is-loading');clearTimeout(window.portfolioBootFallback);},reduced?0:240);
- },Math.max(0,duration-(performance.now()-(window.portfolioBootStarted||0))));
-})();
-
+document.querySelector('.header-brand')?.addEventListener('click',()=>returnToVideo());
 document.querySelector('[aria-label="Back to top"]').addEventListener('click',event=>{event.preventDefault();returnToVideo();});
-// Trial fonts are available only in the local preview.
-if (['localhost', '127.0.0.1'].includes(location.hostname)) {
-  const fonts = document.createElement('link');
-  fonts.rel = 'stylesheet';
-  fonts.href = './local-fonts/fonts.css';
-  document.head.append(fonts);
-}
 // Replace null destinations with your own URLs. Relative paths work on GitHub Pages.
 const destinations = {
   Craft: null, Gallery: null, Resume: 'https://drive.google.com/file/d/11beu2HB285avA1R1cZX8E9XF8QlEzJ4y/view?usp=sharing',
@@ -55,6 +35,7 @@ sizeArtwork();
 const heroVideo = document.querySelector('.hero-video');
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 function updateHeroPlayback() {
+  if (!heroVideo) return;
   if (reducedMotion.matches) {
     heroVideo.pause();
     heroVideo.removeAttribute('autoplay');
@@ -100,6 +81,14 @@ copyEmailButton.addEventListener('click', async () => {
   }
 });
 
+const sidebarEmail=document.querySelector('#sidebar-copy-email');
+sidebarEmail?.addEventListener('click',()=>copyEmailButton.click());
+document.addEventListener('email-copied',()=>{
+  if(!sidebarEmail)return;
+  const label=sidebarEmail.querySelector('.email-label');label.textContent='COPIED!';
+  clearTimeout(sidebarEmail.resetTimer);sidebarEmail.resetTimer=setTimeout(()=>{label.textContent='05. EMAIL';},2000);
+});
+
 const descriptionButton=document.querySelector('#scramble-description');
 const descriptions=['DESIGNED AND CODED WITH ♥︎'];
 let descriptionIndex=0,scrambleFrame,visitStats=null,visitError=false;
@@ -124,6 +113,8 @@ descriptionButton.title='Click to cycle credit, visit count and last visit';
 descriptionButton.addEventListener('click',()=>{descriptionIndex=(descriptionIndex+1)%3;paintFooter(true);});
 paintFooter();
 (async()=>{
+ // Preview visits never increment the live visitor count.
+ if (!['ehioko.com','www.ehioko.com'].includes(location.hostname)) { visitError=true; return; }
  const key='portfolio-visit-v1';let saved=null;try{saved=JSON.parse(localStorage.getItem(key));}catch{}
  const recent=saved&&Date.now()-saved.recordedAt<30*60*1000;
  try{
@@ -174,93 +165,44 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
 })();
 
 (() => {
-  const palette = document.querySelector('#command-palette');
-  const query = document.querySelector('#command-query');
-  const results = document.querySelector('#command-results');
-  const empty = palette.querySelector('.command-empty');
-  const trigger = document.querySelector('#open-search');
-  const closeButton = document.querySelector('#close-search');
-  const closeLabel = closeButton.textContent;
-  let copiedTimer;
-  function resetCopied(){clearTimeout(copiedTimer);closeButton.textContent=closeLabel;}
-  document.addEventListener('email-copied',()=>{
-    if(!palette.open)return;
-    resetCopied();closeButton.textContent='COPIED!';
-    copiedTimer=setTimeout(resetCopied,2000);
-  });
-  palette.addEventListener('close',resetCopied);
-  const items = [
-    {name:'Work',key:'w',modifier:true,shortcut:'[⌘W]',group:'Pages',detail:'/WORK',run:()=>location.hash='work'},
-    {name:'About',aliases:'story my story bio biography',key:'s',modifier:true,shortcut:'[⌘S]',group:'Pages',detail:'/ABOUT',run:()=>document.dispatchEvent(new Event('open-story'))},
-    {name:'Craft',shortcut:'',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Craft"]').click()},
-    {name:'Gallery',key:'g',modifier:true,shortcut:'[⌘G]',group:'Pages',detail:'SOON',run:()=>document.querySelector('[data-missing="Gallery"]').click()},
-    {name:'Download résumé',aliases:'resume cv curriculum vitae download',key:'r',modifier:true,shortcut:'[⌘R]',group:'Commands',detail:'↗',run:()=>document.querySelector('#resume-link').click()},
-    {name:'Copy email',keepOpen:true,aliases:'contact mail ehigoko1@gmail.com',key:'e',modifier:true,shortcut:'[⌘E]',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#copy-email').click()},
-    {name:'Leave a note',aliases:'comment suggestion critique review',shortcut:'⌘N',group:'Commands',detail:'COMMAND',run:()=>document.querySelector('#leave-feedback').click()},
-    {name:'LinkedIn',aliases:'https://www.linkedin.com/in/ehi-oko social',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.linkedin.com/in/ehi-oko','_blank','noopener')},
-    {name:'X/Twitter',aliases:'https://www.x.com/ehigoko social twitter',shortcut:'',group:'Links',detail:'↗',run:()=>window.open('https://www.x.com/ehigoko','_blank','noopener')},
+  const palette=document.querySelector('#command-palette'), query=document.querySelector('#command-query'), results=document.querySelector('#command-results');
+  const empty=palette.querySelector('.command-empty');
+  let opener, active=-1, filtered=[];
+  const project=(id)=>()=>document.dispatchEvent(new CustomEvent('portfolio:open-project',{detail:id}));
+  const items=[
+    {name:'Home',group:'Go to',shortcut:'⌥ H',key:'KeyH',aliases:'home introduction',run:()=>{document.querySelector('#case-study').close();window.scrollTo({top:0,behavior:'smooth'});}},
+    {name:'Work',group:'Go to',shortcut:'⌥ W',key:'KeyW',aliases:'work index projects portfolio',run:()=>document.querySelector('#navigation-stage').scrollIntoView({behavior:'smooth',block:'start'})},
+    {name:'About',group:'Go to',shortcut:'⌥ A',key:'KeyA',aliases:'story bio biography education experience',run:()=>document.dispatchEvent(new Event('open-story'))},
+    {name:'Toggle sound',group:'Commands',shortcut:'⌥ S',key:'KeyS',keepOpen:true,aliases:'mute unmute audio sound',run:()=>document.dispatchEvent(new Event('portfolio:toggle-sound'))},
+    {name:'Download résumé',group:'Commands',shortcut:'⌥ R',key:'KeyR',aliases:'resume cv experience pdf',run:()=>document.querySelector('#resume-link').click()},
+    {name:'Copy email',group:'Commands',shortcut:'⌥ E',key:'KeyE',keepOpen:true,aliases:'email mail contact ehigoko1@gmail.com',run:()=>document.querySelector('#copy-email').click()},
+    {name:'Annotate',group:'Commands',shortcut:'⌥ N',key:'KeyN',aliases:'note feedback suggestion comment',run:()=>document.querySelector('#annotate-feedback').click()}
   ];
-  function contentItems() {
-    const jump = element => () => element.scrollIntoView({block:'start',behavior:'smooth'});
-    const content = [...document.querySelectorAll('.project')].map(project => ({
-      name:project.querySelector('h2').textContent,
-      group:'Content',shortcut:'',detail:'/WORK',
-      aliases:[project.textContent,...[...project.querySelectorAll('img')].map(image=>image.alt),project.classList.contains('mental')?'Thrive Thribe':''].join(' '),
-      run:()=>project.querySelector('[data-case]').click()
-    }));
-    const extra = [
-      [document.querySelector('#intro'),'Introduction','/HOME'],
-      [document.querySelector('.current'),'Previous experience','/HOME'],
-      [document.querySelector('#story p:nth-child(2)'),'About Ehi Oko','/STORY'],
-      [document.querySelector('#story p:nth-child(3)'),'Education and experience','/STORY'],
-      [document.querySelector('.utility p'),'Location and weather','/WORK'],
-      [document.querySelector('#scramble-description'),'Designed and coded with ♥︎','/WORK']
-    ];
-    extra.forEach(([element,name,detail])=>{
-      if(element)content.push({name,group:'Content',shortcut:'',detail,aliases:element.textContent+(element.id==='scramble-description'?' '+descriptions.join(' '):''),run:jump(element)});
-    });
-    return content;
+  function highlight(){results.querySelectorAll('.command-result').forEach((b,i)=>{b.classList.toggle('active',i===active);b.setAttribute('aria-selected',String(i===active));});}
+  function choose(i){const item=filtered[i];if(!item)return;if(!item.keepOpen)palette.close();item.run();}
+  function render(){
+    const terms=query.value.toLowerCase().trim().split(/\s+/).filter(Boolean);
+    filtered=items.filter(item=>terms.every(t=>(item.name+' '+item.aliases+' '+item.shortcut).toLowerCase().includes(t)));
+    active=terms.length?0:-1;results.replaceChildren();let group='';
+    filtered.forEach((item,i)=>{if(item.group!==group){const h=document.createElement('h2');h.className='command-group';h.textContent=item.group;results.append(h);group=item.group;}
+      const b=document.createElement('button');b.type='button';b.className='command-result';const name=document.createElement('span');name.textContent=item.name;const detail=document.createElement('small');detail.className='command-key';detail.textContent=item.shortcut;b.setAttribute('aria-keyshortcuts','Alt+'+item.key.slice(3));b.append(name,detail);b.addEventListener('click',()=>choose(i));b.addEventListener('pointerenter',()=>{active=i;highlight();});results.append(b);});
+    empty.hidden=filtered.length>0;highlight();
   }
-  let filtered = [], active = 0;
-  function highlight() {
-    [...results.querySelectorAll('button')].forEach((button,index)=>button.classList.toggle('active',index===active));
-  }
-  function choose(index) { const item=filtered[index]; if (!item) return; if(!item.keepOpen)palette.close(); item.run(); }
-  const normalizeSearch = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/⌘/g,' cmd command ctrl control ').replace(/[\[\]]/g,' ').trim();
-  function render() {
-    const terms=normalizeSearch(query.value).split(/\s+/).filter(Boolean);
-    filtered=[...items,...(terms.length?contentItems():[])].filter(item=>{
-      const searchable=normalizeSearch([item.name,item.group,item.detail,item.shortcut,item.key||'',item.aliases||''].join(' '));
-      return terms.every(term=>searchable.includes(term));
-    });active=0;results.replaceChildren();
-    let group='';
-    filtered.forEach((item,index)=>{
-      if(item.group!==group){const title=document.createElement('h2');title.className='command-group';title.textContent=item.group;results.append(title);group=item.group;}
-      const button=document.createElement('button');button.className='command-result';
-      const name=document.createElement('span');name.textContent=item.name+' ';const shortcut=document.createElement('span');shortcut.className='command-shortcut';shortcut.textContent=item.shortcut;name.append(shortcut);
-      const detail=document.createElement('small');detail.textContent=item.detail;
-      button.append(name,detail);button.addEventListener('click',()=>choose(index));
-      button.addEventListener('pointerenter',()=>{active=index;highlight();});results.append(button);
-    });
-    empty.hidden=filtered.length!==0;highlight();
-  }
-  function open() { if(palette.open)return;query.value='';render();palette.showModal();if(matchMedia('(max-width:700px)').matches)palette.focus({preventScroll:true});else query.focus(); }
-  trigger.addEventListener('click',open);
-  document.querySelector('#mobile-menu').addEventListener('click',open);
+  function open(){if(palette.open)return;opener=document.activeElement;query.value='';render();palette.showModal();query.focus({preventScroll:true});if(!matchMedia('(prefers-reduced-motion:reduce)').matches)palette.animate([{opacity:0,transform:'translateY(8px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:240,easing:'cubic-bezier(.16,1,.3,1)'});}
+  document.querySelectorAll('.portfolio-menu,#open-search,#mobile-menu').forEach(b=>b.addEventListener('click',open));
   document.querySelector('#close-search').addEventListener('click',()=>palette.close());
-  palette.addEventListener('click',event=>{if(event.target===palette){const r=palette.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)palette.close();}});
+  palette.addEventListener('close',()=>opener?.focus({preventScroll:true}));
+  palette.addEventListener('click',e=>{if(e.target===palette){const r=palette.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)palette.close();}});
   query.addEventListener('input',render);
-  palette.addEventListener('keydown',event=>{
-    if(event.key==='ArrowDown'||event.key==='ArrowUp'){event.preventDefault();if(!filtered.length)return;active=(active+(event.key==='ArrowDown'?1:-1)+filtered.length)%filtered.length;highlight();results.querySelectorAll('button')[active].scrollIntoView({block:'nearest'});}
-    if(event.key==='Enter'&&(event.target===query||event.target.classList.contains('command-result'))){event.preventDefault();choose(active);}
-  });
-  document.addEventListener('keydown',event=>{
-    const key=event.key.toLowerCase();
-    if((event.metaKey||event.ctrlKey)&&key==='k'){event.preventDefault();palette.open?palette.close():open();return;}
-    if(!palette.open||event.altKey||event.shiftKey||event.isComposing||event.repeat)return;
-    const modifier=event.metaKey||event.ctrlKey;
-    const item=items.find(item=>item.key===key&&Boolean(item.modifier)===Boolean(modifier));
-    if(item&&modifier){event.preventDefault();if(!item.keepOpen)palette.close();item.run();}
+  palette.querySelectorAll('[data-category-query]').forEach(b=>b.addEventListener('click',()=>{query.value=b.dataset.categoryQuery;render();query.focus();}));
+  palette.addEventListener('keydown',e=>{if(e.altKey&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&!e.isComposing&&!e.repeat){const item=items.find(item=>item.key===e.code);if(item){e.preventDefault();if(!item.keepOpen)palette.close();item.run();return;}}if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();if(!filtered.length)return;active=(active+(e.key==='ArrowDown'?1:-1)+filtered.length)%filtered.length;highlight();results.querySelectorAll('.command-result')[active].scrollIntoView({block:'nearest'});}if(e.key==='Enter'&&e.target===query){e.preventDefault();choose(Math.max(0,active));}});
+  document.addEventListener('keydown',e=>{
+    if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();palette.open?palette.close():open();return;}
+    if(e.key!=='Enter'||e.defaultPrevented||e.repeat||e.isComposing||e.metaKey||e.ctrlKey||e.altKey||e.shiftKey||palette.open)return;
+    const target=e.target;
+    if(target instanceof Element && target.closest('input,textarea,select,button,a,[contenteditable]:not([contenteditable="false"]),[role="button"],[role="textbox"],video,audio'))return;
+    if(document.querySelector('dialog[open]'))return;
+    e.preventDefault();open();
   });
 })();
 
@@ -272,14 +214,46 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
     'course-scheduling': {title:'Course scheduling',summary:'Smarter course scheduling for AAMU students',category:'Web app',status:'Concept',image:'./assets/7230c.png',alt:'Soft pink blossoms',overview:'A concept for a smarter course scheduling system for AAMU students.',metadata:[],sections:[]},
     'colorstack': {title:'ColorStack AAMU',summary:'Fostering a community of students in tech',category:'Brand, community',image:'./assets/community.png',alt:'ColorStack AAMU community artwork',overview:'Fostering a community of students in tech.',metadata:[],sections:[]}
   };
+  studies.notion={title:'Notion',summary:'Campus leader program'};
+  studies.apron={title:'Apron',summary:'Cooking companion'};
+  studies.aven={title:'Aven'};studies.ibm={title:'IBM'};
+  const dockDescriptions={thrive:'Product','internal-tooling':'Internship',notion:'Growth',apron:'Project',colorstack:'Growth',aven:'Project',ibm:'Growth'};
+  const presentation={thrive:{poster:'thrive-thumbnail.jpg',video:'thrive-thumbnail.mp4'},'internal-tooling':{poster:'sullivan-thumbnail.jpg',video:'sullivan-thumbnail.mp4'},notion:{poster:'notion-thumbnail.jpg',video:'notion-thumbnail.mp4'},apron:{poster:'apron-thumbnail.jpg',video:'apron-thumbnail.mp4'},colorstack:{poster:'colorstack-thumbnail.png'},aven:{poster:'aven-thumbnail.png'},ibm:{poster:'ibm-thumbnail.gif'}};
   const modal=document.querySelector('#case-study'),content=document.querySelector('#case-content'),expand=document.querySelector('#case-expand');
   const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  let thriveStory;
+  function openThriveStory(){
+    if(!thriveStory){
+      thriveStory=document.createElement('dialog');thriveStory.className='thrive-story-modal';thriveStory.setAttribute('aria-labelledby','thrive-story-title');
+      thriveStory.innerHTML=`<header><h2 id="thrive-story-title">THE STORY</h2><button type="button" class="thrive-story-close" aria-label="Close story">Close</button></header><div class="thrive-story-body"><div class="thrive-story-intro"><p>In October 2024, our four-person team won first place and $10,000 at the HBCU Business Pitch Competition with Thrive, an AI-powered mental wellness platform. In early 2026, we returned to the idea with plans to build it into a real product.</p><p>I was the sole designer, working with two engineers and a product manager. I led the product's design direction, from research and strategy to its visual identity, interactive prototypes, and public-facing website.</p><ul><li>$10K in competition funding, placing first among 40+ teams.</li><li>30+ participants involved in user research.</li><li>15+ high-fidelity flows designed across Figma and Framer.</li></ul></div><section><h3>What I owned</h3><div><p>The product's end-to-end design direction, from early wireframes to high-fidelity prototypes.</p><p>Thrive's visual identity, design system, and reusable components.</p><p>The marketing and waitlist website, which I designed and built.</p><p>Core product experiences, including onboarding, AI-guided support, and community interactions.</p><p>User research, usability testing, and translating feedback into design decisions.</p><p>Interactive prototypes and custom interactions in Figma and Framer.</p></div></section><section><h3>What I contributed</h3><div><p>A rethinking of Thrive's original concept, moving beyond an AI companion toward a more community-centered wellness experience.</p><p>Product strategy discussions around feature prioritization, user needs, and what our small team could realistically build.</p><p>Conversations with university leadership about student mental health needs and opportunities for institutional support.</p><p>The exploration of Thribes, small peer-support communities, and Milo, our proposed AI companion and facilitator.</p><p>Decisions around the product's language, privacy, and approach to building trust in a sensitive space.</p></div></section><section><h3>From pitch to product</h3><div class="thrive-story-timeline"><h4>01 — The pitch</h4><p>We developed Thrive's initial concept, designed an early prototype, and won $10,000 at the HBCU Business Pitch Competition.</p><h4>02 — Rediscovery</h4><p>In early 2026, we returned to Thrive, reassessed our original assumptions, and began defining a more focused product direction.</p><h4>03 — Research</h4><p>I gathered insights from 30+ research participants and conversations with university leadership to better understand student needs.</p><h4>04 — Design exploration</h4><p>I translated our findings into user flows, wireframes, and interactive prototypes, reviewing ideas with the team as the product evolved.</p><h4>05 — Brand &amp; web</h4><p>I established the visual system and designed and built our public-facing website to introduce Thrive and capture early interest.</p><h4>06 — Product iteration</h4><p>Working with our engineers and PM, I refined core experiences, explored a community-first direction, and helped shape the scope of our MVP.</p></div></section></div>`;
+      modal.append(thriveStory);
+      const close=()=>{if(matchMedia('(prefers-reduced-motion:reduce)').matches){thriveStory.close();return;}const animation=thriveStory.animate([{opacity:1,transform:'translateY(0) scale(1)'},{opacity:0,transform:'translateY(12px) scale(.985)'}],{duration:180,easing:'ease-in'});animation.finished.then(()=>thriveStory.close());};
+      thriveStory.querySelector('button').addEventListener('click',close);
+      thriveStory.addEventListener('cancel',e=>{e.preventDefault();e.stopPropagation();close();});
+      thriveStory.addEventListener('click',e=>{if(e.target===thriveStory){const r=thriveStory.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)close();}});
+    }
+    thriveStory.showModal();thriveStory.querySelector('.thrive-story-body').scrollTop=0;
+    if(!matchMedia('(prefers-reduced-motion:reduce)').matches)thriveStory.animate([{opacity:0,transform:'translateY(20px) scale(.975)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:380,easing:'cubic-bezier(.16,1,.3,1)'});
+  }
   let previousFocus=null;
   let soonFrame=0;
-  function render(study){
+  function render(study,id){
     cancelAnimationFrame(soonFrame);
+    if(id==='thrive'){
+      content.innerHTML=`<article class="thrive-template"><div class="thrive-media-slot thrive-pitch-cover"><img src="./assets/thrive-pitch-winners.png" alt="The Thrive team holding their $10,000 HBCU Business Pitch Competition winning check"></div><header class="thrive-text thrive-template-header"><h1 id="case-title">Thrive: Accessible Mental Wellness, Built For Community</h1><dl class="thrive-facts"><div><dt>Role</dt><dd>Co-Founder / Design Lead</dd></div><div><dt>Surfaces</dt><dd>iOS App, Web</dd></div><div><dt>Industry</dt><dd>Healthcare</dd></div><div><dt>Context</dt><dd>Winning Pitch</dd></div></dl></header><div class="thrive-text thrive-rule"><img src="./assets/thrive-divider.svg" alt=""></div><section class="thrive-text thrive-overview"><p>Thrive is a mental wellness app designed to make support more accessible for underrepresented communities. After winning <strong>$10,000</strong> at the HBCU Business Pitch competition in October 2024, we decided to take the idea further. From late 2024 to early 2026, I served as Co-Founder and Design Lead, shaping the product from early research and wireframes to its visual identity, interactive prototypes, a waitlist, and a reimagined community-centered experience. I worked alongside two engineers and a product manager.</p><ul><li><strong>$10,000 and 1st place</strong> at HBCU Business Pitch Competition</li><li>Support from <strong>Founders On The Yard (FOTY), The Alabama Collective, HBCUFI</strong></li><li>Recognition and feature from <strong>Alabama A&amp;M University</strong></li></ul><button class="thrive-read-more" type="button">Read more <img src="./assets/thrive-expand.svg" alt="" width="19.2" height="19.2"></button></section><section class="thrive-media-gallery" aria-label="Project gallery"><div class="thrive-media-slot thrive-website-frame"><img src="./assets/thrive-website.png" alt="Thrive culturally intelligent mental healthcare website"></div><div class="thrive-media-pair"><div class="thrive-phone-frame"><img class="thrive-phone thrive-phone-focus" src="./assets/thrive-focus.png" alt="Thrive Focus Challenge screen"></div><div class="thrive-phone-frame"><div class="thrive-phone-crop"><img src="./assets/thrive-birthday.png" alt="Thrive birthday onboarding screen"></div></div></div><div class="thrive-media-pair"><div class="thrive-phone-frame"><img class="thrive-phone thrive-phone-name" src="./assets/thrive-name.png" alt="Thrive name onboarding screen"></div><div class="thrive-phone-frame"><img class="thrive-phone thrive-phone-notifications" src="./assets/thrive-notifications.png" alt="Thrive notification permissions screen"></div></div></section><section class="thrive-brand-row" aria-label="Thrive visual identity"><img src="./assets/thrive-brand-1.png" alt="Thrive wordmark"><img src="./assets/thrive-brand-2.png" alt="Thrive typography"><img src="./assets/thrive-brand-3.png" alt="Thrive color palette"><img src="./assets/thrive-brand-4.png" alt="Thrive app icon on a phone"></section><section class="thrive-text thrive-takeaways"><h2>Takeaways</h2><div class="thrive-takeaway-columns"><div><h3>Trust comes before aesthetics</h3><p>Designing for mental wellness meant prioritizing safety, empathy, and clarity over visual appeal.</p></div><div><h3>Winning a pitch ≠ product validation</h3><p>The $10K proved our idea had potential, not that we'd found product-market fit.</p></div></div></section></article>`;
+      const readMore=content.querySelector('.thrive-read-more');
+      readMore.setAttribute('aria-haspopup','dialog');
+      readMore.addEventListener('click',openThriveStory);
+      return;
+    }
+
     content.innerHTML='<section class="project-soon"><div class="soon-wrap"><div class="soon-num" aria-label="404"><span class="soon-cell"><span>4</span></span><span class="soon-cell"><span>0</span></span><span class="soon-cell"><span>4</span></span></div><h2 id="case-title">'+escape(study.title)+' is still being written.</h2><p>The '+escape(study.title)+' case study is currently in the works. If you would like to hear about it before it is public, reach out at <a href="mailto:ehigoko1@gmail.com">ehigoko1@gmail.com</a>.</p><button class="soon-back">‹ <span>Back to home</span></button></div></section>';
-    content.querySelector('.soon-back').addEventListener('click',()=>modal.close());
+    const media=presentation[id];
+    const hero=document.createElement('section');hero.className='case-cover';
+    hero.innerHTML='<h1 class="case-cover-title">'+escape(study.title)+'</h1><div class="case-cover-media">'+(media.video?'<video autoplay muted loop playsinline poster="./assets/'+media.poster+'"><source src="./assets/'+media.video+'" type="video/mp4"></video>':'<img src="./assets/'+media.poster+'" alt="'+escape(study.title)+'">')+'</div>';
+    content.prepend(hero);
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches)hero.querySelector('video')?.pause();
+    content.querySelector('.soon-back').addEventListener('click',closeCase);
     const row=content.querySelector('.soon-num'),cells=[...row.children].map((cell,index)=>({cell,glyph:cell.firstElementChild,index,next:1+Math.random()*4,until:0,lit:false,color:Math.random()<.5?'#FD974F':'#E37280'}));
     const reduced=matchMedia('(prefers-reduced-motion:reduce)').matches;let lit=0,started=null;
     function tick(now){if(!modal.open)return;if(started===null)started=now;const t=(now-started)/1000,available=Math.min(960,content.clientWidth-80),size=Math.min(180,Math.max(80,content.clientWidth*.18)),base=size*.57+12,stretch=size*2.2;
@@ -290,17 +264,55 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
     soonFrame=requestAnimationFrame(tick);
   }
   function openCase(id,updateURL=true){
-    if(!studies[id])return;
+    if(id!=='thrive'||!studies[id])return;
     if(!modal.open)previousFocus=document.activeElement;
-    render(studies[id]);modal.classList.remove('expanded');expand.setAttribute('aria-pressed','false');expand.setAttribute('aria-label','Expand case study');
+    const wasOpen=modal.open;
+    render(studies[id],id);modal.dataset.project=id;modal.classList.remove('expanded');expand.setAttribute('aria-pressed','false');expand.setAttribute('aria-label','Expand case study');
     if(!modal.open)modal.showModal();content.scrollTop=0;
+    projectDock.querySelectorAll('[data-dock-project]').forEach(button=>{button.setAttribute('aria-current',button.dataset.dockProject===id?'page':'false');});
+    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+      content.getAnimations().forEach(a=>a.cancel());
+      content.animate([{opacity:0,transform:'translateY(32px)'},{opacity:1,transform:'translateY(0)'}],{duration:700,delay:wasOpen?0:240,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'});
+      if(!wasOpen){
+        projectDock.animate([{opacity:0,transform:'translate(-50%, -12px) scale(.94)'},{opacity:1,transform:'translate(-50%, 0) scale(1)'}],{duration:650,easing:'cubic-bezier(.16,1,.3,1)'});
+        projectDock.querySelectorAll('[data-dock-project]').forEach((button,i)=>{
+          const card=document.querySelector('.project-grid [data-project-case="'+button.dataset.dockProject+'"]')?.closest('.project-panel');
+          const from=card?.getBoundingClientRect(),to=button.getBoundingClientRect();
+          const dx=from?Math.max(-240,Math.min(240,from.x+from.width/2-to.x-to.width/2)):0;
+          const dy=from?Math.max(35,Math.min(240,from.y+from.height/2-to.y)):100;
+          button.animate([{opacity:0,transform:'translate('+dx+'px,'+dy+'px) scale(1.5)'},{opacity:1,transform:'translate(0,0) scale(1)'}],{duration:700,delay:i*45,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'});
+        });
+      }
+    }
+
     if(updateURL){const url=new URL(location.href);if(id==='internal-tooling'){url.pathname='/projects/sullivanfoundation';url.searchParams.delete('case');url.hash='';}else{url.pathname='/';url.searchParams.set('case',id);}history.pushState(null,'',url);}
   }
+  const projectDock=document.createElement('nav');projectDock.className='case-project-dock';projectDock.setAttribute('aria-label','Project index');
+  projectDock.innerHTML='<button type="button" class="case-dock-close" aria-label="Close project"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" stroke="currentColor" stroke-width="1.5"/></svg></button><div class="case-dock-tray">'+Object.entries(presentation).map(([id,m])=>'<button type="button" data-dock-project="'+id+'" aria-label="'+escape(studies[id].title)+'" aria-describedby="dock-caption-'+id+'"><img src="./assets/'+m.poster+'" alt=""><span class="case-dock-caption" id="dock-caption-'+id+'" role="tooltip"><span>'+escape(studies[id].title)+'</span><span>'+escape(dockDescriptions[id])+'</span></span></button>').join('')+'</div>';
+  modal.append(projectDock);
+  const dockItems=[...projectDock.querySelectorAll('[data-dock-project]')];
+  function liftNeighbors(index){dockItems.forEach((item,i)=>item.classList.toggle('dock-neighbor',Math.abs(i-index)===1));}
+  dockItems.forEach((item,i)=>{item.addEventListener('pointerenter',()=>liftNeighbors(i));item.addEventListener('focus',()=>liftNeighbors(i));item.addEventListener('blur',()=>liftNeighbors(-10));});
+  projectDock.addEventListener('pointerleave',()=>liftNeighbors(-10));
+
+  let closing=false;
+  function closeCase(){
+    if(closing||!modal.open)return;
+    if(matchMedia('(prefers-reduced-motion: reduce)').matches){modal.close();return;}
+    closing=true;
+    const animation=content.animate([{opacity:1,transform:'translateY(0)'},{opacity:0,transform:'translateY(20px)'}],{duration:260,easing:'cubic-bezier(.4,0,1,1)',fill:'forwards'});
+    projectDock.animate([{opacity:1,transform:'translate(-50%,0)'},{opacity:0,transform:'translate(-50%,-10px)'}],{duration:220,easing:'ease-in'});
+    animation.finished.then(()=>{modal.close();animation.cancel();closing=false;}).catch(()=>{closing=false;});
+  }
+  modal.addEventListener('cancel',event=>{event.preventDefault();closeCase();});
+  projectDock.querySelector('.case-dock-close').addEventListener('click',closeCase);
+  projectDock.querySelectorAll('[data-dock-project]').forEach(button=>button.addEventListener('click',()=>openCase(button.dataset.dockProject)));
+  document.addEventListener('portfolio:open-project',event=>openCase(event.detail));
   document.querySelectorAll('[data-case]').forEach(button=>button.addEventListener('click',()=>openCase(button.dataset.case)));
   document.querySelector('#case-home').addEventListener('click',()=>modal.close());
   expand.addEventListener('click',()=>{const expanded=modal.classList.toggle('expanded');expand.setAttribute('aria-pressed',String(expanded));expand.setAttribute('aria-label',expanded?'Restore popup size':'Expand case study');});
   modal.addEventListener('click',event=>{if(event.target!==modal)return;const r=modal.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)modal.close();});
-  modal.addEventListener('close',()=>{cancelAnimationFrame(soonFrame);const url=new URL(location.href);if(url.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'){url.pathname='/';url.hash='work';history.replaceState(null,'',url);}if(url.searchParams.has('case')){url.searchParams.delete('case');history.replaceState(null,'',url);}previousFocus?.focus({preventScroll:true});});
+  modal.addEventListener('close',()=>{content.querySelectorAll('video').forEach(v=>v.pause());cancelAnimationFrame(soonFrame);const url=new URL(location.href);if(url.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'){url.pathname='/';url.hash='navigation-stage';history.replaceState(null,'',url);}if(url.searchParams.has('case')){url.searchParams.delete('case');history.replaceState(null,'',url);}previousFocus?.focus({preventScroll:true});});
   window.addEventListener('popstate',()=>{const id=location.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[id])openCase(id,false);else if(modal.open)modal.close();});
   const initial=location.pathname.replace(/\/$/,'')==='/projects/sullivanfoundation'?'internal-tooling':new URL(location.href).searchParams.get('case');if(studies[initial])openCase(initial,initial==='internal-tooling'&&location.pathname==='/');
 })();
@@ -312,13 +324,61 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
 (() => {
   const endpoint='https://portfolio-feedback.ehigoko1.workers.dev/';
   const sitekey='0x4AAAAAAFPjn8y4ZI1OyhDS';
+  const localPreview=['localhost','127.0.0.1','[::1]'].includes(location.hostname);
+  let verificationJob=null, settleVerification=null, verificationTimer;
   const modal=document.querySelector('#feedback-dialog'), form=document.querySelector('#feedback-form');
   const section=document.querySelector('#feedback-section'), context=document.querySelector('#feedback-context');
   const status=document.querySelector('#feedback-status'), send=document.querySelector('#feedback-send');
   const message=document.querySelector('#feedback-message'), category=document.querySelector('#feedback-category');
+  const categoryButton=document.querySelector('#feedback-category-trigger');
+  const categoryMenu=document.querySelector('#feedback-category-menu');
+  const categoryOptions=[...categoryMenu.querySelectorAll('[role="option"]')];
+  function syncCategoryPicker(){
+    const current=categoryOptions.find(option=>option.dataset.category===category.value)||categoryOptions[0];
+    categoryButton.querySelector('span').textContent=current.querySelector('span').textContent;
+    categoryOptions.forEach(option=>option.setAttribute('aria-selected',String(option===current)));
+  }
+  function closeCategoryMenu(restore=false){
+    categoryMenu.hidden=true;categoryButton.setAttribute('aria-expanded','false');
+    if(restore)categoryButton.focus({preventScroll:true});
+  }
+  function openCategoryMenu(){
+    if(categoryButton.disabled)return;
+    syncCategoryPicker();categoryMenu.hidden=false;categoryButton.setAttribute('aria-expanded','true');
+    const box=categoryButton.getBoundingClientRect();
+    const available=Math.max(80,innerHeight-32);
+    categoryMenu.style.maxHeight=Math.min(260,available)+'px';
+    const menuHeight=categoryMenu.offsetHeight;
+    categoryMenu.style.left=Math.max(16,Math.min(box.left,innerWidth-categoryMenu.offsetWidth-16))+'px';
+    categoryMenu.style.top=Math.max(16,Math.min(box.bottom+6+menuHeight<=innerHeight-16?box.bottom+6:box.top-menuHeight-6,innerHeight-menuHeight-16))+'px';
+    categoryOptions.find(option=>option.getAttribute('aria-selected')==='true').focus({preventScroll:true});
+  }
+  categoryButton.addEventListener('click',()=>categoryMenu.hidden?openCategoryMenu():closeCategoryMenu());
+  categoryButton.addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp'].includes(event.key)){event.preventDefault();openCategoryMenu();}});
+  categoryOptions.forEach(option=>option.addEventListener('click',()=>{
+    category.value=option.dataset.category;category.dispatchEvent(new Event('change',{bubbles:true}));
+    syncCategoryPicker();closeCategoryMenu(true);
+  }));
+  categoryMenu.addEventListener('keydown',event=>{
+    const index=categoryOptions.indexOf(document.activeElement);
+    if(['ArrowDown','ArrowUp','Home','End'].includes(event.key)){
+      event.preventDefault();
+      const next=event.key==='Home'?0:event.key==='End'?categoryOptions.length-1:(index+(event.key==='ArrowDown'?1:-1)+categoryOptions.length)%categoryOptions.length;
+      categoryOptions[next].focus({preventScroll:true});
+    }
+    if(event.key==='Escape'){event.preventDefault();event.stopPropagation();closeCategoryMenu(true);}
+    if(event.key==='Tab')closeCategoryMenu();
+  });
+  // Escape is handled before the parent annotation dialog's capture listener.
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape'&&!categoryMenu.hidden){event.preventDefault();event.stopImmediatePropagation();closeCategoryMenu(true);}
+  },true);
+  document.addEventListener('pointerdown',event=>{if(!categoryMenu.hidden&&!event.target.closest('.note-category-picker'))closeCategoryMenu();});
+  window.addEventListener('resize',()=>closeCategoryMenu());
+  document.addEventListener('scroll',event=>{if(!categoryMenu.contains(event.target))closeCategoryMenu();},true);
   const prompt=document.querySelector('#feedback-prompt'), success=document.querySelector('#feedback-success');
   const step=document.querySelector('#feedback-step'), close=document.querySelector('#feedback-close');
-  const entries=[...document.querySelectorAll('#leave-feedback,#story-feedback,#feedback-mobile')];
+  const entries=[...document.querySelectorAll('#leave-feedback,#story-feedback,#feedback-mobile,#annotate-feedback')];
   const highlight=document.createElement('div');highlight.id='note-highlight';highlight.hidden=true;highlight.setAttribute('aria-hidden','true');
   for(const corner of ['top-right','bottom-left']){const handle=document.createElement('span');handle.className='note-corner note-corner-'+corner;highlight.append(handle);}
   const hint=document.createElement('span');hint.id='note-highlight-label';highlight.append(hint);document.body.append(highlight);
@@ -327,13 +387,20 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   const targets=[['.hero h1','Introduction'],['.hero .current','Previous experience'],['.bio p','Biography'],['nav h2,.links h2','Section heading'],['nav a,nav button','Navigation link'],['.utility p','Huntsville local time'],['.story-bio p','On design paragraph'],['.story-copy h2','About heading'],['.story-history p','About history paragraph'],['.story-date','Experience date'],['.story-experience','Experience'],['.story-particle-stage','About portrait']];
   targets.forEach(([selector,label])=>document.querySelectorAll(selector).forEach(el=>el.dataset.feedbackSection=label==='Experience'?el.querySelector('.story-company')?.textContent.trim()||label:label==='Section heading'||label==='About heading'?el.textContent.trim():label==='About history paragraph'?(el.closest('.story-history').querySelector('h2').textContent.trim()+': paragraph'):label==='Experience date'?('Date: '+el.closest('.story-experience').querySelector('.story-company').textContent.trim()):label));
   document.querySelectorAll('.project').forEach(card=>{const title=card.querySelector('h2').textContent;card.querySelectorAll('.media,.project-caption-heading,.project-description').forEach(el=>el.dataset.feedbackSection=title);});
+  document.querySelectorAll('.project-panel').forEach(card=>{
+    const title=card.querySelector('h2').textContent;
+    card.dataset.feedbackSection='Project: '+title;
+    card.querySelector('h2').dataset.feedbackSection=title+': title';
+    card.querySelector('.project-description').dataset.feedbackSection=title+': description';
+  });
+  document.querySelectorAll('.work-introduction h2,.work-introduction p,.corner-footer p').forEach(el=>el.dataset.feedbackSection=el.closest('.corner-footer')?'Footer':'Work sidebar');
   function activeHost(){const story=document.querySelector('#story-overlay'),caseStudy=document.querySelector('#case-study');return story.open?story:caseStudy.open?caseStudy:document.body;}
   function mount(){const host=activeHost();host.append(modal,highlight);modal.classList.toggle('note-dark',host.id==='story-overlay');}
   function saveDraft(){if(section.dataset.key&&!form.hidden)drafts.set(section.dataset.key,{message:message.value,category:category.value});}
-  function setState(state){modal.dataset.state=state;step.textContent=state==='choose'?'01 / SELECT':state==='write'?'02 / WRITE':'03 / SENT';prompt.hidden=state!=='choose';form.hidden=state!=='write';context.hidden=state!=='write';success.hidden=state!=='sent';queuePosition();}
+  function setState(state){closeCategoryMenu();modal.dataset.state=state;step.textContent=state==='choose'?'01 / SELECT':state==='write'?'02 / WRITE':'03 / SENT';prompt.hidden=state!=='choose';form.hidden=state!=='write';context.hidden=true;success.hidden=state!=='sent';queuePosition();}
   function markTargets(enabled){document.querySelectorAll('[data-feedback-section]').forEach(el=>{if(enabled){el.dataset.feedbackTabindex=el.getAttribute('tabindex')??'none';el.tabIndex=0;}else{const old=el.dataset.feedbackTabindex;if(old==='none')el.removeAttribute('tabindex');else if(old!==undefined)el.setAttribute('tabindex',old);delete el.dataset.feedbackTabindex;}});}
   function begin(){if(mode)return;mode=true;document.body.classList.add('feedback-selecting');markTargets(true);entries.forEach(el=>el.setAttribute('aria-pressed','true'));}
-  function releaseWidget(){revision++;token='';if(widget!==null&&window.turnstile)window.turnstile.remove(widget);widget=null;}
+  function releaseWidget(){revision++;token='';clearTimeout(verificationTimer);settleVerification?.(false);settleVerification=null;verificationJob=null;if(widget!==null&&window.turnstile)window.turnstile.remove(widget);widget=null;}
   function choose(){if(submitting)return;saveDraft();releaseWidget();selected=null;hovered=null;highlight.hidden=true;status.textContent='';begin();setState('choose');if(!modal.open)modal.show();modal.focus({preventScroll:true});}
   function start(){if(submitting)return;if(modal.open){modal.close();return;}previousFocus=document.activeElement;mount();choose();if(activeHost().id==='case-study')compose('Case study: '+document.querySelector('#case-title').textContent,document.querySelector('.case-intro'));}
   function feedbackBounds(element){
@@ -352,15 +419,44 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   function queuePosition(){if(!frame)frame=requestAnimationFrame(position);}
   new ResizeObserver(queuePosition).observe(modal);window.addEventListener('resize',queuePosition);document.addEventListener('scroll',queuePosition,true);window.visualViewport?.addEventListener('resize',queuePosition);
   function loadTurnstile(){if(window.turnstile)return Promise.resolve();if(loading)return loading;loading=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';script.async=true;script.onload=()=>window.turnstile?resolve():reject(new Error('unavailable'));script.onerror=()=>{loading=null;script.remove();reject(new Error('unavailable'));};document.head.append(script);});return loading;}
-  function updateCount(){document.querySelector('#feedback-count').textContent=message.value.length.toLocaleString('en-US')+' / 2,000';saveDraft();}
-  async function verify(){const current=revision;try{await loadTurnstile();if(current!==revision||!modal.open||form.hidden)return;widget=window.turnstile.render('#feedback-verification',{sitekey,action:'feedback',theme:modal.classList.contains('note-dark')?'dark':'light',appearance:'interaction-only',callback:value=>{if(current===revision){token=value;if(status.dataset.kind==='verification'){status.textContent='';delete status.dataset.kind;}}},'expired-callback':()=>{if(current===revision)token='';},'error-callback':()=>{if(current===revision){token='';status.dataset.kind='verification';status.textContent='The spam check couldn’t load. Use Retry to try again.';retry.hidden=false;}}});}catch{if(current===revision){status.dataset.kind='verification';status.textContent='The spam check couldn’t load. Use Retry to try again.';retry.hidden=false;}}}
-  const retry=document.createElement('button');retry.type='button';retry.id='feedback-retry';retry.textContent='Retry';retry.hidden=true;status.after(retry);retry.addEventListener('click',()=>{releaseWidget();loading=null;retry.hidden=true;status.textContent='';verify();});
-  function compose(label,element){if(submitting)return;saveDraft();releaseWidget();mount();begin();selected=element;hovered=null;section.dataset.label=label;section.dataset.key=element?label+':'+[...document.querySelectorAll('[data-feedback-section]')].indexOf(element):label;section.textContent=label;const draft=drafts.get(section.dataset.key);form.reset();message.value=draft?.message||'';category.value=draft?.category||'General';message.removeAttribute('aria-invalid');status.textContent='';delete status.dataset.kind;retry.hidden=true;send.disabled=false;setState('write');if(!modal.open)modal.show();updateCount();message.focus({preventScroll:true});verify();}
+  function updateCount(){
+    const hasMessage=message.value.trim().length>0;
+    form.classList.toggle('has-message',hasMessage);syncCategoryPicker();if(!hasMessage)closeCategoryMenu();
+    send.disabled=!hasMessage||submitting;
+    message.style.height='auto';message.style.height=Math.min(140,Math.max(40,message.scrollHeight))+'px';
+    saveDraft();queuePosition();
+  }
+  function verificationFailed(){
+    status.dataset.kind='verification';status.textContent='Verification unavailable.';retry.hidden=false;
+  }
+  function verify(){
+    if(localPreview||token)return Promise.resolve(true);
+    if(verificationJob)return verificationJob;
+    const current=revision;let completed=false;
+    verificationJob=new Promise(resolve=>{
+      settleVerification=resolve;
+      const finish=ok=>{if(current!==revision||completed)return;completed=true;clearTimeout(verificationTimer);settleVerification=null;verificationJob=null;resolve(ok);};
+      verificationTimer=setTimeout(()=>finish(false),15000);
+      loadTurnstile().then(()=>{
+        if(completed||current!==revision||!modal.open||form.hidden){finish(false);return;}
+        if(widget!==null)window.turnstile.remove(widget);
+        widget=window.turnstile.render('#feedback-verification',{
+          sitekey,action:'feedback',theme:modal.classList.contains('note-dark')?'dark':'light',appearance:'interaction-only',
+          callback:value=>{if(current!==revision)return;token=value;retry.hidden=true;if(status.dataset.kind==='verification'){status.textContent='';delete status.dataset.kind;}finish(true);},
+          'expired-callback':()=>{if(current===revision)token='';},
+          'error-callback':()=>{if(current===revision){token='';finish(false);}}
+        });
+      }).catch(()=>{loading=null;finish(false);});
+    });
+    return verificationJob;
+  }
+  const retry=document.createElement('button');retry.type='button';retry.id='feedback-retry';retry.textContent='Retry';retry.hidden=true;status.after(retry);retry.addEventListener('click',async()=>{releaseWidget();loading=null;retry.hidden=true;status.textContent='Checking…';if(await verify()){status.textContent='';}else verificationFailed();});
+  function compose(label,element){if(submitting)return;saveDraft();releaseWidget();mount();begin();selected=element;hovered=null;section.dataset.label=label;section.dataset.key=element?label+':'+[...document.querySelectorAll('[data-feedback-section]')].indexOf(element):label;section.textContent=label;const draft=drafts.get(section.dataset.key);form.reset();message.value=draft?.message||'';category.value=draft?.category||'General';message.removeAttribute('aria-invalid');status.textContent='';delete status.dataset.kind;retry.hidden=true;send.disabled=false;setState('write');if(!modal.open)modal.show();updateCount();message.focus({preventScroll:true});}
   document.querySelectorAll('#story-overlay,#case-study').forEach(parent=>parent.addEventListener('close',()=>{if(modal.open&&parent.contains(modal))modal.close();}));
-  entries.forEach(el=>{el.title='Leave a note (⌘N)';el.setAttribute('aria-keyshortcuts','Meta+N');});
+  entries.forEach(el=>{el.title=el.id==='annotate-feedback'?'Annotate this page (⌘N)':'Leave a note (⌘N)';el.setAttribute('aria-keyshortcuts','Meta+N');});
   document.addEventListener('keydown',event=>{if(!event.metaKey||event.ctrlKey||event.altKey||event.shiftKey||event.isComposing||event.repeat||event.key.toLowerCase()!=='n')return;event.preventDefault();if(modal.open){if(!form.hidden)message.focus({preventScroll:true});return;}const palette=document.querySelector('#command-palette');if(palette?.open)palette.close();start();});
   entries.forEach(el=>el.addEventListener('click',start));close.addEventListener('click',()=>{if(!submitting)modal.close();});document.querySelector('#feedback-reselect').addEventListener('click',choose);document.querySelector('#feedback-another').addEventListener('click',choose);
-  modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});modal.addEventListener('close',()=>{saveDraft();releaseWidget();mode=false;selected=null;hovered=null;highlight.hidden=true;document.body.classList.remove('feedback-selecting');markTargets(false);entries.forEach(el=>el.setAttribute('aria-pressed','false'));document.body.append(modal,highlight);previousFocus?.focus({preventScroll:true});});
+  modal.addEventListener('cancel',event=>{if(submitting)event.preventDefault();});modal.addEventListener('close',()=>{closeCategoryMenu();saveDraft();releaseWidget();mode=false;selected=null;hovered=null;highlight.hidden=true;document.body.classList.remove('feedback-selecting');markTargets(false);entries.forEach(el=>el.setAttribute('aria-pressed','false'));document.body.append(modal,highlight);previousFocus?.focus({preventScroll:true});});
   function targetFor(event){return event.target.closest('[data-feedback-section]');}
   document.addEventListener('pointerover',event=>{if(!mode||selected)return;hovered=event.target.closest('#feedback-dialog')?null:targetFor(event);queuePosition();});
   document.addEventListener('pointerout',event=>{if(!mode||selected)return;if(!event.relatedTarget?.closest?.('[data-feedback-section]')){hovered=null;queuePosition();}});
@@ -370,13 +466,30 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   new MutationObserver(()=>{const content=document.querySelector('#case-content');if(!content.children.length||content.querySelector('.case-feedback'))return;const button=document.createElement('button');button.className='case-feedback';button.textContent='Leave a note';button.addEventListener('click',()=>{previousFocus=document.activeElement;compose('Case study: '+document.querySelector('#case-title').textContent,content.querySelector('.case-intro'));});content.querySelector('.soon-wrap')?.append(button);}).observe(document.querySelector('#case-content'),{childList:true});
   message.addEventListener('input',()=>{updateCount();message.removeAttribute('aria-invalid');if(status.dataset.kind==='validation'){status.textContent='';delete status.dataset.kind;}});category.addEventListener('change',saveDraft);
   message.addEventListener('keydown',event=>{if(event.key==='Enter'&&(event.metaKey||event.ctrlKey)){event.preventDefault();form.requestSubmit();}});
-  form.addEventListener('submit',async event=>{event.preventDefault();if(submitting)return;const text=message.value.trim();if(text.length<10||text.length>2000){status.dataset.kind='validation';status.textContent=text.length<10?'Please write at least 10 characters so I can understand your suggestion.':'Please keep your note under 2,000 characters.';message.setAttribute('aria-invalid','true');message.focus({preventScroll:true});return;}if(!token){status.dataset.kind='verification';status.textContent='Finishing the spam check. Please try posting again in a moment.';return;}
-    submitting=true;send.disabled=true;close.disabled=true;document.querySelector('#feedback-reselect').disabled=true;message.readOnly=true;category.disabled=true;send.textContent='Posting…';status.textContent='';modal.setAttribute('aria-busy','true');
+  form.addEventListener('submit',async event=>{event.preventDefault();if(submitting)return;const text=message.value.trim();if(text.length<10||text.length>2000){status.dataset.kind='validation';status.textContent=text.length<10?'Please write at least 10 characters so I can understand your suggestion.':'Please keep your note under 2,000 characters.';message.setAttribute('aria-invalid','true');message.focus({preventScroll:true});return;}if(localPreview){
+      try{
+        const saved=JSON.parse(sessionStorage.getItem('portfolio-preview-notes')||'[]');
+        saved.push({message:text,category:category.value,section:section.dataset.label,createdAt:new Date().toISOString()});
+        sessionStorage.setItem('portfolio-preview-notes',JSON.stringify(saved));
+      }catch{status.textContent='Your browser could not save this preview note. Your draft is still here.';return;}
+      drafts.delete(section.dataset.key);message.value='';selected=null;highlight.hidden=true;
+      success.querySelector('p').textContent='Preview note saved.';
+      success.querySelector('.note-success-detail').textContent='Saved in this tab only. It has not been sent to Ehi.';
+      setState('sent');document.querySelector('#feedback-another').focus({preventScroll:true});return;
+    }
+    if(!token){
+      submitting=true;send.disabled=true;status.dataset.kind='verification';status.textContent='Checking…';
+      const verified=await verify();submitting=false;
+      if(!modal.open)return;
+      if(!verified){send.disabled=false;verificationFailed();return;}
+      status.textContent='';
+    }
+    submitting=true;send.disabled=true;close.disabled=true;document.querySelector('#feedback-reselect').disabled=true;message.readOnly=true;category.disabled=true;categoryButton.disabled=true;send.innerHTML='<span aria-hidden="true">…</span>';send.setAttribute('aria-label','Sending note');status.textContent='';modal.setAttribute('aria-busy','true');
     const version=new URL(document.querySelector('script[src*="app.js"]').src).searchParams.get('v');
     const payload={message:text,page:location.href,section:section.dataset.label,category:category.value,website:form.elements.website.value,token,version};
-    try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Your note couldn’t be sent. Please try again.');drafts.delete(section.dataset.key);message.value='';selected=null;highlight.hidden=true;releaseWidget();setState('sent');document.querySelector('#feedback-another').focus({preventScroll:true});}
-    catch(error){status.textContent=error.name==='TimeoutError'?'The connection timed out. Your draft is still here—please try again.':error.message==='Failed to fetch'?'Couldn’t connect. Your draft is still here—please try again.':error.message;releaseWidget();verify();}
-    finally{submitting=false;send.disabled=false;close.disabled=false;document.querySelector('#feedback-reselect').disabled=false;message.readOnly=false;category.disabled=false;send.innerHTML='Post note <span aria-hidden="true">↗</span>';modal.removeAttribute('aria-busy');}
+    try{const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload),signal:AbortSignal.timeout(30000)});const result=await response.json();if(!response.ok||result.ok!==true)throw new Error(result.error||'Your note couldn’t be sent. Please try again.');drafts.delete(section.dataset.key);message.value='';selected=null;highlight.hidden=true;releaseWidget();success.querySelector('p').textContent='Thank you! Your note has been added ;)';success.querySelector('.note-success-detail').textContent='Sent privately to Ehi.';setState('sent');document.querySelector('#feedback-another').focus({preventScroll:true});}
+    catch(error){status.textContent=error.name==='TimeoutError'?'The connection timed out. Your draft is still here—please try again.':error.message==='Failed to fetch'?'Couldn’t connect. Your draft is still here—please try again.':error.message;releaseWidget();}
+    finally{submitting=false;send.disabled=false;close.disabled=false;document.querySelector('#feedback-reselect').disabled=false;message.readOnly=false;category.disabled=false;categoryButton.disabled=false;send.innerHTML='<svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';send.setAttribute('aria-label','Send note');modal.removeAttribute('aria-busy');}
   });
 })();
 
@@ -700,7 +813,7 @@ function closeStory(){document.querySelector('#feedback-dialog').close();overlay
 document.querySelectorAll('a[href="#story"]').forEach(link=>link.addEventListener('click',event=>{if(document.body.classList.contains('feedback-selecting'))return;event.preventDefault();openStory();}));
 document.addEventListener('open-story',openStory);
 storyPhone.addEventListener('change',()=>{if(!overlay.open)return;if(storyPhone.matches){portrait?.setVisible(false);select(0);}else{overlay.close();openStory();}});
-overlay.querySelector('[data-story-work]').addEventListener('click',event=>{event.preventDefault();closeStory();document.querySelector('#work').scrollIntoView({behavior:'smooth'});});
+overlay.querySelector('[data-story-work]').addEventListener('click',event=>{event.preventDefault();closeStory();document.querySelector('#navigation-stage').scrollIntoView({behavior:'smooth'});});
 overlay.querySelector('[data-story-gallery]').addEventListener('click',()=>{closeStory();document.querySelector('[data-missing="Gallery"]')?.click();});
 overlay.querySelector('[data-story-email]').addEventListener('click',()=>document.querySelector('#copy-email').click());
 document.querySelector('#story-home').addEventListener('click',()=>{closeStory();returnToVideo();});document.querySelector('#story-close').addEventListener('click',closeStory);
