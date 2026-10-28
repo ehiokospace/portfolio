@@ -787,7 +787,7 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
  .intro-landing{position:relative}.header-brand{padding:8px 0}.header-brand span{display:inline;font-size:11px}
 }
 
-.intro-landing .hero,.intro-cinematic .intro-landing .hero{height:45svh;min-height:0}
+@media(max-width:700px){.intro-landing .hero,.intro-cinematic .intro-landing .hero{height:45svh;min-height:0}}
 @media(max-width:700px){.work-sidebar .sidebar-bio>a[href="#story"]{display:none}}
 
 .mobile-project-heading{display:none}
