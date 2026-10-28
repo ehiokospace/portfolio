@@ -242,7 +242,7 @@
 
 // Thumbnail discipline labels: independently damped rows follow the native cursor.
 (() => {
-  const fine = matchMedia('(hover: hover) and (pointer: fine)');
+  const fine = matchMedia('(min-width:701px) and (hover: hover) and (pointer: fine)');
   const reduced = matchMedia('(prefers-reduced-motion: reduce)');
   const labels = {
     ibm: ['GROWTH', 'COMMUNITY'],
@@ -336,4 +336,15 @@
  drawer.addEventListener('click',event=>{if(event.target===drawer)drawer.close();else if(event.target.closest('.sidebar-links a,.sidebar-links button,.nav-control'))drawer.close();});
  function sync(){if(breakpoint.matches){body.append(views,links);}else{if(drawer.open)drawer.close();viewsAnchor.after(views);linksAnchor.after(links);}}
  breakpoint.addEventListener('change',sync);sync();
+})();
+
+// Put the shared header before the film on mobile, retaining desktop order.
+(() => {
+ const header=document.querySelector('main>.shared-navigation');
+ const intro=document.querySelector('main>.intro-landing');
+ if(!header||!intro)return;
+ const anchor=document.createComment('Desktop header position');header.before(anchor);
+ const mobile=matchMedia('(max-width:700px)');
+ const sync=()=>{if(mobile.matches)intro.before(header);else anchor.after(header);};
+ mobile.addEventListener('change',sync);sync();
 })();

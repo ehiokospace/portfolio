@@ -786,3 +786,21 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
  .project-grid .project-preview-control,.project-grid .project-panel:is(:hover,:focus-within) .project-preview-control{bottom:80px;right:14px}
  .intro-landing{position:relative}.header-brand{padding:8px 0}.header-brand span{display:inline;font-size:11px}
 }
+
+.intro-landing .hero,.intro-cinematic .intro-landing .hero{height:45svh;min-height:0}
+@media(max-width:700px){.work-sidebar .sidebar-bio>a[href="#story"]{display:none}}
+
+.mobile-project-heading{display:none}
+@media(max-width:700px){.mobile-project-heading{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 -12px;color:#77736f}.mobile-project-heading h2,.mobile-project-heading>span{margin:0;font:400 11px/20px 'Departure Mono',monospace;text-transform:uppercase;letter-spacing:0}.mobile-project-heading>span{margin-left:auto;text-align:right}}
+@media(max-width:700px){.mobile-project-heading,.mobile-project-heading h2,.mobile-project-heading>span{color:#16130e}}
+
+@media(max-width:700px){.intro-landing .intro-copy{width:calc(100% - 32px)}.intro-landing .hero #intro-headline{font-size:clamp(16px,4.8vw,30px);line-height:1.2}.intro-landing .hero #intro-headline .headline-line{display:block;white-space:nowrap}}
+
+.intro-landing .hero #intro-headline .headline-line{display:block;white-space:nowrap}
+@media(max-width:700px){.work-sidebar{display:none!important}.shared-navigation{position:relative;top:auto}.intro-landing{padding-top:0}}
+@media(max-width:700px){.shared-navigation{padding-block:12px}.intro-landing,.intro-cinematic .intro-landing{padding-top:0}}
+@media(max-width:700px){.mobile-project-heading{margin:0;padding:12px 0}.project-grid{row-gap:28px}.mobile-project-heading+ .project-panel{margin-top:-16px}}
+@media(max-width:700px){.intro-landing,.intro-cinematic .intro-landing{padding-bottom:0}.navigation-study{padding-top:0}.mobile-project-heading{padding-block:24px;margin:0}.mobile-project-heading+.project-panel{margin-top:-28px}}
+
+.intro-cinematic .intro-skip,.intro-skip{display:none!important}
+@media(max-width:700px),(hover:none),(pointer:coarse){.project-cursor-labels{display:none!important}}
