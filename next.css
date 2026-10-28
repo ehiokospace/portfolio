@@ -804,3 +804,6 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
 
 .intro-cinematic .intro-skip,.intro-skip{display:none!important}
 @media(max-width:700px),(hover:none),(pointer:coarse){.project-cursor-labels{display:none!important}}
+@media(max-width:700px){#mobile-navigation-drawer .corner-views{display:none}}
+@media(max-width:700px){#command-palette #close-search.command-floating-close{display:none!important}}
+@media(max-width:700px){.mobile-navigation-toggle{display:none}}
