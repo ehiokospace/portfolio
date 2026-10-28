@@ -316,3 +316,24 @@
   fine.addEventListener('change',hide);
   new MutationObserver(()=>{if(active && !resolve(document.elementFromPoint(point.x,point.y)))hide();}).observe(document.body,{attributes:true,subtree:true,attributeFilter:['open','hidden']});
 })();
+
+// Compact navigation drawer on narrow screens; reuse the original live controls.
+(() => {
+ const breakpoint=matchMedia('(max-width:700px)');
+ const header=document.querySelector('.shared-navigation .corner-top-right');
+ const sidebar=document.querySelector('.work-sidebar');
+ const links=sidebar.querySelector('.sidebar-links');
+ const views=header.querySelector('.corner-views');
+ const linksAnchor=document.createComment('Sidebar navigation');links.before(linksAnchor);
+ const viewsAnchor=document.createComment('Portfolio views');views.before(viewsAnchor);
+ const toggle=document.createElement('button');toggle.type='button';toggle.className='mobile-navigation-toggle';toggle.setAttribute('aria-label','Open navigation');toggle.setAttribute('aria-haspopup','dialog');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-controls','mobile-navigation-drawer');
+ toggle.innerHTML='<svg viewBox="0 0 24 24" width="20" height="20" fill="none" aria-hidden="true"><path d="M4 8h16M4 16h16" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';header.append(toggle);
+ const drawer=document.createElement('dialog');drawer.id='mobile-navigation-drawer';drawer.setAttribute('aria-label','Navigation');drawer.innerHTML='<header><span>NAVIGATION</span><button type="button" aria-label="Close navigation">CLOSE</button></header><div class="mobile-navigation-body"></div>';
+ document.body.append(drawer);const body=drawer.querySelector('.mobile-navigation-body');
+ toggle.addEventListener('click',()=>{drawer.showModal();toggle.setAttribute('aria-expanded','true');});
+ drawer.querySelector('header button').addEventListener('click',()=>drawer.close());
+ drawer.addEventListener('close',()=>toggle.setAttribute('aria-expanded','false'));
+ drawer.addEventListener('click',event=>{if(event.target===drawer)drawer.close();else if(event.target.closest('.sidebar-links a,.sidebar-links button,.nav-control'))drawer.close();});
+ function sync(){if(breakpoint.matches){body.append(views,links);}else{if(drawer.open)drawer.close();viewsAnchor.after(views);linksAnchor.after(links);}}
+ breakpoint.addEventListener('change',sync);sync();
+})();
