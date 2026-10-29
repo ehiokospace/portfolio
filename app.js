@@ -218,7 +218,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   studies.apron={title:'Apron',summary:'Cooking companion'};
   studies.aven={title:'Aven'};studies.ibm={title:'IBM'};
   const dockDescriptions={thrive:'Product','internal-tooling':'Internship',notion:'Growth',apron:'Project',colorstack:'Growth',aven:'Project',ibm:'Growth'};
-  const presentation={thrive:{poster:'thrive-thumbnail.jpg',video:'thrive-thumbnail.mp4'},'internal-tooling':{poster:'sullivan-thumbnail.jpg',video:'sullivan-thumbnail.mp4'},notion:{poster:'notion-thumbnail.jpg',video:'notion-thumbnail.mp4'},apron:{poster:'apron-thumbnail.jpg',video:'apron-thumbnail.mp4'},colorstack:{poster:'colorstack-thumbnail.png'},aven:{poster:'aven-thumbnail.png'},ibm:{poster:'ibm-thumbnail.gif'}};
+  const presentation={thrive:{poster:'thrive-thumbnail.jpg',video:'thrive-thumbnail.mp4'},'internal-tooling':{poster:'sullivan-thumbnail-v3.png'},notion:{poster:'notion-thumbnail-v2.png'},apron:{poster:'apron-thumbnail.jpg',video:'apron-thumbnail.mp4'},colorstack:{poster:'colorstack-thumbnail.png'},aven:{poster:'aven-thumbnail.png'},ibm:{poster:'ibm-thumbnail.gif'}};
   const modal=document.querySelector('#case-study'),content=document.querySelector('#case-content'),expand=document.querySelector('#case-expand');
   const escape=value=>String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let thriveStory;
