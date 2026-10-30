@@ -189,7 +189,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
     empty.hidden=filtered.length>0;highlight();
   }
   function open(){if(palette.open)return;opener=document.activeElement;query.value='';render();palette.showModal();query.focus({preventScroll:true});if(!matchMedia('(prefers-reduced-motion:reduce)').matches)palette.animate([{opacity:0,transform:'translateY(8px) scale(.98)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:240,easing:'cubic-bezier(.16,1,.3,1)'});}
-  document.querySelectorAll('.portfolio-menu,#open-search,#mobile-menu').forEach(b=>b.addEventListener('click',open));
+  document.querySelectorAll('.command-shortcut,#open-search,#mobile-menu').forEach(b=>b.addEventListener('click',open));
   document.querySelector('#close-search').addEventListener('click',()=>palette.close());
   palette.addEventListener('close',()=>opener?.focus({preventScroll:true}));
   palette.addEventListener('click',e=>{if(e.target===palette){const r=palette.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)palette.close();}});
@@ -198,11 +198,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   palette.addEventListener('keydown',e=>{if(e.altKey&&!e.ctrlKey&&!e.metaKey&&!e.shiftKey&&!e.isComposing&&!e.repeat){const item=items.find(item=>item.key===e.code);if(item){e.preventDefault();if(!item.keepOpen)palette.close();item.run();return;}}if(['ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();if(!filtered.length)return;active=(active+(e.key==='ArrowDown'?1:-1)+filtered.length)%filtered.length;highlight();results.querySelectorAll('.command-result')[active].scrollIntoView({block:'nearest'});}if(e.key==='Enter'&&e.target===query){e.preventDefault();choose(Math.max(0,active));}});
   document.addEventListener('keydown',e=>{
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();palette.open?palette.close():open();return;}
-    if(e.key!=='Enter'||e.defaultPrevented||e.repeat||e.isComposing||e.metaKey||e.ctrlKey||e.altKey||e.shiftKey||palette.open)return;
-    const target=e.target;
-    if(target instanceof Element && target.closest('input,textarea,select,button,a,[contenteditable]:not([contenteditable="false"]),[role="button"],[role="textbox"],video,audio'))return;
-    if(document.querySelector('dialog[open]'))return;
-    e.preventDefault();open();
+
   });
 })();
 
@@ -285,7 +281,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
     if(!['thrive','internal-tooling'].includes(id)||!studies[id])return;
     if(!modal.open)previousFocus=document.activeElement;
     const wasOpen=modal.open;
-    projectDock.classList.remove('is-scroll-hidden');dockScrollTop=0;render(studies[id],id);modal.dataset.project=id;modal.classList.remove('expanded');expand.setAttribute('aria-pressed','false');expand.setAttribute('aria-label','Expand case study');
+    projectDock.classList.remove('is-scroll-hidden');dockScrollTop=0;dockUserScrollUntil=0;render(studies[id],id);modal.dataset.project=id;modal.classList.remove('expanded');expand.setAttribute('aria-pressed','false');expand.setAttribute('aria-label','Expand case study');
     if(!modal.open)modal.showModal();content.scrollTop=0;
     projectDock.querySelectorAll('[data-dock-project]').forEach(button=>{button.setAttribute('aria-current',button.dataset.dockProject===id?'page':'false');});
     if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
@@ -340,10 +336,18 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   mobileHeader.querySelector('[data-case-home]').onclick=closeCase;
   mobilePanel.addEventListener('cancel',e=>{e.preventDefault();closeMobilePanel();});
   mobilePanel.addEventListener('click',e=>{if(e.target===mobilePanel){const r=mobilePanel.getBoundingClientRect();if(e.clientY<r.top||e.clientY>r.bottom||e.clientX<r.left||e.clientX>r.right)closeMobilePanel();}});
-  let dockScrollTop=0;
+  let dockScrollTop=0,dockUserScrollUntil=0;
+  // Safari can scroll a newly opened dialog to its focused control. Only
+  // intentional scrolling should tuck away the project dock.
+  const armDockScroll=()=>{dockUserScrollUntil=performance.now()+1200;};
+  content.addEventListener('wheel',armDockScroll,{passive:true});
+  content.addEventListener('touchmove',armDockScroll,{passive:true});
+  content.addEventListener('pointerdown',armDockScroll,{passive:true});
+  content.addEventListener('keydown',event=>{if(['ArrowDown','ArrowUp','PageDown','PageUp','Home','End',' '].includes(event.key))armDockScroll();});
   content.addEventListener('scroll',()=>{
     const next=content.scrollTop;
     const delta=next-dockScrollTop;
+    if(performance.now()>dockUserScrollUntil){dockScrollTop=next;return;}
     if(delta>.5)projectDock.classList.add('is-scroll-hidden');
     else if(delta<-.5 || next<=0)projectDock.classList.remove('is-scroll-hidden');
     dockScrollTop=next;

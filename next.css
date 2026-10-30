@@ -1111,3 +1111,18 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
 /* Opening the sheet focuses its container, not a seemingly selected icon. */
 .case-mobile-panel:focus{outline:none}
 .case-mobile-panel button:focus:not(:focus-visible){outline:none}
+
+/* Menu access beside the sidebar credit. */
+.work-copyright{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.command-shortcut{appearance:none;border:0;background:transparent;padding:0;color:inherit;cursor:pointer;font:400 13px/20px "Departure Mono",monospace;white-space:nowrap;text-transform:uppercase}
+.command-shortcut:hover{opacity:.6}
+.command-shortcut:focus-visible{outline:2px solid currentColor;outline-offset:5px}
+
+.work-sidebar .work-copyright .command-shortcut{font-family:"Departure Mono",monospace!important;font-size:13px!important;font-weight:400!important;line-height:20px!important;padding:0;text-align:left;color:#15130f}
+
+/* Minimal view switch: outline only the active view. */
+.corner-top-right .corner-views{padding:0;gap:8px;border:0;background:transparent;border-radius:0}
+.corner-top-right .corner-views .nav-control{border:1px solid transparent;border-radius:10px;background:transparent;min-height:36px;padding:8px 14px}
+.corner-top-right .corner-views .nav-control[aria-pressed='true']{border-color:#16130e22;background:transparent}
+.corner-top-right .corner-views .nav-control[aria-pressed='true']:hover{border-color:#16130e22}
+.corner-top-right .view-indicator{display:none}
