@@ -217,22 +217,44 @@
   function toggleSound() { muted = !muted; try { localStorage.setItem('portfolio-sound-muted', String(muted)); } catch {} refresh(); }
   document.addEventListener('portfolio:toggle-sound', toggleSound);
   refresh();
-  function tap() {
+  let hoverBuffer=null;
+  async function loadHover(){try{context ||= new (window.AudioContext || window.webkitAudioContext)();hoverBuffer=await context.decodeAudioData(await (await fetch('./assets/project-hover.wav')).arrayBuffer());}catch{}}
+  document.addEventListener('pointerdown',()=>{if(!hoverBuffer)loadHover();},{once:true});
+  function tap(hover = false) {
     if (muted) return;
     try {
       context ||= new (window.AudioContext || window.webkitAudioContext)();
+      if(hover && context.state!=='running')return;
       context.resume().then(() => {
         const now = context.currentTime;
+        if(hover){
+          if(!hoverBuffer)return;
+          const source=context.createBufferSource();source.buffer=hoverBuffer;source.playbackRate.value=1.25;
+          const gain=context.createGain();gain.gain.value=.6;
+          source.connect(gain).connect(context.destination);source.start(now);
+          source.onended=()=>{source.disconnect();gain.disconnect();};
+          return;
+        }
         const buffer = context.createBuffer(1, Math.ceil(context.sampleRate * .025), context.sampleRate);
         const data = buffer.getChannelData(0);
         for (let i=0;i<data.length;i++) data[i] = (Math.random()*2-1)*Math.exp(-i/(context.sampleRate*.0035));
         const source = context.createBufferSource(); source.buffer = buffer;
         const filter = context.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 1900; filter.Q.value = .7;
-        const gain = context.createGain(); gain.gain.setValueAtTime(.12, now); gain.gain.exponentialRampToValueAtTime(.001, now+.025);
+        const gain = context.createGain(); gain.gain.setValueAtTime(hover ? .075 : .12, now); gain.gain.exponentialRampToValueAtTime(.001, now+.025);
         source.connect(filter).connect(gain).connect(context.destination); source.start(now); source.stop(now+.03);
       }).catch(() => {});
     } catch {}
   }
+  let lastDockHover=0;
+  document.addEventListener('pointerover',event=>{
+    if(!event.isTrusted || event.pointerType==='touch')return;
+    const item=event.target.closest('.case-project-dock [data-dock-project]');
+    if(!item || item.contains(event.relatedTarget))return;
+    const now=performance.now();
+    if(now-lastDockHover<45)return;
+    lastDockHover=now;
+    tap(true);
+  });
   document.addEventListener('click', event => {
     if (!event.isTrusted || !event.target.closest('button, a, select, [role="option"]')) return;
     if (event.target.closest('[disabled], [aria-disabled="true"]')) return;
@@ -278,12 +300,28 @@
       if(Math.abs(x-r.x)>.1 || Math.abs(y-r.y)>.1)moving=true;
       r.row.style.transform = `translate3d(${r.x}px,${r.y}px,0)`;
     });
+    host.classList.toggle('is-obstructed',nearAnnotate());
     if(moving || now < stopAt)frame=requestAnimationFrame(tick);
   }
   function wake(){if(!frame){previous=0;frame=requestAnimationFrame(tick);}}
   function hide(){
     active=null; cancelAnimationFrame(reveal); host.classList.remove('is-visible');
     stopAt=performance.now()+450; wake();
+  }
+  function nearAnnotate() {
+    const button=document.querySelector('#annotate-feedback');
+    if(!button || !button.getClientRects().length)return false;
+    const b=button.getBoundingClientRect();
+    const clearance=6;
+    const intersects=(x,y,w,h)=>x+w>b.left-clearance && x<b.right+clearance &&
+      y+h>b.top-clearance && y<b.bottom+clearance;
+    return rows.some((r,i)=>{
+      const width=r.text.offsetWidth || r.width;
+      const height=r.text.offsetHeight || 34;
+      const x=Math.max(8,Math.min(point.x+14,innerWidth-width-8));
+      const y=Math.max(8,Math.min(point.y+14,innerHeight-88))+i*40;
+      return intersects(x,y,width,height) || intersects(r.x,r.y,width,height);
+    });
   }
   function resolve(element) {
     if(!fine.matches || document.hidden || document.body.classList.contains('feedback-selecting') || document.querySelector('dialog[open]'))return null;
@@ -294,7 +332,9 @@
     return labels[(card.querySelector('[data-project-case]')?.dataset.projectCase || card.querySelector('[data-project-tags]')?.dataset.projectTags)]?card:null;
   }
   function update(element) {
-    const card=resolve(element);
+    const blocked=nearAnnotate();
+    host.classList.toggle('is-obstructed',blocked);
+    const card=blocked?null:resolve(element);
     if(card===active){if(card)wake();return;}
     if(!card){if(active)hide();return;}
     active=card;cancelAnimationFrame(reveal);host.classList.remove('is-visible');

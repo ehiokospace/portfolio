@@ -278,7 +278,7 @@
  function showMedia(index){
   galleryIndex=index;const item=media[index],group=groups[item.group];
   gallery.querySelector('h2').textContent=group.name;
-  caseButton.hidden=item.group!=='thrive';
+  caseButton.hidden=!['thrive','sullivan'].includes(item.group);
   gallery.querySelector('figcaption').textContent=item.title;
   paintMedia(galleryArt,item);galleryStrip.replaceChildren();galleryStrip.setAttribute('aria-label','More from '+group.name);
   media.forEach((other,i)=>{
