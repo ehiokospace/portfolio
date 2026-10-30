@@ -314,7 +314,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   const mobileBrand='<img src="./assets/header-butterfly.svg" alt="" width="23" height="23"><span>EHI OKO</span>';
   mobileHeader.innerHTML='<button type="button" data-case-panel="navigation" aria-label="Open navigation">'+mobileIcon('hamburger')+'</button><button type="button" class="case-mobile-brand" data-case-home>'+mobileBrand+'</button><button type="button" data-case-panel="projects" aria-label="Browse projects">'+mobileIcon('projects')+'</button>';
   modal.append(mobileHeader);
-  const mobilePanel=document.createElement('dialog');mobilePanel.className='case-mobile-panel';modal.append(mobilePanel);
+  const mobilePanel=document.createElement('dialog');mobilePanel.className='case-mobile-panel';mobilePanel.tabIndex=-1;modal.append(mobilePanel);
   let panelTrigger;
   async function closeMobilePanel(){
     if(!mobilePanel.open)return;
@@ -332,6 +332,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
     mobilePanel.querySelectorAll('[data-mobile-project]').forEach(b=>b.onclick=async()=>{await closeMobilePanel();openCase(b.dataset.mobileProject);});
     mobilePanel.querySelectorAll('[data-mobile-action]').forEach(b=>b.onclick=async()=>{const action=b.dataset.mobileAction;await closeMobilePanel();if(action==='email'||action==='contact'){document.querySelector('#copy-email')?.click();return;}modal.close();if(action==='about')document.dispatchEvent(new Event('open-story'));if(action==='craft'||action==='gallery')document.querySelector('[data-missing="'+(action==='craft'?'Craft':'Gallery')+'"]')?.click();});
     if(!mobilePanel.open)mobilePanel.showModal();
+    mobilePanel.focus({preventScroll:true});
     mobilePanel.style.setProperty('--panel-bottom',mobilePanel.getBoundingClientRect().bottom+'px');
     if(!matchMedia('(prefers-reduced-motion: reduce)').matches){mobilePanel.animate([{opacity:0,transform:'translateY(-20px) scale(.96)'},{opacity:1,transform:'translateY(0) scale(1)'}],{duration:380,easing:'cubic-bezier(.16,1,.3,1)'});mobilePanel.querySelectorAll('.case-mobile-projects button,.case-mobile-links button').forEach((b,i)=>b.animate([{opacity:0,transform:'translateY(16px)'},{opacity:1,transform:'translateY(0)'}],{duration:400,delay:40+i*25,easing:'cubic-bezier(.16,1,.3,1)',fill:'backwards'}));}
   }
