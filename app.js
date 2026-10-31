@@ -2,7 +2,7 @@ document.querySelector('.header-brand')?.addEventListener('click',()=>returnToVi
 document.querySelector('[aria-label="Back to top"]').addEventListener('click',event=>{event.preventDefault();returnToVideo();});
 // Replace null destinations with your own URLs. Relative paths work on GitHub Pages.
 const destinations = {
-  Craft: null, Gallery: null, Resume: 'https://drive.google.com/file/d/11beu2HB285avA1R1cZX8E9XF8QlEzJ4y/view?usp=sharing',
+  Craft: null, Gallery: null, Resume: 'https://drive.google.com/file/d/1CpuS_9kZ4EvmNX11TUOzZD1AE65pZtOQ/view?usp=sharing',
   'Internal tooling case study': null,
   'AI mental health case study': null,
   'Course scheduling case study': null,
