@@ -119,7 +119,7 @@
   }
 ];
  const groups={thrive:{name:"Thrive",color:"73,145,124"},sullivan:{name:"Sullivan Foundation",color:"41,119,183"},notion:{name:"Notion",color:"226,116,151"},colorstack:{name:"ColorStack AAMU",color:"137,24,67"},apron:{name:"Apron",color:"172,113,91"},aven:{name:"Aven",color:"151,161,111"},ibm:{name:"IBM",color:"24,24,24"}};
- const nodes=media.map((item,i)=>{
+ const nodes=media.filter(item=>item.group!=='apron').map((item,i)=>{
   const panel=document.querySelector('.panel-'+item.group),launch=panel.querySelector('.project-launch');
   const title=groups[item.group].name+' · '+item.title;
   const button=document.createElement('button');button.type='button';button.className='spatial-node';
