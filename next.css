@@ -1126,3 +1126,9 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
 .corner-top-right .corner-views .nav-control[aria-pressed='true']{border-color:#16130e22;background:transparent}
 .corner-top-right .corner-views .nav-control[aria-pressed='true']:hover{border-color:#16130e22}
 .corner-top-right .view-indicator{display:none}
+
+/* Close Apron's former slot with the remaining community projects. */
+@media(min-width:701px){
+ .project-grid .panel-colorstack{grid-column:1;grid-row:81/111}
+ .project-grid .panel-ibm{grid-column:2;grid-row:81/111}
+}
