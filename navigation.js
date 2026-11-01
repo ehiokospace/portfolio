@@ -248,7 +248,7 @@
   let lastDockHover=0;
   document.addEventListener('pointerover',event=>{
     if(!event.isTrusted || event.pointerType==='touch')return;
-    const item=event.target.closest('.case-project-dock [data-dock-project]');
+    const item=event.target.closest('.case-project-dock [data-dock-project], .work-sidebar .sidebar-links a, .work-sidebar .sidebar-links button');
     if(!item || item.contains(event.relatedTarget))return;
     const now=performance.now();
     if(now-lastDockHover<45)return;
