@@ -60,7 +60,10 @@
       stage.dispatchEvent(new Event('viewchange'));
       stage.setAttribute('aria-label', button.textContent.trim() + ' view');
       placeIndicator();
-      stage.scrollIntoView({behavior: reduced.matches ? 'instant' : 'smooth', block: 'start'});
+      if (button.dataset.view === 'projects') {
+        button.focus({preventScroll:true});
+        stage.scrollIntoView({behavior: reduced.matches ? 'instant' : 'smooth', block: 'start'});
+      }
     });
     // Standard left/right navigation for this two-option view switch.
     button.addEventListener('keydown', event => {

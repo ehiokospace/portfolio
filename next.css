@@ -148,7 +148,9 @@ main > .utility, main > .layout, main > .sidebar-footer, #feedback-mobile { disp
 @media (max-width: 700px), (hover: none) {
  .project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; aspect-ratio: auto; gap: 20px 8px; margin-bottom: 28px; }
  .project-panel { grid-column: auto; grid-row: auto; padding-bottom: 72px; }
- .project-image-space { position: relative; height: auto; aspect-ratio: 4 / 3; }
+ /* Match the desktop grid's 30-row and 50-row cards when they reflow. */
+ .project-image-space { position: relative; height: auto; aspect-ratio: var(--project-card-ratio, 4 / 3); }
+ .project-grid :is(.panel-thrive, .panel-aven) { --project-card-ratio: 4 / 5; }
  .project-summary { height: 72px; padding: 10px 18px 0 0; flex-direction: column; justify-content: flex-start; gap: 3px; opacity: 1; }
  .project-summary h2, .project-summary .project-description { font-size: 14px; white-space: normal; text-align: left; }
  .project-summary .project-description { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -415,9 +417,6 @@ body:has(#spatial-gallery[open]), html:has(#spatial-gallery[open]) { overflow: h
 /* Preserve the complete 5:3 Sullivan composition, including its outer padding. */
 .panel-sullivan .project-image-space { background: var(--paper); }
 .panel-sullivan .project-thumbnail-video { object-fit: contain; }
-@media (max-width: 700px), (hover: none) {
- .panel-sullivan .project-image-space { aspect-ratio: 5 / 3; }
-}
 @media (min-width: 701px) and (hover: hover) and (pointer: fine) {
  .panel-sullivan { grid-row: 1 / 26; }
  .panel-tbd { grid-row: 26 / 81; }
@@ -778,8 +777,7 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
  .project-grid{display:flex!important;flex-direction:column;gap:28px;aspect-ratio:auto!important;grid-template-rows:none!important;margin:0 0 80px;padding:0;height:auto}
  .project-grid[hidden]{display:none!important}
  .project-grid .project-panel{display:block;position:relative;grid-area:auto!important;width:100%;height:auto;min-height:0;padding:0;overflow:visible}
- .project-grid .project-image-space,.project-grid .project-panel:is(:hover,:focus-within) .project-image-space{position:relative;inset:auto;width:100%;height:auto!important;aspect-ratio:4/3;border-radius:8px}
- .project-grid .panel-thrive .project-image-space,.project-grid .panel-tbd .project-image-space,.project-grid .panel-aven .project-image-space{aspect-ratio:4/5}
+ .project-grid .project-image-space,.project-grid .project-panel:is(:hover,:focus-within) .project-image-space{position:relative;inset:auto;width:100%;height:auto!important;aspect-ratio:var(--project-card-ratio, 4 / 3);border-radius:8px}
  .project-grid .project-summary{position:relative;inset:auto;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start;gap:3px;width:100%;height:auto;min-height:56px;padding:12px 24px 0 0;opacity:1!important;transition:none}
  .project-grid .project-summary h2,.project-grid .project-summary .project-description{font:400 17px/23px 'TWK Lausanne',Arial,sans-serif;white-space:normal;text-align:left;overflow:visible;display:block}
  .project-grid .project-launch{inset:0;border-radius:8px}
@@ -787,7 +785,7 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
  .intro-landing{position:relative}.header-brand{padding:8px 0}.header-brand span{display:inline;font-size:11px}
 }
 
-@media(max-width:700px){.intro-landing .hero,.intro-cinematic .intro-landing .hero{height:45svh;min-height:0}}
+@media(max-width:700px){.intro-landing .hero,.intro-cinematic .intro-landing .hero{height:70svh;min-height:0}}
 @media(max-width:700px){.work-sidebar .sidebar-bio>a[href="#story"]{display:none}}
 
 .mobile-project-heading{display:none}
@@ -1138,14 +1136,199 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
  .project-grid{grid-template-rows:repeat(110,minmax(0,1fr));aspect-ratio:8/11;margin-bottom:32px}
 }
 
-/* Align the desktop shortcut with the final project cards. */
-@media(min-width:701px){
- .work-layout .work-sidebar{position:relative;top:auto;align-self:stretch;height:auto;margin-bottom:32px;overflow:visible}
- .work-sidebar .work-copyright{padding-bottom:0}
-}
-
 /* Use only the page inset below the final row, matching the side edges. */
 @media(min-width:701px){
  .work-layout .project-grid{margin-bottom:0}
- .work-layout .work-sidebar{margin-bottom:0}
+ .work-sidebar .work-copyright{padding-bottom:0}
 }
+
+.spatial-gesture-hint {
+ position: absolute;
+ inset: 6px auto auto 50%;
+ transform: translateX(-50%);
+ z-index: 301;
+ margin: 0;
+ padding: 4px 8px;
+ border-radius: 6px;
+ background: var(--paper);
+ white-space: nowrap;
+ text-align: center;
+ color: #666;
+ font-size: 12px;
+ pointer-events: none;
+}
+
+/* Spatial exhibition */
+.spatial-view[open] {
+ position: fixed;
+ inset: 0;
+ width: 100%;
+ height: 100dvh;
+ max-width: none;
+ max-height: none;
+ min-height: 0;
+ margin: 0;
+ padding: 0;
+ border: 0;
+ border-radius: 0;
+ overflow: hidden;
+ color: #eee;
+ background: #0e0e0e;
+ animation: exhibition-enter .32s ease-out both;
+}
+@keyframes exhibition-enter { from { opacity: 0; } to { opacity: 1; } }
+body:has(.spatial-view[open]) { overflow: hidden; }
+.spatial-view .spatial-scene { border-radius: 0; }
+.spatial-view .spatial-scene:focus-visible { outline: 1px solid #ffffff30; outline-offset: -2px; }
+.spatial-view .spatial-nodes { overflow: clip; }
+.exhibition-artwork {
+ position: absolute;
+ pointer-events: auto;
+ top: 50%;
+ left: 50%;
+ max-width: none;
+ padding: 0;
+ border: 0;
+ background: transparent;
+ color: white;
+ cursor: inherit;
+}
+.exhibition-artwork img { display: block; width: 100%; max-height: 245px; object-fit: cover; }
+.exhibition-artwork img { border-radius: 0; transition: transform .2s ease-out; }
+.exhibition-artwork.is-culled { opacity: 0 !important; pointer-events: none !important; }
+.spatial-scene:not(.is-dragging) .exhibition-artwork:is(:hover,:focus-visible) img { transform: scale(1.055); }
+.exhibition-cursor {
+ position: absolute;
+ inset: 0 auto auto 0;
+ z-index: 3500;
+ pointer-events: none;
+ visibility: hidden;
+}
+@media (hover:hover) and (pointer:fine) {
+ .spatial-view .spatial-scene, .spatial-view .spatial-scene.is-dragging * { cursor: none; }
+ .exhibition-cursor.is-visible { visibility: visible; }
+ .exhibition-cursor::after {
+  content: '';
+  display: block;
+  width: 14px;
+  height: 14px;
+  border: 1px solid white;
+  border-radius: 50%;
+  transform: translate(-50%,-50%);
+  transition: width .16s, height .16s, background .16s;
+ }
+ .exhibition-cursor.over-artwork::after { width: 22px; height: 22px; background: #ffffff29; }
+ .is-dragging .exhibition-cursor::after { width: 9px; height: 9px; background: white; }
+}
+.exhibition-icon, .exhibition-controls button {
+ display: grid;
+ place-items: center;
+ color: #ddd;
+ background: #131313bf;
+ border: 1px solid #ffffff36;
+ border-radius: 5px;
+}
+.exhibition-icon { width: 38px; height: 38px; cursor: pointer; }
+.exhibition-icon:hover, .exhibition-controls button:is(:hover,.is-held) { background: #414141; color: white; }
+.exhibition-exit, .exhibition-info, .exhibition-controls { position: absolute; z-index: 3600; }
+.exhibition-exit { top: 16px; left: 16px; }
+.exhibition-info { bottom: 16px; left: 16px; }
+.exhibition-info summary::-webkit-details-marker { display: none; }
+.exhibition-info p {
+ position: absolute;
+ bottom: 46px;
+ left: 0;
+ width: min(230px, 75vw);
+ margin: 0;
+ padding: 12px;
+ background: #171717f5;
+ border: 1px solid #ffffff25;
+ border-radius: 6px;
+ font: 13px/1.55 'TWK Lausanne', Arial, sans-serif;
+}
+.exhibition-controls { right: 16px; bottom: 16px; display: flex; align-items: center; gap: 12px; }
+.exhibition-keys { display: grid; grid-template-columns: repeat(3, 25px); gap: 4px; }
+.exhibition-keys button { width: 25px; height: 25px; padding: 0; font: 11px var(--mono); touch-action: none; }
+.exhibition-keys button:first-child { grid-column: 2; }
+.exhibition-keys button:nth-child(2) { grid-column: 1; }
+.exhibition-controls .exhibition-reset { width: 39px; height: 39px; }
+.exhibition-reset span { border: 1px solid currentColor; border-radius: 50%; width: 19px; height: 19px; display: grid; place-items: center; }
+.exhibition-reset span::after { content: ''; width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
+
+#spatial-gallery {
+ inset: 16px 16px auto auto;
+ width: min(420px, calc(100vw - 32px));
+ height: auto;
+ max-height: calc(100dvh - 32px);
+ padding: 16px;
+ background: #181818f5;
+ border: 1px solid #ffffff25;
+ border-radius: 0;
+ color: #eee;
+ box-shadow: 0 16px 56px #0008;
+}
+#spatial-gallery[open] { animation: exhibition-panel-in .26s cubic-bezier(.2,.75,.3,1) both; }
+#spatial-gallery::backdrop { background: #0003; }
+@keyframes exhibition-panel-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
+#spatial-gallery .spatial-gallery-art { height: min(48dvh, 410px); box-shadow: none; border-radius: 0; }
+#spatial-gallery figcaption { color: #bbb; }
+#spatial-gallery .spatial-gallery-thumb[aria-pressed='true'] { outline-color: #eee; }
+@media (prefers-reduced-motion: reduce) {
+ .spatial-view[open], #spatial-gallery[open] { animation: none; }
+ .exhibition-cursor::after, .exhibition-artwork img { transition: none; }
+}
+
+.home-mobile-menu { display: none; }
+@media (max-width: 700px) {
+ .shared-navigation .corner-header { display: grid; grid-template-columns: 1fr auto; }
+ .home-mobile-menu {
+  display: grid;
+  place-items: center;
+  grid-column: 2;
+  grid-row: 1;
+  justify-self: end;
+  border: 0;
+  padding: 8px;
+  background: none;
+  color: #171717;
+  cursor: pointer;
+ }
+ .shared-navigation .header-brand { grid-column: 1; grid-row: 1; justify-self: start; }
+ .shared-navigation .corner-top-right { display: none; }
+}
+
+
+.mobile-work-footer { display: none; }
+@media (max-width: 700px) {
+ .work-layout .project-grid { margin-bottom: 0; }
+ .mobile-work-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  color: #77736f;
+  margin-top: 40px;
+  padding-bottom: 24px;
+  font: 400 13px/1.4 'TWK Lausanne', Arial, sans-serif;
+ }
+}
+
+.shared-navigation .corner-header .header-brand,
+#story-overlay #story-home.about-brand,
+.case-mobile-header .case-mobile-brand,
+.case-mobile-panel .case-mobile-brand {
+ gap: 10px;
+ padding-block: 11px;
+ border-radius: 7px;
+}
+.shared-navigation .corner-header .header-brand span,
+#story-overlay #story-home.about-brand span,
+.case-mobile-header .case-mobile-brand span,
+.case-mobile-panel>header .case-mobile-brand span {
+ top: auto;
+ font: 400 14px/14px 'Departure Mono', monospace;
+ text-transform: uppercase;
+ white-space: nowrap;
+}
+.shared-navigation .corner-header .header-brand,
+.case-mobile-header .case-mobile-brand,
+.case-mobile-panel .case-mobile-brand { color: #16130e; }

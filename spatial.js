@@ -1,26 +1,11 @@
-// Connected project constellation with an orbit camera and a continuous focus move.
+// A looping exhibition with a camera that pans and travels through layers of artwork.
 (() => {
- const stage=document.querySelector('#navigation-stage'),view=document.querySelector('.spatial-view');
- const scene=view.querySelector('.spatial-scene'),canvas=scene.querySelector('canvas'),ctx=canvas.getContext('2d'),holder=scene.querySelector('.spatial-nodes');
- const reduced=matchMedia('(prefers-reduced-motion: reduce)');
- let yaw=-.35,pitch=-.12,vx=0,vy=0,width=0,height=0,raf=0,last=0,zoom=0,targetZoom=0;
- let selected=null,hovered=null,dragging=false,moved=false,previous=null,focusMove=null,pinchDistance=0;
- const pointers=new Map();
- // A continuous depth ruler, synchronized with pinch and keyboard zoom.
- const ruler=document.createElement('div');ruler.className='spatial-depth-ruler';
- ruler.innerHTML='<span class="depth-label depth-max">IMMERSION</span><span class="depth-label depth-mid">EXPLORATION</span><span class="depth-label depth-min">CONSTELLATION</span><div class="depth-ticks" aria-hidden="true">'+Array.from({length:31},()=>'<i></i>').join('')+'</div><input class="spatial-depth-range" type="range" min="0" max="100" step="1" value="0" aria-label="Spatial zoom" aria-orientation="vertical" aria-valuetext="0 percent, Constellation">';
- view.append(ruler);
- const depthRange=ruler.querySelector('input'),depthTicks=[...ruler.querySelectorAll('i')],depthLabels=[...ruler.querySelectorAll('.depth-label')];
- depthRange.addEventListener('input',()=>{targetZoom=Number(depthRange.value)/100*1.2;focusMove=null;selected=null;vx=vy=0;delete scene.dataset.focusedProject;start();});
- function updateDepthRuler(){
-  const fraction=Math.max(0,Math.min(1,zoom/1.2));
-  depthTicks.forEach((tick,index)=>{const distance=(1-index/30-fraction)/.085;const strength=Math.exp(-distance*distance/2);tick.style.width=(9+24*strength)+'px';tick.style.opacity=String(.18+.58*strength);});
-  depthLabels.forEach((label,index)=>{const position=1-index*.5;label.style.opacity=String(.65*Math.exp(-Math.pow((fraction-position)/.22,2)));});
-  if(document.activeElement!==depthRange)depthRange.value=String(Math.round(fraction*100));
-  const state=fraction<.25?'Constellation':fraction<.75?'Exploration':'Immersion';
-  depthRange.setAttribute('aria-valuetext',Math.round(fraction*100)+' percent, '+state);
- }
- // Supplied deliverables, grouped by project for relationship highlights and galleries.
+ const stage = document.querySelector('#navigation-stage');
+ const view = stage?.querySelector('.spatial-view');
+ if (!view) return;
+ const scene = view.querySelector('.spatial-scene');
+ const holder = scene.querySelector('.spatial-nodes');
+ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
  const media=[
   {
     "group": "thrive",
@@ -38,11 +23,6 @@
     "src": "spatial-colorstack-gathering.jpg"
   },
   {
-    "group": "apron",
-    "title": "Cooking Assistant",
-    "src": "spatial-apron-assistant.png"
-  },
-  {
     "group": "aven",
     "title": "My Insights",
     "src": "aven-thumbnail.png"
@@ -50,7 +30,7 @@
   {
     "group": "sullivan",
     "title": "Dashboard",
-    "src": "sullivan-thumbnail.jpg"
+    "src": "sullivan-thumbnail-v3.png"
   },
   {
     "group": "thrive",
@@ -71,11 +51,6 @@
     "group": "thrive",
     "title": "Birthday Onboarding",
     "src": "thrive-birthday.png"
-  },
-  {
-    "group": "apron",
-    "title": "Brand Identity",
-    "src": "spatial-apron-brand.png"
   },
   {
     "group": "thrive",
@@ -118,143 +93,276 @@
     "src": "thrive-brand-4.png"
   }
 ];
- const groups={thrive:{name:"Thrive",color:"73,145,124"},sullivan:{name:"Sullivan Foundation",color:"41,119,183"},notion:{name:"Notion",color:"226,116,151"},colorstack:{name:"ColorStack AAMU",color:"137,24,67"},apron:{name:"Apron",color:"172,113,91"},aven:{name:"Aven",color:"151,161,111"},ibm:{name:"IBM",color:"24,24,24"}};
- const nodes=media.filter(item=>item.group!=='apron').map((item,i)=>{
-  const panel=document.querySelector('.panel-'+item.group),launch=panel.querySelector('.project-launch');
-  const title=groups[item.group].name+' · '+item.title;
-  const button=document.createElement('button');button.type='button';button.className='spatial-node';
-  button.dataset.experience=item.group;button.dataset.media=item.title;
-  button.setAttribute('aria-label','Open '+title);
-  button.style.setProperty('--node-surface',getComputedStyle(panel).getPropertyValue('--project-surface'));
-  const art=document.createElement('span');art.className='spatial-node-art';art.setAttribute('aria-hidden','true');
-  if(item.src){
-   const image=document.createElement('img');image.src='./assets/'+item.src;image.alt='';image.draggable=false;
-   if(/^thrive-(focus|birthday|name|notifications)\.png$/.test(item.src)){image.style.objectFit='contain';}
-   image.style.objectPosition=item.position||'center';
-   image.addEventListener('load',()=>{art.style.aspectRatio=String(Math.max(.8,Math.min(1.8,image.naturalWidth/image.naturalHeight)));});
-   if(item.detail)image.className='spatial-detail';
-   art.append(image);
-  }else{
-   art.classList.add('spatial-media-placeholder');
-   const name=document.createElement('span');name.textContent=groups[item.group].name;
-   const slot=document.createElement('span');slot.textContent=item.title.toUpperCase();art.append(name,slot);
-  }
-  const caption=document.createElement('span');caption.className='spatial-node-caption';
-  const captionText=document.createElement('span');captionText.className='spatial-node-title';captionText.textContent=item.title;
-  caption.append(captionText);button.append(art,caption);holder.append(button);
-  // Equal-area latitude bands paired with the golden angle cover the whole sphere.
-  const pointIndex=i;
-  const y=1-2*(pointIndex+.5)/media.length,angle=pointIndex*Math.PI*(3-Math.sqrt(5)),ring=Math.sqrt(1-y*y);
-  const node={button,launch,item,group:item.group,point:[Math.cos(angle)*ring,y,Math.sin(angle)*ring],index:i};
-  button.addEventListener('pointerenter',()=>{hovered=i;});
-  button.addEventListener('pointerleave',()=>{hovered=null;});
-  button.addEventListener('focus',()=>{hovered=i;vx=vy=0;});
-  button.addEventListener('blur',()=>{hovered=null;});
-  button.addEventListener('click',event=>{
-   event.stopPropagation();if(moved)return;
-   openGallery(i);
+ const groups={thrive:{name:"Thrive"},sullivan:{name:"Sullivan Foundation"},notion:{name:"Notion"},colorstack:{name:"ColorStack AAMU"},aven:{name:"Aven"},ibm:{name:"IBM"}};
+ const camera = { x: 0, y: 0, z: 0, hoverX: 0, hoverY: 0 };
+ const target = { ...camera };
+ const keys = new Set();
+ const pointers = new Map();
+ const directions = {
+  w: [0, 0, 1], a: [-1, 0], s: [0, 0, -1], d: [1, 0],
+  ArrowUp: [0, -1], ArrowLeft: [-1, 0], ArrowDown: [0, 1], ArrowRight: [1, 0]
+ };
+ const depth = 3400;
+ const wrap = (value, length) => ((value % length) + length) % length;
+ let frame = 0;
+ let lastTime = 0;
+ let dragged = false;
+
+ // Give each artwork its own position and depth.
+ const nodes = media.map((item, index) => {
+  const column = index % 5;
+  const row = Math.floor(index / 5);
+  const noise = (seed) => wrap(Math.sin((index + 1) * seed) * 43758.5453, 1);
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'exhibition-artwork';
+  const label = groups[item.group].name + ' · ' + item.title;
+  button.setAttribute('aria-label', 'View ' + label);
+  const artwork = document.createElement('img');
+  artwork.src = './assets/' + item.src;
+  artwork.alt = '';
+  artwork.draggable = false;
+  artwork.decoding = 'async';
+  artwork.style.objectPosition = item.position || 'center';
+  button.append(artwork);
+  button.addEventListener('click', event => {
+   if (!dragged || event.detail === 0) openGallery(index, button);
   });
+  button.addEventListener('focus', () => {
+   if (!button.matches(':focus-visible')) return;
+   const bounds = button.getBoundingClientRect();
+   if (!button.classList.contains('is-culled') &&
+       bounds.left >= 8 && bounds.right <= view.clientWidth - 8 &&
+       bounds.top >= 8 && bounds.bottom <= view.clientHeight - 8) return;
+   target.x += node.offsetX;
+   target.y += node.offsetY;
+   start();
+  });
+  holder.append(button);
+  const node = {
+   button,
+   x: (column + .14 + noise(12.9898) * .76) / 5,
+   y: (row + .12 + noise(78.233) * .80) / 4,
+   z: 540 + noise(32.018) * 900,
+   size: 108 + noise(19.49) * 150,
+   offsetX: 0,
+   offsetY: 0
+  };
+  button.style.width = node.size + 'px';
   return node;
  });
- // One minimum-length tree per experience keeps the idle constellation quiet.
- const edges=[];
- Object.keys(groups).forEach(group=>{
-  const members=nodes.filter(node=>node.group===group),connected=new Set([members[0].index]);
-  while(connected.size<members.length){
-   let best=null;
-   members.filter(node=>connected.has(node.index)).forEach(a=>members.filter(node=>!connected.has(node.index)).forEach(b=>{
-    const score=dot(a.point,b.point);if(!best||score>best.score)best={a:a.index,b:b.index,score};
-   }));
-   edges.push({...best,group,color:groups[group].color});connected.add(best.b);
-  }
- });
- scene.dataset.idleConnections=String(edges.length);
- function dot(a,b){return a.reduce((sum,v,i)=>sum+v*b[i],0);}
- function rotate([x,y,z]){const a=x*Math.cos(yaw)+z*Math.sin(yaw),b=z*Math.cos(yaw)-x*Math.sin(yaw);return[a,y*Math.cos(pitch)-b*Math.sin(pitch),y*Math.sin(pitch)+b*Math.cos(pitch)];}
- function project(point){
-  const[x,y,z]=rotate(point),radius=Math.min(width*.36,height*.37),distance=3.8-zoom*.65;
-  const perspective=distance/(distance-z),magnification=1+zoom*1.4;
-  return{x:x*radius*perspective*magnification,y:y*radius*perspective*magnification,z,scale:perspective*(1+zoom*1.25)};
- }
- function arc(a,b,t){const cosine=Math.max(-.9999,Math.min(.9999,dot(a,b))),angle=Math.acos(cosine),sin=Math.sin(angle);return a.map((v,i)=>(v*Math.sin((1-t)*angle)+b[i]*Math.sin(t*angle))/sin);}
- function draw(){
-  updateDepthRuler();
-  ctx.clearRect(0,0,width,height);
-  const active=hovered??selected;
-  const activeGroup=active===null?null:nodes[active].group;
-  const paths=edges.map(edge=>({...edge,highlight:activeGroup!==null&&edge.group===activeGroup}));
-  paths.forEach(edge=>{
-   const a=nodes[edge.a].point,b=nodes[edge.b].point;
-   const angle=Math.acos(Math.max(-1,Math.min(1,dot(a,b))));
-   const steps=Math.max(12,Math.min(74,Math.round(angle*Math.min(width,height)*.37/8)));
-   for(let step=1;step<steps;step++){
-    const p=project(arc(a,b,step/steps));
-    const alpha=edge.highlight ? .65+(p.z+1)*.12 : (active===null ? .2 : .055)*(.7+(p.z+1)*.15);
-    ctx.fillStyle=`rgba(${edge.color},${alpha})`;
-    ctx.beginPath();ctx.arc(width/2+p.x,height/2+p.y,edge.highlight ? 1.3 : .95,0,Math.PI*2);ctx.fill();
+
+ function draw() {
+  const width = view.clientWidth;
+  const height = view.clientHeight;
+  const tileWidth = Math.max(width * 1.25, 820);
+  const tileHeight = Math.max(height * 1.38, 760);
+  const responsiveSize = Math.min(1.35, Math.max(.68, width / 1150));
+  for (const node of nodes) {
+   const distance = wrap(node.z - camera.z, depth);
+   const perspective = 1350 / (420 + distance);
+   node.offsetX = wrap(node.x * tileWidth - camera.x, tileWidth) - tileWidth / 2;
+   node.offsetY = wrap(node.y * tileHeight - camera.y, tileHeight) - tileHeight / 2;
+   // Repeated world boundaries stay outside the visible area on the near layers.
+   const x = (node.offsetX - camera.hoverX) * perspective;
+   const y = (node.offsetY - camera.hoverY) * perspective;
+   const scale = perspective * responsiveSize;
+   const opacity = Math.min(1, distance / 180, (depth - distance) / 250) *
+     Math.max(.24, 1.18 - distance / 4200);
+   const edgeFade = Math.min(1, (tileWidth / 2 - Math.abs(node.offsetX)) / 90,
+     (tileHeight / 2 - Math.abs(node.offsetY)) / 90);
+   // Allow for the hover scale when checking whether the artwork can enter the frame.
+   const offscreen = Math.abs(x) > (width + node.size * scale * 1.06) / 2 ||
+     Math.abs(y) > (height + 245 * scale * 1.06) / 2;
+   const alpha = opacity * edgeFade;
+   const culled = offscreen || alpha < .01;
+   if (culled && node.button !== document.activeElement) {
+    node.button.classList.add('is-culled');
+    continue;
    }
-  });
-  scene.dataset.activeConnections=String(paths.filter(edge=>edge.highlight).length);
-  nodes.forEach(({button,point,index})=>{
-   const p=project(point),related=active===null||nodes[active].group===nodes[index].group;
-   button.dataset.related=String(related);
-   button.style.transform=`translate(-50%, -50%) translate(${p.x}px, ${p.y}px) scale(${p.scale})`;
-   button.style.opacity=String((.5+(p.z+1)*.25)*(related?1:.42));button.style.zIndex=String(Math.round((p.z+1)*100));
-   button.classList.toggle('is-selected',selected===index);
-   button.classList.toggle('is-hovered',hovered===index);
-  });
- }
- function orbit(){selected=null;focusMove=null;targetZoom=0;vx=vy=0;delete scene.dataset.focusedProject;nodes.forEach(n=>n.button.setAttribute('aria-label',n.button.querySelector('.spatial-node-title').textContent+' — open media'));start();}
- function tick(time){
-  if(view.hidden||document.hidden||gallery.open){raf=0;last=0;return;}
-  const dt=Math.min(2,(time-last)/16.67||1);last=time;
-  zoom+=(targetZoom-zoom)*(reduced.matches?1:1-Math.pow(.9,dt));
-  if(focusMove){
-   const progress=reduced.matches?1:Math.min(1,(time-focusMove.start)/1100);
-   const eased=1-Math.pow(1-progress,4);
-   yaw=focusMove.fromYaw+(focusMove.toYaw-focusMove.fromYaw)*eased;pitch=focusMove.fromPitch+(focusMove.toPitch-focusMove.fromPitch)*eased;
-   if(progress===1)focusMove=null;
-  }else if(!dragging){
-   yaw+=vx*dt;pitch+=vy*dt;vx*=Math.pow(.93,dt);vy*=Math.pow(.93,dt);
-   if(!reduced.matches&&hovered===null&&selected===null)yaw+=.0006*dt;
+   node.button.classList.remove('is-culled');
+   Object.assign(node.button.style, {
+    transform: `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`,
+    opacity: alpha,
+    pointerEvents: alpha > .12 ? '' : 'none',
+    zIndex: String(Math.round(depth - distance))
+   });
   }
-  pitch=Math.max(-1.55,Math.min(1.55,pitch));draw();raf=requestAnimationFrame(tick);
  }
- function start(){if(!raf&&!view.hidden&&!document.hidden)raf=requestAnimationFrame(tick);}
- function resize(){const r=scene.getBoundingClientRect();width=r.width;height=r.height;const dpr=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);ctx.setTransform(dpr,0,0,dpr,0,0);draw();}
- new ResizeObserver(resize).observe(scene);stage.addEventListener('viewchange',()=>{if(view.hidden){pointers.clear();dragging=false;}resize();start();});document.addEventListener('visibilitychange',start);
- scene.addEventListener('pointerdown',event=>{
-  if(event.pointerType==='mouse'&&event.button!==0)return;
-  if(event.pointerType==='mouse')event.preventDefault();
-  pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
-  if(pointers.size===2){const[a,b]=[...pointers.values()];pinchDistance=Math.hypot(a.x-b.x,a.y-b.y);moved=true;return;}
-  dragging=true;moved=false;previous={x:event.clientX,y:event.clientY};vx=vy=0;
+
+ function animate(time) {
+  frame = 0;
+  if (!view.open || document.hidden) return;
+  const elapsed = lastTime ? Math.min(32, time - lastTime) : 16;
+  lastTime = time;
+  for (const key of keys) {
+   const [x, y, z = 0] = directions[key];
+   target.x += x * elapsed * .53;
+   target.y += y * elapsed * .53;
+   target.z += z * elapsed * .95;
+  }
+  const blend = reduced.matches ? 1 : 1 - Math.exp(-elapsed / 85);
+  let settling = false;
+  for (const axis of ['x', 'y', 'z', 'hoverX', 'hoverY']) {
+   const remaining = target[axis] - camera[axis];
+   camera[axis] += Math.abs(remaining) < .05 ? remaining : remaining * blend;
+   settling ||= Math.abs(remaining) >= .05;
+  }
+  draw();
+  if (settling || keys.size) start();
+  else lastTime = 0;
+ }
+
+ function start() {
+  if (!frame && view.open && !document.hidden) frame = requestAnimationFrame(animate);
+ }
+
+ function clearHover() {
+  target.hoverX = 0;
+  target.hoverY = 0;
+  start();
+ }
+
+ function clearMovement() {
+  clearHover();
+  keys.clear();
+  pointers.clear();
+  scene.classList.remove('is-dragging');
+  view.querySelectorAll('[data-move]').forEach(button => button.classList.remove('is-held'));
+ }
+
+ function reset() {
+  Object.assign(target, { x: 0, y: 0, z: 0 });
+  start();
+ }
+
+ function pressDirection(key) {
+  keys.add(key);
+  view.querySelector(`[data-move="${key}"]`)?.classList.add('is-held');
+  start();
+ }
+
+ function releaseDirection(key) {
+  keys.delete(key);
+  view.querySelector(`[data-move="${key}"]`)?.classList.remove('is-held');
+ }
+
+ const indexSwitch = document.querySelector('.shared-navigation [data-view="projects"]');
+ view.querySelector('.exhibition-exit').addEventListener('click', () => indexSwitch.click());
+ view.addEventListener('cancel', event => {
+  event.preventDefault();
+  indexSwitch.click();
  });
- scene.addEventListener('pointermove',event=>{
-  if(!pointers.has(event.pointerId))return;pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
-  if(pointers.size===2){const[a,b]=[...pointers.values()],distance=Math.hypot(a.x-b.x,a.y-b.y);targetZoom=Math.max(0,Math.min(1.2,targetZoom+(distance-pinchDistance)*.004));pinchDistance=distance;focusMove=null;return;}
-  if(!dragging)return;const dx=event.clientX-previous.x,dy=event.clientY-previous.y;if(!moved&&Math.hypot(dx,dy)<4)return;
-  moved=true;focusMove=null;selected=null;delete scene.dataset.focusedProject;scene.setPointerCapture(event.pointerId);scene.classList.add('is-dragging');
-  yaw+=dx*.005;pitch+=dy*.005;vx=dx*.0025;vy=dy*.0025;previous={x:event.clientX,y:event.clientY};draw();
+ stage.addEventListener('viewchange', () => {
+  if (stage.dataset.activeView === 'spatial' && !view.open) {
+   view.showModal();
+   scene.focus({preventScroll:true});
+   start();
+  } else if (stage.dataset.activeView !== 'spatial' && view.open) {
+   clearMovement();
+   view.close();
+  }
  });
- function release(event){pointers.delete(event.pointerId);if(scene.hasPointerCapture(event.pointerId))scene.releasePointerCapture(event.pointerId);dragging=false;previous=null;scene.classList.remove('is-dragging');if(reduced.matches)vx=vy=0;}
- scene.addEventListener('pointerup',release);scene.addEventListener('pointercancel',release);scene.addEventListener('lostpointercapture',()=>{dragging=false;scene.classList.remove('is-dragging');});
- scene.addEventListener('click',event=>{if(!moved&&!event.target.closest('.spatial-node'))orbit();});
- scene.addEventListener('wheel',event=>{
-  // Ordinary wheel scrolling navigates the page. Trackpad pinch (Ctrl+wheel)
-  // zooms the constellation; clicking, touch pinch, and keyboard zoom also work.
-  if(!event.ctrlKey)return;
-  event.preventDefault();focusMove=null;selected=null;delete scene.dataset.focusedProject;
-  targetZoom=Math.max(0,Math.min(1.2,targetZoom-event.deltaY*(event.ctrlKey ? .009 : .0018)));start();
- },{passive:false});
- scene.addEventListener('keydown',event=>{
-  if(event.key==='Enter'||event.key===' ')moved=false;
-  if(!['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','+','=','-','Escape','Home'].includes(event.key))return;
-  event.preventDefault();focusMove=null;vx=vy=0;
-  if(event.key==='ArrowLeft')yaw-=.15;if(event.key==='ArrowRight')yaw+=.15;if(event.key==='ArrowUp')pitch-=.15;if(event.key==='ArrowDown')pitch+=.15;
-  if(event.key==='+'||event.key==='=')targetZoom=Math.min(1.2,targetZoom+.15);if(event.key==='-')targetZoom=Math.max(0,targetZoom-.15);
-  if(event.key==='Escape'||event.key==='Home')orbit();draw();
+ new ResizeObserver(start).observe(view);
+ window.addEventListener('blur', clearMovement);
+ document.addEventListener('visibilitychange', () => { clearMovement(); start(); });
+
+ view.addEventListener('keydown', event => {
+  if (event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented ||
+      event.target.closest('input, textarea, [contenteditable]')) return;
+  const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
+  if (Object.hasOwn(directions, key)) {
+   event.preventDefault();
+   pressDirection(key);
+  } else if (['+', '=', '-', 'Home'].includes(key)) {
+   event.preventDefault();
+   if (key === 'Home') reset();
+   else target.z += key === '-' ? -145 : 145;
+   start();
+  }
  });
+ window.addEventListener('keyup', event => releaseDirection(event.key.length === 1 ? event.key.toLowerCase() : event.key));
+
+ for (const button of view.querySelectorAll('[data-move]')) {
+  const key = button.dataset.move;
+  button.addEventListener('pointerdown', event => {
+   if (event.button !== 0) return;
+   button.setPointerCapture(event.pointerId);
+   pressDirection(key);
+  });
+  button.addEventListener('lostpointercapture', () => releaseDirection(key));
+  button.addEventListener('click', event => {
+   if (event.detail !== 0) return;
+   const [x, y, z = 0] = directions[key];
+   target.x += x * 100;
+   target.y += y * 100;
+   target.z += z * 145;
+   start();
+  });
+ }
+ view.querySelector('.exhibition-reset').addEventListener('click', reset);
+
+ const cursor = scene.querySelector('.exhibition-cursor');
+ scene.addEventListener('pointerleave', () => {
+  cursor.classList.remove('is-visible');
+  clearHover();
+ });
+ scene.addEventListener('pointerdown', event => {
+  if (event.button !== 0 || pointers.size >= 2) return;
+  if (pointers.size === 0) dragged = false;
+  clearHover();
+  pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (pointers.size === 2) {
+   dragged = true;
+   for (const id of pointers.keys()) scene.setPointerCapture(id);
+  }
+ });
+ scene.addEventListener('pointermove', event => {
+  cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`;
+  cursor.classList.toggle('is-visible', event.pointerType === 'mouse');
+  cursor.classList.toggle('over-artwork', Boolean(event.target.closest('.exhibition-artwork')));
+  const previous = pointers.get(event.pointerId);
+  if (!previous) {
+   if (event.pointerType === 'mouse' && !reduced.matches) {
+    const bounds = scene.getBoundingClientRect();
+    target.hoverX = 24 * ((event.clientX - bounds.left) / bounds.width - .5);
+    target.hoverY = 24 * ((event.clientY - bounds.top) / bounds.height - .5);
+    start();
+   }
+   return;
+  }
+  const dx = event.clientX - previous.x;
+  const dy = event.clientY - previous.y;
+  if (!dragged && Math.hypot(dx, dy) < 5) return;
+  dragged = true;
+  pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+  if (!scene.hasPointerCapture(event.pointerId)) scene.setPointerCapture(event.pointerId);
+  scene.classList.add('is-dragging');
+  if (pointers.size === 2) {
+   const other = [...pointers.entries()].find(([id]) => id !== event.pointerId)[1];
+   target.z += (Math.hypot(event.clientX - other.x, event.clientY - other.y) -
+     Math.hypot(previous.x - other.x, previous.y - other.y)) * 7;
+  } else {
+   target.x -= dx * 1.25;
+   target.y -= dy * 1.25;
+  }
+  start();
+ });
+ for (const type of ['pointerup', 'pointercancel', 'lostpointercapture', 'pointerleave']) {
+  scene.addEventListener(type, event => {
+   if (type === 'lostpointercapture' && event.target !== scene) return;
+   if (type === 'pointerleave' && scene.hasPointerCapture(event.pointerId)) return;
+   pointers.delete(event.pointerId);
+   if (!pointers.size) scene.classList.remove('is-dragging');
+  });
+ }
+ scene.addEventListener('wheel', event => {
+  event.preventDefault();
+  const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? view.clientHeight : 1;
+  target.z -= Math.max(-180, Math.min(180, event.deltaY * unit)) * (event.ctrlKey ? 8 : 3);
+  target.x += event.deltaX * unit * .65;
+  start();
+ }, {passive:false});
  const gallery=document.createElement('dialog');gallery.id='spatial-gallery';
  gallery.setAttribute('aria-labelledby','spatial-gallery-title');
  gallery.innerHTML=`<div class="spatial-gallery-shell"><header class="spatial-gallery-header"><h2 id="spatial-gallery-title"></h2><button type="button" class="spatial-gallery-case">View case study ↗</button><button type="button" class="spatial-gallery-close" aria-label="Close media"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><figure class="spatial-gallery-media"><div class="spatial-gallery-art"></div><figcaption></figcaption></figure><div class="spatial-gallery-thumbnails" role="group"></div></div>`;
@@ -262,7 +370,7 @@
  const galleryArt=gallery.querySelector('.spatial-gallery-art');
  const galleryStrip=gallery.querySelector('.spatial-gallery-thumbnails');
  const caseButton=gallery.querySelector('.spatial-gallery-case');
- let galleryIndex=0,originNode=null,openingAnimation=null;
+ let galleryIndex=0,originNode=null;
  function paintMedia(host,item){
   host.replaceChildren();host.style.background=getComputedStyle(document.querySelector('.panel-'+item.group)).getPropertyValue('--project-surface');
   if(item.src){
@@ -289,33 +397,28 @@
    galleryStrip.append(thumb);
   });
  }
- function openGallery(index){
-  if(gallery.open)return;
-  const node=nodes[index],source=node.button.querySelector('.spatial-node-art').getBoundingClientRect();
-  originNode=node.button;selected=index;hovered=null;vx=vy=0;focusMove=null;
-  showMedia(index);gallery.showModal();
-  if(!reduced.matches){
-   const destination=galleryArt.getBoundingClientRect();
-   const dx=source.left+source.width/2-destination.left-destination.width/2;
-   const dy=source.top+source.height/2-destination.top-destination.height/2;
-   openingAnimation=galleryArt.animate([
-    {transform:`translate(${dx}px,${dy}px) scale(${source.width/destination.width},${source.height/destination.height})`,opacity:.75},
-    {transform:'translate(0,0) scale(1)',opacity:1}
-   ],{duration:460,easing:'cubic-bezier(.22,1,.36,1)'});
-  }
+ function openGallery(index, button) {
+  originNode = button;
+  clearMovement();
+  showMedia(index);
+  gallery.showModal();
   gallery.querySelector('.spatial-gallery-close').focus({preventScroll:true});
  }
- function closeGallery(){openingAnimation?.cancel();gallery.close();}
+ function closeGallery() { gallery.close(); }
  gallery.querySelector('.spatial-gallery-close').addEventListener('click',closeGallery);
  gallery.addEventListener('click',event=>{if(event.target===gallery)closeGallery();});
- gallery.addEventListener('cancel',()=>openingAnimation?.cancel());
- gallery.addEventListener('close',()=>{selected=null;hovered=originNode?nodes.findIndex(node=>node.button===originNode):null;originNode?.focus({preventScroll:true});start();});
- caseButton.addEventListener('click',()=>{const launch=nodes[galleryIndex].launch;closeGallery();launch.click();});
+ gallery.addEventListener('close', () => {
+  if (view.open && !document.querySelector('#case-study[open]')) originNode?.focus({preventScroll:true});
+ });
+ caseButton.addEventListener('click', () => {
+  const launch = document.querySelector('.panel-' + media[galleryIndex].group + ' .project-launch');
+  closeGallery();
+  launch?.click();
+ });
  gallery.addEventListener('keydown',event=>{
   if(!['ArrowLeft','ArrowRight'].includes(event.key))return;
   event.preventDefault();const related=media.map((item,index)=>({item,index})).filter(entry=>entry.item.group===media[galleryIndex].group);
   const current=related.findIndex(entry=>entry.index===galleryIndex);
   showMedia(related[(current+(event.key==='ArrowRight'?1:-1)+related.length)%related.length].index);
  });
- resize();start();
 })();

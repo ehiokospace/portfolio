@@ -2,7 +2,7 @@ document.querySelector('.header-brand')?.addEventListener('click',()=>returnToVi
 document.querySelector('[aria-label="Back to top"]').addEventListener('click',event=>{event.preventDefault();returnToVideo();});
 // Replace null destinations with your own URLs. Relative paths work on GitHub Pages.
 const destinations = {
-  Craft: null, Gallery: null, Resume: 'https://drive.google.com/file/d/1nbFPw89tB5goZcDs4Yo3lkjcrQg21eoN/view?usp=sharing',
+  Craft: null, Gallery: null, Resume: 'https://drive.google.com/file/d/1fxVQCzO1g50A-jgAfcKDHY8xHN6e7jGN/view?usp=sharing',
   'Internal tooling case study': null,
   'AI mental health case study': null,
   'Course scheduling case study': null,
@@ -307,10 +307,27 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
   const mobileHeader=document.createElement('header');
   mobileHeader.className='case-mobile-header';
   const mobileIcon=name=>'<img class="case-mobile-icon" src="./assets/mobile-'+name+'.svg" alt="">';
-  const mobileBrand='<img src="./assets/header-butterfly.svg" alt="" width="23" height="23"><span>EHI OKO</span>';
+  const mobileBrand='<img src="./assets/ehi-oko-butterfly.svg" alt="" width="21.12" height="21.12"><span>EHI OKO</span>';
   mobileHeader.innerHTML='<button type="button" data-case-panel="navigation" aria-label="Open navigation">'+mobileIcon('hamburger')+'</button><button type="button" class="case-mobile-brand" data-case-home>'+mobileBrand+'</button><button type="button" data-case-panel="projects" aria-label="Browse projects">'+mobileIcon('projects')+'</button>';
   modal.append(mobileHeader);
-  const mobilePanel=document.createElement('dialog');mobilePanel.className='case-mobile-panel';mobilePanel.tabIndex=-1;modal.append(mobilePanel);
+  const mobilePanel=document.createElement('dialog');
+  mobilePanel.id='portfolio-mobile-menu';
+  mobilePanel.className='case-mobile-panel';
+  mobilePanel.tabIndex=-1;
+  document.body.append(mobilePanel);
+  const homeHeader=document.querySelector('.shared-navigation .corner-header');
+  const homeMenu=document.createElement('button');
+  homeMenu.type='button';
+  homeMenu.className='home-mobile-menu';
+  homeMenu.setAttribute('aria-label','Open navigation');
+  homeMenu.setAttribute('aria-haspopup','dialog');
+  homeMenu.setAttribute('aria-controls',mobilePanel.id);
+  homeMenu.innerHTML=mobileIcon('hamburger');
+  homeHeader.append(homeMenu);
+  homeMenu.addEventListener('click',()=>showMobilePanel('navigation'));
+  matchMedia('(max-width:700px)').addEventListener('change',event=>{
+    if(!event.matches&&mobilePanel.open)mobilePanel.close();
+  });
   let panelTrigger;
   async function closeMobilePanel(){
     if(!mobilePanel.open)return;
@@ -318,7 +335,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
     mobilePanel.close();panelTrigger?.focus({preventScroll:true});
   }
   function showMobilePanel(kind){
-    panelTrigger=document.activeElement;
+    if(!mobilePanel.open)panelTrigger=document.activeElement;
     const projects=kind==='projects';
     mobilePanel.setAttribute('aria-label',projects?'Browse projects':'Navigation');
     mobilePanel.dataset.panel=kind;
@@ -326,7 +343,7 @@ setInterval(()=>{if(descriptionIndex===2&&visitStats)paintFooter();},60000);
     mobilePanel.querySelector('[data-panel-close]').onclick=closeMobilePanel;
     mobilePanel.querySelector('[data-switch]').onclick=e=>showMobilePanel(e.currentTarget.dataset.switch);
     mobilePanel.querySelectorAll('[data-mobile-project]').forEach(b=>b.onclick=async()=>{await closeMobilePanel();openCase(b.dataset.mobileProject);});
-    mobilePanel.querySelectorAll('[data-mobile-action]').forEach(b=>b.onclick=async()=>{const action=b.dataset.mobileAction;await closeMobilePanel();if(action==='email'||action==='contact'){document.querySelector('#copy-email')?.click();return;}modal.close();if(action==='about')document.dispatchEvent(new Event('open-story'));if(action==='craft'||action==='gallery')document.querySelector('[data-missing="'+(action==='craft'?'Craft':'Gallery')+'"]')?.click();});
+    mobilePanel.querySelectorAll('[data-mobile-action]').forEach(b=>b.onclick=async()=>{const action=b.dataset.mobileAction;await closeMobilePanel();if(action==='email'||action==='contact'){document.querySelector('#copy-email')?.click();return;}if(modal.open)modal.close();if(action==='work')document.querySelector('#navigation-stage')?.scrollIntoView();if(action==='about')document.dispatchEvent(new Event('open-story'));if(action==='craft'||action==='gallery')document.querySelector('[data-missing="'+(action==='craft'?'Craft':'Gallery')+'"]')?.click();});
     if(!mobilePanel.open)mobilePanel.showModal();
     mobilePanel.focus({preventScroll:true});
     mobilePanel.style.setProperty('--panel-bottom',mobilePanel.getBoundingClientRect().bottom+'px');
