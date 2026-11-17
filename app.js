@@ -947,6 +947,9 @@ rows.forEach(row=>{const index=Number(row.dataset.storyImage);row.addEventListen
 
 // The butterfly returns to the intro; ordinary scrolling stays unrestricted.
 function returnToVideo(){
+  if (document.querySelector('#navigation-stage')?.dataset.activeView === 'spatial') {
+    document.querySelector('.shared-navigation [data-view="projects"]')?.click();
+  }
   history.replaceState(history.state,'',location.pathname+location.search);
   window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
   document.querySelector('.hero video')?.play().catch(()=>{});

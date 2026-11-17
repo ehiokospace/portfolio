@@ -5,95 +5,50 @@
  if (!view) return;
  const scene = view.querySelector('.spatial-scene');
  const holder = scene.querySelector('.spatial-nodes');
- const reduced = matchMedia('(prefers-reduced-motion: reduce)');
- const media=[
-  {
-    "group": "thrive",
-    "title": "Winning Pitch",
-    "src": "thrive-pitch-winners.png"
-  },
-  {
-    "group": "notion",
-    "title": "Campus Community",
-    "src": "spatial-notion.gif"
-  },
-  {
-    "group": "colorstack",
-    "title": "Chapter Gathering",
-    "src": "spatial-colorstack-gathering.jpg"
-  },
-  {
-    "group": "aven",
-    "title": "My Insights",
-    "src": "aven-thumbnail.png"
-  },
-  {
-    "group": "sullivan",
-    "title": "Dashboard",
-    "src": "sullivan-thumbnail-v3.png"
-  },
-  {
-    "group": "thrive",
-    "title": "Focus Challenge",
-    "src": "thrive-focus.png"
-  },
-  {
-    "group": "ibm",
-    "title": "Skillsbuild Ambassador",
-    "src": "ibm-thumbnail.gif"
-  },
-  {
-    "group": "colorstack",
-    "title": "Community Workshop",
-    "src": "spatial-colorstack-workshop.jpg"
-  },
-  {
-    "group": "thrive",
-    "title": "Birthday Onboarding",
-    "src": "thrive-birthday.png"
-  },
-  {
-    "group": "thrive",
-    "title": "Name Onboarding",
-    "src": "thrive-name.png"
-  },
-  {
-    "group": "sullivan",
-    "title": "Service Corps",
-    "src": "sullivan-service-corps.jpg"
-  },
-  {
-    "group": "thrive",
-    "title": "Stay Connected",
-    "src": "thrive-notifications.png"
-  },
-  {
-    "group": "thrive",
-    "title": "Website",
-    "src": "thrive-website.png"
-  },
-  {
-    "group": "thrive",
-    "title": "Wordmark",
-    "src": "thrive-brand-1.png"
-  },
-  {
-    "group": "thrive",
-    "title": "Typography",
-    "src": "thrive-brand-2.png"
-  },
-  {
-    "group": "thrive",
-    "title": "Product Preview",
-    "src": "thrive-thumbnail.jpg"
-  },
-  {
-    "group": "thrive",
-    "title": "App Icon",
-    "src": "thrive-brand-4.png"
+ const canvas = document.createElement('canvas');
+ canvas.className = 'exhibition-webgl';
+ canvas.setAttribute('aria-hidden', 'true');
+ scene.prepend(canvas);
+ let renderExhibition;
+ let rendererRequested = false;
+ async function loadRenderer() {
+  if (rendererRequested) return;
+  rendererRequested = true;
+  try {
+   const { mountExhibition } = await import('./spatial-renderer.js?v=3');
+   renderExhibition = await mountExhibition(canvas);
+   start();
+  } catch (error) {
+   console.warn('Spatial is using its HTML renderer.', error);
   }
-];
- const groups={thrive:{name:"Thrive"},sullivan:{name:"Sullivan Foundation"},notion:{name:"Notion"},colorstack:{name:"ColorStack AAMU"},aven:{name:"Aven"},ibm:{name:"IBM"}};
+ }
+ canvas.addEventListener('webglcontextlost', event => {
+  event.preventDefault();
+  holder.classList.add('show-html-art');
+ });
+ canvas.addEventListener('webglcontextrestored', () => {
+  holder.classList.remove('show-html-art');
+  start();
+ });
+ const reduced = matchMedia('(prefers-reduced-motion: reduce)');
+ const media = [
+  {"title": "Thrive Pitch Win", "src": "thrive-pitch-winners.png", "description": "My co-founders and I pitched Thrive, our approach to making mental wellness more accessible through community. We won the HBCU Business Pitch Competition."},
+  {"title": "Notion Campus Community", "src": "spatial-notion.gif", "description": "As a Notion Campus Leader, I helped build a community where students could learn Notion and share how they used it in their own work."},
+  {"title": "ColorStack AAMU", "src": "spatial-joy-in-stem-poster.png", "description": "Black Girl Joy in STEM brought together Black women in STEM at Alabama A&M. We invited students to hear directly from the panelists about their paths and experiences."},
+  {"title": "ColorStack AAMU", "src": "spatial-colorstack-gathering.jpg", "description": "As part of ColorStack AAMU’s leadership, I helped create spaces for students in tech to meet and get to know each other outside class."},
+  {"title": "Sullivan Foundation Dashboard", "src": "sullivan-thumbnail-v3.png", "description": "During my Sullivan Foundation internship, I worked on a dashboard for community organizations. It brought conversations, referrals, and follow-ups into one place so teams could keep track of what needed attention."},
+  {"title": "HBCU Game Jam", "src": "spatial-hbcu-game-jam.jpg", "description": "My team competed at HBCU Game Jam in spring 2025. Our project won Best Sound Design."},
+  {"title": "IBM SkillsBuild Ambassador", "src": "ibm-thumbnail.gif", "description": "I served as an IBM SkillsBuild ambassador at Alabama A&M in spring 2025, helping students find free courses and resources for building tech skills."},
+  {"title": "ColorStack AAMU", "src": "spatial-joy-in-stem-photos.jpg", "description": "Black Girl Joy in STEM gave students at Alabama A&M a chance to hear from Black women about their experiences in STEM and connect with others exploring similar paths."},
+  {"title": "Thrive Website", "src": "thrive-website.png", "description": "As a Thrive co-founder, I worked on how to explain our approach to mental wellness to someone encountering Thrive for the first time. The website put culturally responsive care and community at the center of that introduction."},
+  {"title": "ColorStack AAMU", "src": "spatial-colorstack-workshop.jpg", "description": "Through ColorStack AAMU, I helped make room for students in tech to learn from each other. Workshops gave members time to work together and ask questions outside the classroom."},
+  {"title": "Sullivan Service Corps", "src": "sullivan-service-corps.jpg", "description": "I spent five weeks in Asheville with the Sullivan Foundation’s Service Corps. I worked with community organizations and took on consulting, product design, and engineering during the internship."},
+  {"title": "ColorStack AAMU", "src": "spatial-colorstack-chapter-photo.jpg", "description": "I helped lead ColorStack AAMU during the 2025–2026 school year. Our chapter gave students in tech a place to find peers and build relationships on campus."},
+  {"title": "Thrive Wordmark", "src": "thrive-brand-1.png", "description": "Co-founding Thrive meant figuring out how a mental wellness brand should feel to the people using it. I wanted it to feel approachable and reflect the role of community in the product."},
+  {"title": "ColorStack AAMU", "src": "colorstack-thumbnail.png", "description": "Leading ColorStack AAMU in 2025–2026 gave me the chance to build a community for students in tech through chapter gatherings, workshops, and conversations like Black Girl Joy in STEM."},
+  {"title": "Thrive Typography", "src": "thrive-brand-2.png", "description": "Working on Thrive’s visual identity meant thinking about how people would read it in different settings, from their first visit to the website to everyday use of the app."},
+  {"title": "Thrive App Icon", "src": "thrive-brand-4.png", "description": "While building Thrive, I explored how its identity would carry from the website into the app and stay recognizable at a glance."}
+ ];
  const camera = { x: 0, y: 0, z: 0, hoverX: 0, hoverY: 0 };
  const target = { ...camera };
  const keys = new Set();
@@ -116,8 +71,7 @@
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'exhibition-artwork';
-  const label = groups[item.group].name + ' · ' + item.title;
-  button.setAttribute('aria-label', 'View ' + label);
+  button.setAttribute('aria-label', 'About ' + item.title);
   const artwork = document.createElement('img');
   artwork.src = './assets/' + item.src;
   artwork.alt = '';
@@ -131,9 +85,10 @@
   button.addEventListener('focus', () => {
    if (!button.matches(':focus-visible')) return;
    const bounds = button.getBoundingClientRect();
+   const viewport = scene.getBoundingClientRect();
    if (!button.classList.contains('is-culled') &&
-       bounds.left >= 8 && bounds.right <= view.clientWidth - 8 &&
-       bounds.top >= 8 && bounds.bottom <= view.clientHeight - 8) return;
+       bounds.left >= viewport.left + 8 && bounds.right <= viewport.right - 8 &&
+       bounds.top >= viewport.top + 8 && bounds.bottom <= viewport.bottom - 8) return;
    target.x += node.offsetX;
    target.y += node.offsetY;
    start();
@@ -141,14 +96,28 @@
   holder.append(button);
   const node = {
    button,
-   x: (column + .14 + noise(12.9898) * .76) / 5,
-   y: (row + .12 + noise(78.233) * .80) / 4,
+   url: artwork.src,
+   animated: item.src.endsWith('.gif'),
+   x: .075 + .85 * (column + .14 + noise(12.9898) * .76) / 5,
+   y: .12 + .76 * (row + .12 + noise(78.233) * .80) / 4,
    z: 540 + noise(32.018) * 900,
    size: 108 + noise(19.49) * 150,
    offsetX: 0,
    offsetY: 0
   };
-  button.style.width = node.size + 'px';
+  node.width = node.size;
+  node.height = node.size;
+  function fitArtwork() {
+   if (!artwork.naturalWidth) return;
+   const ratio = artwork.naturalHeight / artwork.naturalWidth;
+   node.width = Math.min(node.size, 310 / ratio);
+   node.height = node.width * ratio;
+   button.style.width = node.width + 'px';
+   start();
+  }
+  button.style.width = node.width + 'px';
+  fitArtwork();
+  artwork.addEventListener('load', fitArtwork);
   return node;
  });
 
@@ -158,6 +127,7 @@
   const tileWidth = Math.max(width * 1.25, 820);
   const tileHeight = Math.max(height * 1.38, 760);
   const responsiveSize = Math.min(1.35, Math.max(.68, width / 1150));
+  const artwork = [];
   for (const node of nodes) {
    const distance = wrap(node.z - camera.z, depth);
    const perspective = 1350 / (420 + distance);
@@ -172,8 +142,8 @@
    const edgeFade = Math.min(1, (tileWidth / 2 - Math.abs(node.offsetX)) / 90,
      (tileHeight / 2 - Math.abs(node.offsetY)) / 90);
    // Allow for the hover scale when checking whether the artwork can enter the frame.
-   const offscreen = Math.abs(x) > (width + node.size * scale * 1.06) / 2 ||
-     Math.abs(y) > (height + 245 * scale * 1.06) / 2;
+   const offscreen = Math.abs(x) > (width + node.width * scale * 1.06) / 2 ||
+     Math.abs(y) > (height + node.height * scale * 1.06) / 2;
    const alpha = opacity * edgeFade;
    const culled = offscreen || alpha < .01;
    if (culled && node.button !== document.activeElement) {
@@ -181,6 +151,14 @@
     continue;
    }
    node.button.classList.remove('is-culled');
+   if (renderExhibition && !node.animated && !culled) {
+    artwork.push({
+     button: node.button, url: node.url, width: node.width * responsiveSize,
+     x: node.offsetX - camera.hoverX, y: node.offsetY - camera.hoverY,
+     distance: 420 + distance, opacity: alpha, order: Math.round(depth - distance),
+     highlighted: !scene.classList.contains('is-dragging') && node.button.matches(':hover,:focus-visible'),
+    });
+   }
    Object.assign(node.button.style, {
     transform: `translate(${x}px, ${y}px) translate(-50%, -50%) scale(${scale})`,
     opacity: alpha,
@@ -188,11 +166,12 @@
     zIndex: String(Math.round(depth - distance))
    });
   }
+  if (width && height) renderExhibition?.(width, height, artwork);
  }
 
  function animate(time) {
   frame = 0;
-  if (!view.open || document.hidden) return;
+  if (view.hidden || document.hidden) return;
   const elapsed = lastTime ? Math.min(32, time - lastTime) : 16;
   lastTime = time;
   for (const key of keys) {
@@ -214,7 +193,7 @@
  }
 
  function start() {
-  if (!frame && view.open && !document.hidden) frame = requestAnimationFrame(animate);
+  if (!frame && !view.hidden && !document.hidden) frame = requestAnimationFrame(animate);
  }
 
  function clearHover() {
@@ -248,20 +227,22 @@
  }
 
  const indexSwitch = document.querySelector('.shared-navigation [data-view="projects"]');
- view.querySelector('.exhibition-exit').addEventListener('click', () => indexSwitch.click());
- view.addEventListener('cancel', event => {
-  event.preventDefault();
-  indexSwitch.click();
- });
+ const header = indexSwitch.closest('.shared-navigation');
+ function measureHeader() {
+  document.documentElement.style.setProperty('--spatial-header-height', header.getBoundingClientRect().height + 'px');
+ }
+ new ResizeObserver(measureHeader).observe(header);
+ const sidebar = stage.closest('.work-layout').querySelector('.work-sidebar');
  stage.addEventListener('viewchange', () => {
-  if (stage.dataset.activeView === 'spatial' && !view.open) {
-   view.showModal();
-   scene.focus({preventScroll:true});
-   start();
-  } else if (stage.dataset.activeView !== 'spatial' && view.open) {
+  sidebar.inert = !view.hidden;
+  if (view.hidden) {
    clearMovement();
-   view.close();
+   return;
   }
+  measureHeader();
+  loadRenderer();
+  scene.focus({preventScroll:true});
+  start();
  });
  new ResizeObserver(start).observe(view);
  window.addEventListener('blur', clearMovement);
@@ -270,6 +251,10 @@
  view.addEventListener('keydown', event => {
   if (event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented ||
       event.target.closest('input, textarea, [contenteditable]')) return;
+  if (event.key === 'Escape') {
+   indexSwitch.click();
+   return;
+  }
   const key = event.key.length === 1 ? event.key.toLowerCase() : event.key;
   if (Object.hasOwn(directions, key)) {
    event.preventDefault();
@@ -300,9 +285,10 @@
    start();
   });
  }
- view.querySelector('.exhibition-reset').addEventListener('click', reset);
 
  const cursor = scene.querySelector('.exhibition-cursor');
+ scene.addEventListener('focusin', start);
+ scene.addEventListener('focusout', start);
  scene.addEventListener('pointerleave', () => {
   cursor.classList.remove('is-visible');
   clearHover();
@@ -318,17 +304,17 @@
   }
  });
  scene.addEventListener('pointermove', event => {
-  cursor.style.transform = `translate(${event.clientX}px, ${event.clientY}px)`;
+  const bounds = scene.getBoundingClientRect();
+  cursor.style.transform = `translate(${event.clientX - bounds.left}px, ${event.clientY - bounds.top}px)`;
   cursor.classList.toggle('is-visible', event.pointerType === 'mouse');
   cursor.classList.toggle('over-artwork', Boolean(event.target.closest('.exhibition-artwork')));
   const previous = pointers.get(event.pointerId);
   if (!previous) {
    if (event.pointerType === 'mouse' && !reduced.matches) {
-    const bounds = scene.getBoundingClientRect();
     target.hoverX = 24 * ((event.clientX - bounds.left) / bounds.width - .5);
     target.hoverY = 24 * ((event.clientY - bounds.top) / bounds.height - .5);
-    start();
    }
+   start();
    return;
   }
   const dx = event.clientX - previous.x;
@@ -363,62 +349,42 @@
   target.x += event.deltaX * unit * .65;
   start();
  }, {passive:false});
- const gallery=document.createElement('dialog');gallery.id='spatial-gallery';
- gallery.setAttribute('aria-labelledby','spatial-gallery-title');
- gallery.innerHTML=`<div class="spatial-gallery-shell"><header class="spatial-gallery-header"><h2 id="spatial-gallery-title"></h2><button type="button" class="spatial-gallery-case">View case study ↗</button><button type="button" class="spatial-gallery-close" aria-label="Close media"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button></header><figure class="spatial-gallery-media"><div class="spatial-gallery-art"></div><figcaption></figcaption></figure><div class="spatial-gallery-thumbnails" role="group"></div></div>`;
+ const gallery = document.createElement('dialog');
+ gallery.id = 'spatial-gallery';
+ gallery.setAttribute('aria-labelledby', 'spatial-gallery-title');
+ gallery.setAttribute('aria-describedby', 'spatial-gallery-description');
+ gallery.innerHTML = `
+  <header class="spatial-gallery-header">
+   <h2 id="spatial-gallery-title"></h2>
+   <button type="button" class="spatial-gallery-close" aria-label="Close artifact description">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m5 5 14 14M19 5 5 19" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+   </button>
+  </header>
+  <p id="spatial-gallery-description"></p>`;
  document.body.append(gallery);
- const galleryArt=gallery.querySelector('.spatial-gallery-art');
- const galleryStrip=gallery.querySelector('.spatial-gallery-thumbnails');
- const caseButton=gallery.querySelector('.spatial-gallery-case');
- let galleryIndex=0,originNode=null;
- function paintMedia(host,item){
-  host.replaceChildren();host.style.background=getComputedStyle(document.querySelector('.panel-'+item.group)).getPropertyValue('--project-surface');
-  if(item.src){
-   const image=document.createElement('img');image.src='./assets/'+item.src;image.alt=groups[item.group].name+' — '+item.title;image.draggable=false;
-   if(/^thrive-(focus|birthday|name|notifications)\.png$/.test(item.src)){image.style.objectFit='contain';}
-   image.style.objectPosition=item.position||'center';if(item.detail)image.className='spatial-gallery-detail';host.append(image);
-  }else{
-   const placeholder=document.createElement('div');placeholder.className='spatial-gallery-placeholder';
-   const title=document.createElement('span');title.textContent=groups[item.group].name;
-   const label=document.createElement('span');label.textContent=item.title+' · Media placeholder';placeholder.append(title,label);host.append(placeholder);
-  }
- }
- function showMedia(index){
-  galleryIndex=index;const item=media[index],group=groups[item.group];
-  gallery.querySelector('h2').textContent=group.name;
-  caseButton.hidden=!['thrive','sullivan'].includes(item.group);
-  gallery.querySelector('figcaption').textContent=item.title;
-  paintMedia(galleryArt,item);galleryStrip.replaceChildren();galleryStrip.setAttribute('aria-label','More from '+group.name);
-  media.forEach((other,i)=>{
-   if(other.group!==item.group)return;
-   const thumb=document.createElement('button');thumb.type='button';thumb.className='spatial-gallery-thumb';
-   thumb.setAttribute('aria-label','Show '+other.title);thumb.setAttribute('aria-pressed',String(i===index));
-   paintMedia(thumb,other);thumb.addEventListener('click',()=>{showMedia(i);galleryStrip.querySelector('[aria-pressed="true"]').focus({preventScroll:true});});
-   galleryStrip.append(thumb);
-  });
- }
+ const galleryTitle = gallery.querySelector('h2');
+ const galleryDescription = gallery.querySelector('p');
+ const galleryClose = gallery.querySelector('.spatial-gallery-close');
+ let originNode;
+
  function openGallery(index, button) {
   originNode = button;
   clearMovement();
-  showMedia(index);
+  const item = media[index];
+  galleryTitle.textContent = item.title;
+  galleryDescription.textContent = item.description;
   gallery.showModal();
-  gallery.querySelector('.spatial-gallery-close').focus({preventScroll:true});
+  galleryClose.focus({preventScroll:true});
  }
- function closeGallery() { gallery.close(); }
- gallery.querySelector('.spatial-gallery-close').addEventListener('click',closeGallery);
- gallery.addEventListener('click',event=>{if(event.target===gallery)closeGallery();});
+
+ galleryClose.addEventListener('click', () => gallery.close());
+ gallery.addEventListener('click', event => {
+  if (event.target !== gallery) return;
+  const bounds = gallery.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right ||
+      event.clientY < bounds.top || event.clientY > bounds.bottom) gallery.close();
+ });
  gallery.addEventListener('close', () => {
-  if (view.open && !document.querySelector('#case-study[open]')) originNode?.focus({preventScroll:true});
- });
- caseButton.addEventListener('click', () => {
-  const launch = document.querySelector('.panel-' + media[galleryIndex].group + ' .project-launch');
-  closeGallery();
-  launch?.click();
- });
- gallery.addEventListener('keydown',event=>{
-  if(!['ArrowLeft','ArrowRight'].includes(event.key))return;
-  event.preventDefault();const related=media.map((item,index)=>({item,index})).filter(entry=>entry.item.group===media[galleryIndex].group);
-  const current=related.findIndex(entry=>entry.index===galleryIndex);
-  showMedia(related[(current+(event.key==='ArrowRight'?1:-1)+related.length)%related.length].index);
+  if (!view.hidden) originNode?.focus({preventScroll:true});
  });
 })();

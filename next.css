@@ -358,39 +358,6 @@ body:has(#feedback-dialog[open]) #feedback-dialog[data-state='write'] #feedback-
 .spatial-node:hover .spatial-node-caption, .spatial-node:focus-visible .spatial-node-caption, .spatial-node.is-hovered .spatial-node-caption { opacity: 1; transform: translate(-50%,0); }
 
 /* Expanded media retains its experience context and a strip of related pieces. */
-#spatial-gallery { position: fixed; inset: 0; width: 100vw; max-width: none; height: 100dvh; max-height: none; margin: 0; padding: max(84px, calc(var(--navigation-height) + 20px)) clamp(24px, 10vw, 170px) 28px; border: 0; background: #f7f6f5f5; color: #242321; overflow: auto; overscroll-behavior: contain; font-family: 'TWK Lausanne',Arial,sans-serif; }
-#spatial-gallery::backdrop { background: #f7f6f5b8; backdrop-filter: blur(9px); }
-body:has(#spatial-gallery[open]), html:has(#spatial-gallery[open]) { overflow: hidden; }
-.spatial-gallery-shell { max-width: 1200px; margin: 0 auto; }
-.spatial-gallery-header { display: flex; align-items: center; gap: 20px; margin-bottom: 16px; }
-.spatial-gallery-header h2 { margin: 0; font: 400 16px/24px 'TWK Lausanne',Arial,sans-serif; }
-.spatial-gallery-case { padding: 0; color: inherit; font: 400 15px/24px 'TWK Lausanne',Arial,sans-serif; text-decoration: underline; text-underline-offset: 4px; }
-.spatial-gallery-close { display: grid; place-items: center; width: 36px; height: 36px; margin-left: auto; padding: 4px; color: inherit; border-radius: 7px; }
-.spatial-gallery-close:hover { background: #16130e08; }
-.spatial-gallery-media { margin: 0; }
-.spatial-gallery-art { position: relative; display: grid; place-items: center; width: 100%; height: min(61dvh, 650px); min-height: 180px; overflow: hidden; border-radius: 8px; box-shadow: 0 18px 50px #211c1814; transform-origin: center; }
-.spatial-gallery-art img { display: block; width: 100%; height: 100%; object-fit: contain; }
-.spatial-gallery-art img.spatial-gallery-detail { object-fit: cover; transform: scale(1.65); }
-.spatial-gallery-media figcaption { margin-top: 10px; color: #77736f; font: 400 13px/20px 'TWK Lausanne',Arial,sans-serif; }
-.spatial-gallery-thumbnails { display: flex; gap: 12px; margin-top: 20px; padding: 3px; overflow-x: auto; }
-.spatial-gallery-thumb { display: grid; place-items: center; position: relative; flex: none; width: 94px; height: 62px; padding: 0; border: 0; border-radius: 6px; overflow: hidden; opacity: .7; }
-.spatial-gallery-thumb img { width: 100%; height: 100%; object-fit: cover; }
-.spatial-gallery-thumb img.spatial-gallery-detail { transform: scale(1.65); }
-.spatial-gallery-thumb:hover, .spatial-gallery-thumb[aria-pressed='true'] { opacity: 1; }
-.spatial-gallery-thumb[aria-pressed='true'] { outline: 1px solid #242321; outline-offset: 3px; }
-.spatial-gallery-placeholder { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; padding: 12px; text-align: center; font: 400 clamp(18px,3vw,40px)/1.2 'TWK Lausanne',Arial,sans-serif; }
-.spatial-gallery-placeholder span:last-child { color: #77736f; font: 400 11px/16px var(--mono); }
-.spatial-gallery-thumb .spatial-gallery-placeholder { padding: 6px; gap: 4px; font-size: 9px; }
-.spatial-gallery-thumb .spatial-gallery-placeholder span:last-child { font: 400 8px/10px 'TWK Lausanne',Arial,sans-serif; }
-#spatial-gallery button:focus-visible { outline: 2px dotted #fd919c; outline-offset: 4px; }
-@media(max-width:700px) {
- #spatial-gallery { padding: 28px 18px; }
- .spatial-gallery-header { gap: 12px; flex-wrap: wrap; }
- .spatial-gallery-header h2 { max-width: calc(100% - 50px); }
- .spatial-gallery-case { font-size: 13px; order: 3; flex-basis: 100%; text-align: left; }
- .spatial-gallery-art { height: 55dvh; }
- .spatial-gallery-thumb { width: 76px; height: 52px; }
-}
 @media(prefers-reduced-motion:reduce) { .spatial-node-art, .spatial-node-caption { transition: none; } }
 
 /* Rectangular view switch with softened corners. */
@@ -588,7 +555,7 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
 
 /* Departure Mono is always uppercase; Lausanne titles retain their written case. */
 .project-cursor-clip>span,.nav-control,.portfolio-menu,.menu-return,.corner-footer,.work-brand,
-.spatial-media-placeholder span:last-child,.spatial-gallery-placeholder span:last-child,
+.spatial-media-placeholder span:last-child,
 .command-group,.command-shortcut,#command-query,#command-query::placeholder,#close-search,
 .command-result small,.feedback-send-tip kbd,.note-step,.note-shortcut,#note-highlight-label,
 .story-readmore,.story-experiences h2,.story-bottom h2,.story-sidebar h2,.story-bio h2,.story-history h2,
@@ -827,7 +794,7 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
 .thrive-identity-frame>img{display:block;width:100%;height:100%;object-fit:cover}
 /* Continuous iOS-style corner treatment; 1.6 approximates 60% smoothing. */
 @supports(corner-shape:superellipse(1.6)){
- .intro-landing .hero,.project-image-space,.project-launch,.spatial-node-art,.spatial-gallery-art,.spatial-gallery-thumb,.case-cover-media,.thrive-template .thrive-media-slot,.thrive-template .thrive-phone-frame,.thrive-template .thrive-brand-row img,.thrive-template .case-placeholder{corner-shape:superellipse(1.6)}
+ .intro-landing .hero,.project-image-space,.project-launch,.spatial-node-art,.case-cover-media,.thrive-template .thrive-media-slot,.thrive-template .thrive-phone-frame,.thrive-template .thrive-brand-row img,.thrive-template .case-placeholder{corner-shape:superellipse(1.6)}
 }
 .thrive-identity-frame{overflow:hidden}
 #case-study .thrive-template:not(.sullivan-template) .thrive-overview>p{font-size:15px;line-height:23px}
@@ -1159,11 +1126,19 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
 }
 
 /* Spatial exhibition */
-.spatial-view[open] {
+body:has(.spatial-view:not([hidden])) .shared-navigation {
  position: fixed;
- inset: 0;
+ inset: 0 0 auto;
+}
+body:has(.spatial-view:not([hidden])) .shared-navigation + .navigation-study {
+ margin-top: var(--spatial-header-height, var(--navigation-height));
+}
+.spatial-view:not([hidden]) {
+ position: fixed;
+ inset: var(--spatial-header-height, var(--navigation-height)) 0 0;
+ z-index: 4;
  width: 100%;
- height: 100dvh;
+ height: auto;
  max-width: none;
  max-height: none;
  min-height: 0;
@@ -1172,14 +1147,16 @@ body:has(#feedback-dialog[open]) #feedback-dialog .feedback-heading #feedback-ti
  border: 0;
  border-radius: 0;
  overflow: hidden;
- color: #eee;
- background: #0e0e0e;
+ color: var(--landing-ink);
+ background: var(--paper);
  animation: exhibition-enter .32s ease-out both;
 }
 @keyframes exhibition-enter { from { opacity: 0; } to { opacity: 1; } }
-body:has(.spatial-view[open]) { overflow: hidden; }
+html { scrollbar-gutter: stable; }
+body:has(.spatial-view:not([hidden])) { overflow: hidden; }
+body:has(.spatial-view:not([hidden])) #annotate-feedback { visibility: hidden; }
 .spatial-view .spatial-scene { border-radius: 0; }
-.spatial-view .spatial-scene:focus-visible { outline: 1px solid #ffffff30; outline-offset: -2px; }
+.spatial-view .spatial-scene:focus-visible { outline: 1px solid #16130e26; outline-offset: -2px; }
 .spatial-view .spatial-nodes { overflow: clip; }
 .exhibition-artwork {
  position: absolute;
@@ -1193,8 +1170,8 @@ body:has(.spatial-view[open]) { overflow: hidden; }
  color: white;
  cursor: inherit;
 }
-.exhibition-artwork img { display: block; width: 100%; max-height: 245px; object-fit: cover; }
-.exhibition-artwork img { border-radius: 0; transition: transform .2s ease-out; }
+.exhibition-artwork img { display: block; width: 100%; height: auto; }
+.exhibition-artwork img { border-radius: 6px; transition: transform .2s ease-out; }
 .exhibition-artwork.is-culled { opacity: 0 !important; pointer-events: none !important; }
 .spatial-scene:not(.is-dragging) .exhibition-artwork:is(:hover,:focus-visible) img { transform: scale(1.055); }
 .exhibition-cursor {
@@ -1212,71 +1189,83 @@ body:has(.spatial-view[open]) { overflow: hidden; }
   display: block;
   width: 14px;
   height: 14px;
-  border: 1px solid white;
+  border: 1px solid #16130e;
   border-radius: 50%;
   transform: translate(-50%,-50%);
   transition: width .16s, height .16s, background .16s;
  }
- .exhibition-cursor.over-artwork::after { width: 22px; height: 22px; background: #ffffff29; }
- .is-dragging .exhibition-cursor::after { width: 9px; height: 9px; background: white; }
+ .exhibition-cursor.over-artwork::after { width: 22px; height: 22px; background: #16130e18; }
+ .is-dragging .exhibition-cursor::after { width: 9px; height: 9px; background: #16130e; }
 }
-.exhibition-icon, .exhibition-controls button {
+.exhibition-controls {
+ position: absolute;
+ right: 16px;
+ bottom: 16px;
+ z-index: 3600;
+}
+.exhibition-controls button {
  display: grid;
  place-items: center;
- color: #ddd;
- background: #131313bf;
- border: 1px solid #ffffff36;
+ color: var(--landing-ink);
+ background: var(--paper);
+ border: 1px solid #16130e30;
  border-radius: 5px;
 }
-.exhibition-icon { width: 38px; height: 38px; cursor: pointer; }
-.exhibition-icon:hover, .exhibition-controls button:is(:hover,.is-held) { background: #414141; color: white; }
-.exhibition-exit, .exhibition-info, .exhibition-controls { position: absolute; z-index: 3600; }
-.exhibition-exit { top: 16px; left: 16px; }
-.exhibition-info { bottom: 16px; left: 16px; }
-.exhibition-info summary::-webkit-details-marker { display: none; }
-.exhibition-info p {
- position: absolute;
- bottom: 46px;
- left: 0;
- width: min(230px, 75vw);
- margin: 0;
- padding: 12px;
- background: #171717f5;
- border: 1px solid #ffffff25;
- border-radius: 6px;
- font: 13px/1.55 'TWK Lausanne', Arial, sans-serif;
-}
-.exhibition-controls { right: 16px; bottom: 16px; display: flex; align-items: center; gap: 12px; }
+.exhibition-controls button:is(:hover,.is-held) { background: #eeedeb; }
 .exhibition-keys { display: grid; grid-template-columns: repeat(3, 25px); gap: 4px; }
 .exhibition-keys button { width: 25px; height: 25px; padding: 0; font: 11px var(--mono); touch-action: none; }
 .exhibition-keys button:first-child { grid-column: 2; }
 .exhibition-keys button:nth-child(2) { grid-column: 1; }
-.exhibition-controls .exhibition-reset { width: 39px; height: 39px; }
-.exhibition-reset span { border: 1px solid currentColor; border-radius: 50%; width: 19px; height: 19px; display: grid; place-items: center; }
-.exhibition-reset span::after { content: ''; width: 3px; height: 3px; border-radius: 50%; background: currentColor; }
-
 #spatial-gallery {
- inset: 16px 16px auto auto;
- width: min(420px, calc(100vw - 32px));
- height: auto;
+ position: fixed;
+ inset: 0;
+ box-sizing: border-box;
+ width: min(420px, calc(100% - 32px));
  max-height: calc(100dvh - 32px);
- padding: 16px;
- background: #181818f5;
- border: 1px solid #ffffff25;
- border-radius: 0;
- color: #eee;
- box-shadow: 0 16px 56px #0008;
+ margin: auto;
+ padding: clamp(22px, 4vw, 30px);
+ overflow: auto;
+ overscroll-behavior: contain;
+ background: rgb(249 248 248 / 80%);
+ -webkit-backdrop-filter: blur(18px) saturate(115%);
+ backdrop-filter: blur(18px) saturate(115%);
+ border: 1px solid #16130e1c;
+ border-radius: 22px;
+ corner-shape: superellipse(1.6);
+ color: var(--landing-ink);
+ box-shadow: 0 16px 56px #16130e24;
+ font-family: 'TWK Lausanne', Arial, sans-serif;
 }
+.spatial-gallery-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.spatial-gallery-header h2 { margin: 0; font-size: 23px; line-height: 1.2; }
+.spatial-gallery-close {
+ flex: none;
+ display: grid;
+ place-items: center;
+ width: 34px;
+ height: 34px;
+ margin: -5px -6px 0 0;
+ padding: 0;
+ border: 0;
+ border-radius: 7px;
+ background: transparent;
+ color: inherit;
+ cursor: pointer;
+}
+.spatial-gallery-close:hover { background: #16130e0c; }
+.spatial-gallery-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+#spatial-gallery-description { margin: 18px 0 0; font-size: 17px; line-height: 1.55; }
 #spatial-gallery[open] { animation: exhibition-panel-in .26s cubic-bezier(.2,.75,.3,1) both; }
-#spatial-gallery::backdrop { background: #0003; }
-@keyframes exhibition-panel-in { from { opacity: 0; transform: translateX(18px); } to { opacity: 1; transform: translateX(0); } }
-#spatial-gallery .spatial-gallery-art { height: min(48dvh, 410px); box-shadow: none; border-radius: 0; }
-#spatial-gallery figcaption { color: #bbb; }
-#spatial-gallery .spatial-gallery-thumb[aria-pressed='true'] { outline-color: #eee; }
+#spatial-gallery::backdrop { background: #16130e0d; backdrop-filter: none; }
+@keyframes exhibition-panel-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) {
- .spatial-view[open], #spatial-gallery[open] { animation: none; }
+ .spatial-view:not([hidden]), #spatial-gallery[open] { animation: none; }
  .exhibition-cursor::after, .exhibition-artwork img { transition: none; }
 }
+
+.spatial-scene .exhibition-webgl { pointer-events: none; }
+.spatial-scene .spatial-nodes:not(.show-html-art) .has-webgl-art img { opacity: 0; }
+
 
 .home-mobile-menu { display: none; }
 @media (max-width: 700px) {
