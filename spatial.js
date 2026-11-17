@@ -226,8 +226,8 @@
   view.querySelector(`[data-move="${key}"]`)?.classList.remove('is-held');
  }
 
- const indexSwitch = document.querySelector('.shared-navigation [data-view="projects"]');
- const header = indexSwitch.closest('.shared-navigation');
+ const indexSwitch = document.querySelector('.corner-views [data-view="projects"]');
+ const header = document.querySelector(".shared-navigation");
  function measureHeader() {
   document.documentElement.style.setProperty('--spatial-header-height', header.getBoundingClientRect().height + 'px');
  }
